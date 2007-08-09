@@ -9,9 +9,11 @@
 	{
 		protected $tableName = null;
 		
+		protected $emptySet = true;
+		
 		
 		/////////////////////////////////////////////////////////////////////////////////////////////
-		public function __construct( $tableName, $id = null, $where = null )
+		public function __construct( $sTableName ) //, $iID = null, $sWhere = null )
 		//
 		// Description:
 		//		Get the schema of the supplied table name, and, if an id is specified, load the 
@@ -20,269 +22,158 @@
 		{
 			parent::__construct();
 
-			$this->tableName = $tableName;
+			$this->tableName = $sTableName;
 			
-			$this->getSchema( $this->tableName );
-			
-			if( !is_null( $id ) || !is_null( $where ) )
-			{
-				$this->load( intval( $id ), $where );
-			}
+			$this->GetSchema( $this->tableName );
 		
 		} // __construct()
 		
 		
 		
 		/////////////////////////////////////////////////////////////////////////////////////////////
-		protected function load( $id = '', $where = null )
+		public function Find( $xId )
 		//
 		// Description:
 		//
 		//
 		{
-			$query = $this->spawnQuery();
+			$aPrimaryKey = &$this->aSchemas[ $this->tableName ][ "primary_key" ];
 			
-			// main data:
-			
-			// note - currently assumes we only have one field in the primary key
-			
-			$primaryKey = $this->aSchemas[ $this->tableName ][ "primary_key" ][ 0 ];
-
-			if( !is_array( $where ) )
+			if( !empty( $xId ) )
 			{
-				$where = array();
-			}
-
-			if( !empty( $id ) && !isset( $where[ $primaryKey ] ) )
-			{
-				$where[ "{$this->tableName}.{$primaryKey}" ] = $id;
-			}
-			
-			$select = " SELECT ";
-			
-			// build the fields for the primary table:
-			$fields = array();
-			
-			foreach( $this->aSchemas[ $this->tableName ][ "fields" ] as $field )
-			{
-				$fields[] = $this->tableName . "." . $field[ "field" ] . " ";
-			}
-			
-			
-			// from clause:
-			$from = " FROM {$this->tableName} ";
-			
-			
-			// build the join clause (appends the fields):
-			
-			$join = array();
-			
-			$nameLookup = array();
-			
-			foreach( $this->aSchemas[ $this->tableName ][ "foreign_key" ] as $relationship )
-			{
-				if( $relationship[ "type" ] == "m-1" || $relationship[ "type" ] == "1-1" )
+				if( count( $aPrimaryKey ) > 1 && ( !is_array( $xId ) || count( $xId ) != count( $aPrimaryKey ) ) )
 				{
-					// LEFT JOIN [relationship_table] AS [relationship_name]
-					// ON [relationship_table.field ] = [primary_table.field]
-					
-					$join[] = "LEFT JOIN " . $relationship[ "table" ] . " AS " . $relationship[ "name" ] . " \n" . 
-						"ON " . $relationship[ "name" ] . "." . current( $relationship[ "foreign" ] ) . " = " . 
-						$this->tableName . "." . current( $relationship[ "local" ] );
-					
-					$nameLookup[ $relationship[ "name" ] ] = $relationship[ "table" ];
-						
-					foreach( $this->aSchemas[ $relationship[ "table" ] ][ "fields" ] as $field )
-					{
-						// SELECT [relationship_name].[field] AS [relationship_name].[field]
-						$fields[] = $relationship[ "name" ] . "." . $field[ "field" ] . " AS " . 
-							"\"" . $relationship[ "name" ] . "." . $field[ "field" ] . "\" " ;
-					}
+					trigger_error( "Invalid Key Provided", E_USER_ERROR );
+					exit;
 				}
 			}
 			
-			// build the where clause:
-			
-			$tmpWhere = '';
-
-			foreach( $where as $key => $value )
+			if( empty( $xId ) )
 			{
-			
-				// holy moly, clean this up:
-			
-				// figure out the field type:
-				$field = explode( ".", $key );
-				$tmpTable = ''; $tmpField = '';
-				
-				if( count( $field ) == 1 )
-				{
-					$tmpTable = $this->tableName;
-					$tmpField = $key;
-				}
-				elseif( count( $field ) == 2 )
-				{
-					$tmpTable = $field[0];
-					$tmpField = $field[1];
-				}
-				
-				if( !isset( $this->aSchemas[ $tmpTable ] ) )
-				{
-					$tmpTable = $nameLookup[ $tmpTable ];
-				}
-				
-				$type = $this->GetFieldType( $tmpTable, $tmpField );
-				
-				$tmpWhere .= !empty( $tmpWhere ) ? " AND " : " WHERE ";
-				$tmpWhere .= "{$key} = " . $this->FormatData( $type, $value ) . " ";
-			}
-
-			$where = $tmpWhere;
-
-			$limit = " LIMIT 1 ";
-			
-			
-			// concatenate all the pieces of the query together:
-			
-			$sql = "{$select} " . implode( ", \n", $fields ) . " {$from} " . 
-				implode( "\n", $join ) . " {$where} {$limit}";
-			
-			$this->aSchemas[ $this->tableName ][ "sql" ] = str_replace( "\n", "", $sql );
-
-			// execute and pray:
-			if( !$query->execute( $sql ) )
-			{
-				trigger_error( "Failed on Query. Error: " . 
-					$query->getLastError() . "\n Query: {$sql}", E_USER_ERROR );
+				trigger_error( "Invalid Key Provided", E_USER_ERROR );
 				exit;
 			}
 			
-			// loop the data and create member variables
-			if( $query->fetch() )
+			$oQuery = $this->spawnQuery();
+					
+			// Handle our provided key:	
+			$sWhere = "";		
+
+			if( is_array( $xId ) && count( $aPrimaryKey ) > 0 )
 			{
-				// grab a copy of the record:
-				$record = $query->getRecord();
+				// our primary key value is an array -- put the data in the WHERE clause:
 				
-				// loop each field
-				foreach( $record as $key => $value )
-				{
-					if( strpos( $key, "." ) )
-					{
-						// if the key contains a period, it is a tablename.field name combination,
-						// and data must be loaded into the appropriate member class.
-
-						$data = explode( ".", $key );
+				foreach( $xId as $sField => $sValue )
+				{					
+					$sType = $this->GetFieldType( $this->tableName, $sField );
+					
+					$sWhere .= !empty( $sWhere ) ? " AND " : " WHERE ";
+					$sWhere .= "{$sField} = " . $this->FormatData( $sType, $sValue ) . " ";
+				}
+			}
+			else
+			{
+				// we have a singular primary key -- put the data in the WHERE clause:
+				$sKey = reset( $aPrimaryKey );
+				$sType = $this->GetFieldType( $this->tableName, $sKey );
+				
+				$sWhere .= !empty( $sWhere ) ? " AND " : " WHERE ";
+				$sWhere .= "{$sKey} = " . $this->FormatData( $sType, $xId ) . " ";
+			}
+			
+			
+			// Build the fields for the primary table:
 						
-						if( !isset( $this->$data[0] ) )
-						{
-							// if we haven't defined this class yet, create it:
-							$this->$data[0] = new StdClass();
-						}
+			$sFields = "";
+			
+			foreach( $this->aSchemas[ $this->tableName ][ "fields" ] as $aField )
+			{
+				$sFields .= !empty( $sFields ) ? ", \n" : "";
+				$sFields .= $aField[ "field" ];
+			}			
+			
+			// Concatenate all the pieces of the query together:
+			$sSQL = "SELECT {$sFields} FROM {$this->tableName} {$sWhere}";		
 
-						// save the data:
-						$this->$data[0]->$data[1] = $value;
-					}
-					else
-					{
-						// otherwise this data is part of the primary table, 
-						// create a member variable:
-						$this->$key = $value;
-					}
+			// Execute and pray:
+			if( !$oQuery->execute( $sSQL ) )
+			{
+				trigger_error( "Failed on Query. Error: " . 
+					$query->getLastError() . "\n Query: {$sSQL}", E_USER_ERROR );
+				exit;
+			}
+			
+			// Loop the data and create member variables
+			if( $oQuery->fetch() )
+			{
+				// Grab a copy of the record:
+				$oRecord = $oQuery->getRecord();
+				
+				// Loop each field
+				foreach( $oRecord as $sKey => $sValue )
+				{
+					// otherwise this data is part of the primary table, 
+					// create a member variable:
+					$this->$sKey = $sValue;
+				}
+				
+				$this->emptySet = false;
+			}	
+			
+		} // Find()
+		
+		
+		////////////////////////////////////////////////////////////////////////////////////////////
+		public function IsEmpty()
+		{
+			return( $this->emptySet );
+			
+		} // IsEmpty()
+		
+		
+		////////////////////////////////////////////////////////////////////////////////////////////
+		public function __get( $sName )
+		{			
+			// first, determine if a relationship by this name exists
+		
+			//echo "Looking for: {$sName}<br /><br />";
+		
+			$aRelationship = array();
+	
+			foreach( $this->aSchemas[ $this->tableName ][ "foreign_key" ] as $aTmpRelationship )
+			{			
+				if( strtolower( $sName ) == strtolower( $aTmpRelationship[ "name" ] ) )
+				{
+					$aRelationship = $aTmpRelationship;
+					break;
 				}
 			}
 			
-
-			// 1-M relationships:
-			foreach( $this->aSchemas[ $this->tableName ][ "foreign_key" ] as $foreignKey )
+			if( !$aRelationship )
 			{
-				if( $foreignKey[ "table" ] == $this->tableName )
-				{
-					continue;
-				}
-				
-				if( $foreignKey[ "type" ] == "m-1" || $foreignKey[ "type" ] == "1-1" )
-				{
-					continue;
-				}
-				
-				if( $foreignKey[ "type" ] == "1-m" || $foreignKey[ "type" ] == '' ) // blank is temporary
-				{
-					// if the relationship is 1-M, we create an array to hold the many data records
-					// that might refer to this table:
-					
-					$this->$foreignKey[ "table" ] = array();
-				}
-				
-				// setup the query to get the data:
-				
-				$sql = "SELECT
-					*
-				FROM
-					" . $foreignKey[ "table" ] . "
-				WHERE ";
-				
-				$where = '';
-				
-				// loop each foreign key and create the where clauses for the relationships:
-				foreach( $foreignKey[ "foreign" ] as $key => $foreignField )
-				{
-					if( !empty( $this->$foreignKey[ "local" ][ $key ] ) )
-					{
-						// where = foreignTable.foreignField = valueOf( thisTable.localField )
-					
-						$where .= !empty( $where ) ? " AND " : "";
-						$where .= $foreignField . " = " . $this->$foreignKey[ "local" ][ $key ] . " " ;
-					}
-				}
-				
-				
-				if( empty( $where ) )
-				{
-					// if we somehow do not have a where, do not execute the query:
-					continue;
-				}
-				
-				$sql .= $where;
-				
-				
-				// execute the query:
-				$query = $this->spawnQuery();
-				
-				if( !$query->execute( $sql ) )
-				{
-					trigger_error( "Failed on Query: {$sql}", E_USER_ERROR );
-					exit;
-				}
-				
-				
-				$i = 0;
-				
-				// loop each result:
-				while( $query->fetch() )
-				{
-					// get a copy of the data
-					$record = $query->getRecord();
-					
-					$table = &$this->$foreignKey[ "table" ];
-				
-					// create a class for this data object in the array:
-					$table[ $i ] = new StdClass();
-					$table = &$table[ $i ];
-					
-					// loop each value and store it in the member variable:
-					foreach( $record as $key => $value )
-					{
-						$table->$key = $value; 
-					}
-					
-					$i++;
-				}
-
-			} // foreach( foreign_key )
+				trigger_error( "", E_USER_ERROR );
+				exit;
+			}	
 			
+			// the relationship exists, attempt to load the data:
 			
+			if( $aRelationship[ "type" ] == "1-m" )
+			{
+				$this->$sName = array();
 			
-		} // load()
-		
+				
+			}
+			else
+			{
+				$sLocalColumn = current( $aRelationship[ "local" ] );
+				
+				$this->$sName = new crud( $aRelationship[ "table" ] );		
+				$this->$sName->Find( $this->$sLocalColumn );
+			}
+			
+			return( $this->$sName );
+			
+		} // __get()
 		
 		
 		/////////////////////////////////////////////////////////////////////////////////////////////
@@ -293,6 +184,7 @@
 		//		existing record
 		//
 		{
+			/*
 			// grab a copy of the primary key:
 			$primaryKey = reset( $this->aSchemas[ $this->tableName ][ "primary_key" ] );
 			
@@ -308,6 +200,8 @@
 				// if we do have data supplied in the primary key field, we need to update the data:
 				$this->update();
 			}
+			
+			*/
 		
 		} // save()
 				
@@ -333,6 +227,7 @@
 		//		tables referenced.
 		//
 		{
+			/*
 			// get the primary key of the primary table:
 			$primaryKey = reset( $this->aSchemas[ $this->tableName ][ "primary_key" ] );
 		
@@ -382,6 +277,7 @@
 				} // foreach( instanceOf( foreign_table )
 
 			} // foreach( foreign_table )
+			*/			
 			
 		} // update()
 		
@@ -395,6 +291,7 @@
 		//		updating the data.
 		//
 		{
+			/*
 			// grab a copy of this table's foreign key -- TODO : remove duplication:
 			$primaryKey = reset( $this->aSchemas[ $table ][ "primary_key" ] );
 			
@@ -439,7 +336,8 @@
 			
 			// for now:
 			echo "{$sql}<br /><br />";
-		
+			*/
+			
 		} // updateQuery()
 		
 		
@@ -453,6 +351,7 @@
 		//		will also delete all data that is related through a 1-1 or 1-Many relationship
 		//
 		{
+			/*
 			$query = $this->spawnQuery();
 			
 			$query->begin();
@@ -549,6 +448,7 @@
 			}
 			
 			$query->rollback();
+			*/
 		
 		} // destroy()
 	
