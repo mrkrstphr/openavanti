@@ -26,12 +26,8 @@
 		
 		////////////////////////////////////////////////////////////////////////////////////////////
 		protected static function Update( &$iVar )
-		{
-			$sMicrotime = microtime();
-						
-			$aParts = explode( " ", $sMicrotime );
-			
-			$iVar = ( (float)$aParts[ 0 ] + (float)$aParts[ 1 ] );
+		{			
+			$iVar = microtime( true );
 			
 		} // Update()
 	
