@@ -72,17 +72,8 @@
 			}
 			else if( !empty( $this->sModel ) && class_exists( "model", true ) )
 			{
-				$sModel = "class {$this->sModel} extends Model 
-				{
-					public function __construct() 
-					{
-						parent::__construct();
-					}
-				};";
-				
-				eval( $sModel );
-				
-				$oModel = new $this->sModel();
+				ClassFunctions::Create( "$this->sModel}Controller", "Model" );				
+				$oModel = new {"{$this->sModel}Controller"}();
 			}
 			else
 			{

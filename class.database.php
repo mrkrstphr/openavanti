@@ -467,6 +467,15 @@
 			return( null );
 		
 		} // GetFieldType()
+		
+		
+		////////////////////////////////////////////////////////////////////////////////////////////
+		public function TableExists( $sTable )
+		{
+		
+			return( true );
+		
+		} // TableExists()
 
     }; // class Database()
 

@@ -11,6 +11,8 @@
 		
 		protected $emptySet = true;
 		
+		protected $oSelect = null;
+		
 		
 		/////////////////////////////////////////////////////////////////////////////////////////////
 		public function __construct( $sTableName ) //, $iID = null, $sWhere = null )
@@ -31,12 +33,12 @@
 		
 		
 		/////////////////////////////////////////////////////////////////////////////////////////////
-		public function Find( $xId )
+		public function Find( $xId = null, $aClauses = array() )
 		//
 		// Description:
 		//
 		//
-		{
+		{			
 			$aPrimaryKey = &$this->aSchemas[ $this->tableName ][ "primary_key" ];
 			
 			if( !empty( $xId ) )
@@ -48,16 +50,24 @@
 				}
 			}
 			
-			if( empty( $xId ) )
+			if( empty( $xId ) && !isset( $aClauses[ "where" ] ) )
 			{
 				trigger_error( "Invalid Key Provided", E_USER_ERROR );
 				exit;
 			}
 			
-			$oQuery = $this->spawnQuery();
+			
+			$sWhere = isset( $aClauses[ "where" ] ) ? $aClauses[ "where" ] : "";
+			
+			
+			$this->oSelect = $this->spawnQuery();
 					
 			// Handle our provided key:	
-			$sWhere = "";		
+			
+			if( !empty( $sWhere ) )
+			{
+				$sWhere = " WHERE {$sWhere} ";
+			}		
 
 			if( is_array( $xId ) && count( $aPrimaryKey ) > 0 )
 			{
@@ -71,7 +81,7 @@
 					$sWhere .= "{$sField} = " . $this->FormatData( $sType, $sValue ) . " ";
 				}
 			}
-			else
+			else if( !empty( $xId ) )
 			{
 				// we have a singular primary key -- put the data in the WHERE clause:
 				$sKey = reset( $aPrimaryKey );
@@ -82,33 +92,94 @@
 			}
 			
 			
-			// Build the fields for the primary table:
-						
-			$sFields = "";
+			// Setup supplied joins:
 			
-			foreach( $this->aSchemas[ $this->tableName ][ "fields" ] as $aField )
+			$sJoins = "";
+			
+			if( isset( $aClauses[ "join" ] ) )
 			{
-				$sFields .= !empty( $sFields ) ? ", \n" : "";
-				$sFields .= $aField[ "field" ];
-			}			
+				foreach( $aClauses[ "join" ] as $sJoin )
+				{
+					$aRelationship = $this->FindRelationship( $sJoin );
+					
+					if( !$aRelationship )
+					{
+						new Exception( "Unknown join relationship specified: {$sJoin}" );
+					}
+					
+					$sJoins .= " INNER JOIN " . $aRelationship[ "table" ] . " AS " . 
+						"_" . $aRelationship[ "name" ] . " ON ";
+					
+					$sOn = "";
+					
+					foreach( $aRelationship[ "local" ] as $iIndex => $sField )
+					{
+						$sOn .= ( !empty( $sOn ) ? " AND " : "" ) . 
+							"_" . StringFunctions::ToSingular( $this->tableName ) . 
+							"." . $sField . " = " . "_" . $aRelationship[ "name" ] . 
+							"." . $aRelationship[ "foreign" ][ $iIndex ];
+					}
+					
+					$sJoins .= " {$sOn} ";
+				}
+			}
+			
+			$sFields = "_" . StringFunctions::ToSingular( $this->tableName ) . ".*";
 			
 			// Concatenate all the pieces of the query together:
-			$sSQL = "SELECT {$sFields} FROM {$this->tableName} {$sWhere}";		
+			$sSQL = "SELECT {$sFields} FROM {$this->tableName} AS _" . 
+				StringFunctions::ToSingular( $this->tableName ) . " {$sJoins} {$sWhere}";		
+
+			//echo "<b>Finished Query</b>: {$sSQL}<br /><br />";
 
 			// Execute and pray:
-			if( !$oQuery->execute( $sSQL ) )
+			if( !$this->oSelect->execute( $sSQL ) )
 			{
 				trigger_error( "Failed on Query. Error: " . 
-					$query->getLastError() . "\n Query: {$sSQL}", E_USER_ERROR );
+					$this->oSelect->getLastError() . "\n Query: {$sSQL}", E_USER_ERROR );
 				exit;
 			}
 			
 			// Loop the data and create member variables
-			if( $oQuery->fetch() )
+			if( $this->oSelect->fetch() )
 			{
-				// Grab a copy of the record:
-				$oRecord = $oQuery->getRecord();
-				
+				$this->Load( $this->oSelect->GetRecord() );
+			}	
+			
+		} // Find()
+		
+		
+		////////////////////////////////////////////////////////////////////////////////////////////
+		protected function FindRelationship( $sName = "", $sTable = "" )
+		{
+			if( empty( $sName ) && empty( $sTableName ) )
+			{
+				return( null );
+			}
+		
+			
+			foreach( $this->aSchemas[ $this->tableName ][ "foreign_key" ] as $oForeignKey )
+			{
+				if( $oForeignKey[ "name" ] == $sName || $oForeignKey[ "table" ] == $sTable )
+				{
+					return( $oForeignKey );
+				}
+			}
+			
+			return( null );
+		
+		} // FindRelationship()
+		
+		
+		////////////////////////////////////////////////////////////////////////////////////////////
+		protected function Load( $oRecord = null )
+		//
+		// Description:
+		//	
+		{
+		
+			if( !is_null( $oRecord ) )
+			{
 				// Loop each field
 				foreach( $oRecord as $sKey => $sValue )
 				{
@@ -118,13 +189,13 @@
 				}
 				
 				$this->emptySet = false;
-			}	
-			
-		} // Find()
+			}
+	
+		} // Load()
 		
 		
 		////////////////////////////////////////////////////////////////////////////////////////////
-		public function IsEmpty()
+		protected function IsEmpty()
 		{
 			return( $this->emptySet );
 			
@@ -132,12 +203,64 @@
 		
 		
 		////////////////////////////////////////////////////////////////////////////////////////////
+		protected function GetCount() 
+		{
+		
+			if( !is_null( $this->oSelect ) )
+			{
+				return( $this->oSelect->RowCount() );
+			}
+			
+			return( 0 );
+		
+		} // GetCount()
+		
+		
+		////////////////////////////////////////////////////////////////////////////////////////////
+		public function Reset()
+		{
+			// this method is untested ---
+			
+			
+			if( !is_null( $this->oSelect ) && $this->oSelect->Fetch() )
+			{
+				$this->oSelect->Reset();
+				$this->Load( $this->oSelect->GetRecord() );
+			}
+			else
+			{
+				$this->emptySet = true;
+				return( false );
+			}
+			
+			return( true );
+			
+		
+		} // Reset()
+		
+		
+		////////////////////////////////////////////////////////////////////////////////////////////
+		public function Next()
+		{
+			if( !is_null( $this->oSelect ) && $this->oSelect->Fetch() )
+			{
+				$this->Load( $this->oSelect->GetRecord() );
+			}
+			else
+			{
+				$this->emptySet = true;
+				return( false );
+			}
+			
+			return( true );
+			
+		} // Next()
+		
+		
+		////////////////////////////////////////////////////////////////////////////////////////////
 		public function __get( $sName )
 		{			
-			// first, determine if a relationship by this name exists
-		
-			//echo "Looking for: {$sName}<br /><br />";
-		
+			// first, determine if a relationship by this name exists		
 			$aRelationship = array();
 	
 			foreach( $this->aSchemas[ $this->tableName ][ "foreign_key" ] as $aTmpRelationship )
@@ -158,10 +281,21 @@
 			// the relationship exists, attempt to load the data:
 			
 			if( $aRelationship[ "type" ] == "1-m" )
-			{
-				$this->$sName = array();
-			
+			{				
+				$sWhere = "";
 				
+				foreach( $aRelationship[ "foreign" ] as $iIndex => $sKey )
+				{
+					$sRelated = $aRelationship[ "local" ][ $iIndex ];
+					
+					$sWhere .= empty( $sWhere ) ? "" : " AND ";
+					$sWhere .= " {$sKey} = {$this->$sRelated} ";
+				}
+				
+				$this->$sName = new crud( $aRelationship[ "table" ] );
+				$this->$sName->Find( null, array(
+					"where" => $sWhere 
+				) );
 			}
 			else
 			{
@@ -176,20 +310,65 @@
 		} // __get()
 		
 		
-		/////////////////////////////////////////////////////////////////////////////////////////////
-		public function save()
+		////////////////////////////////////////////////////////////////////////////////////////////
+		public function __call( $sName, $aArguments )
+		{
+			switch( strtolower( $sName ) )
+			{
+				case "empty":
+					return( $this->IsEmpty() );
+				break;
+				
+				case "count":
+					return( $this->GetCount() );
+				break;
+				
+				
+				
+				default:
+					throw new Exception( "Call to undefined method: {$sName}" );
+				break;
+			}
+				
+		} // __call()
+		
+		
+		////////////////////////////////////////////////////////////////////////////////////////////
+		public function Save()
 		//
 		// Description:
 		//		Based on presence of primary key data, either creates a new record, or updates the
 		//		existing record
 		//
 		{
-			/*
 			// grab a copy of the primary key:
-			$primaryKey = reset( $this->aSchemas[ $this->tableName ][ "primary_key" ] );
+			$aPrimaryKeys = $this->aSchemas[ $this->tableName ][ "primary_key" ];
 			
+			$bInsert = false;
 			
-			if( empty( $this->$primaryKey ) )
+			foreach( $aPrimaryKeys as $sPrimaryKey )
+			{
+				if( empty( $this->$sPrimaryKey ) )
+				{
+					$bInsert = true;
+					break;
+				}
+			}
+			
+			// Fundamental flaw in this logic: if we are in a relationship table, which has
+			// two primary keys, such as item_id and quantity, then both of those keys will
+			// more than likely be present, even though the data might not be in the database.
+			
+			// In other words, when a compound key is comprised entirely of foreign keys,
+			// this logic will not work.
+			
+			// Recommend possibly keeping track of whether or not we pulled the data from the
+			// database (using Find()), or if it was programmer supplied.
+			
+			// Recommendation above is flawed as objects loaded from post may already exist in
+			// the database but were not loaded from the database
+			
+			if( $bInsert )
 			{
 				// if there is no data in the primary key field of this object, we need to insert
 				// a new record:
@@ -200,113 +379,125 @@
 				// if we do have data supplied in the primary key field, we need to update the data:
 				$this->update();
 			}
-			
-			*/
 		
-		} // save()
+		} // Save()
 				
 		
+		////////////////////////////////////////////////////////////////////////////////////////////
+		public function SaveAll()
+		{
+			$this->Save();
 		
-		/////////////////////////////////////////////////////////////////////////////////////////////
-		protected function insert()
+			foreach( $this as &$xVar )
+			{
+				if( ( is_object( $xVar ) && is_subclass_of( $xVar, "crud" ) ) || 
+					( is_object( $xVar ) && strtolower( get_class( $xVar ) ) == "crud" ) )
+				{
+					$xVar->SaveAll();
+				}
+			}
+		
+		
+		} // SaveAll()
+		
+		
+		////////////////////////////////////////////////////////////////////////////////////////////
+		protected function Insert()
 		//
 		// Description:
 		//
 		//
 		{
+			$oQuery = $this->SpawnQuery();
+
+			$sFields = "";
+			$sValues = "";
+			
+			$aPrimaryKeys = $this->aSchemas[ $this->tableName ][ "primary_key" ];			
+			
+			// loop each field in the table and specify it's data:
+			foreach( $this->aSchemas[ $this->tableName ][ "fields" ] as $field )
+			{
+				// automate updating update date fields:
+				if( in_array( $field[ "field" ], array( "created_date", "created_stamp", "created_on" ) ) )
+				{
+					$this->$field[ "field" ] = gmdate( "Y-m-d H:i:s" );
+				}
+				
+				if( in_array( $field[ "field" ], $aPrimaryKeys ) )
+				{
+					continue;
+				}				
+				
+				$sFields .= ( !empty( $sFields ) ? ", " : "" ) . 
+					$field[ "field" ];
+					
+				$sValue = isset( $this->$field[ "field" ] ) ? 
+					$this->$field[ "field" ] : "";
+					
+				$sValues .= ( !empty( $sValues ) ? ", " : "" ) . 
+					$this->FormatData( $field[ "type" ], $sValue );
+			}
+			
+			$sSQL = "INSERT INTO " . $this->tableName . " (
+				{$sFields}
+			) VALUES (
+				{$sValues}
+			)";
+			
+			if( !$oQuery->Execute( $sSQL ) )
+			{
+				throw new Exception( "Failed on Query: " . $oQuery->GetLastError() );
+			}
 		
 		} // insert()
 		
 		
 		
-		/////////////////////////////////////////////////////////////////////////////////////////////
-		protected function update()
+		////////////////////////////////////////////////////////////////////////////////////////////
+		protected function Update()
 		//
 		// Description:
 		//		Responsible for updating the currently stored data for primary table and all foreign
 		//		tables referenced.
 		//
-		{
-			/*
+		{	
 			// get the primary key of the primary table:
 			$primaryKey = reset( $this->aSchemas[ $this->tableName ][ "primary_key" ] );
 		
 			// update the primary record:
-			$this->updateQuery( $this->tableName, $this->$primaryKey );
+			$sSQL = $this->UpdateQuery();
 			
-
-			// loop each foreign table:	
-			foreach( $this->aSchemas[ $this->tableName ][ "foreign_key" ] as $foreignKey )
+			$oQuery = $this->SpawnQuery();
+			
+			if( !$oQuery->Execute( $sSQL ) )
 			{
-				if( $foreignKey[ "type" ] != "1-1" && $foreignKey[ "type" ] != "1-m" )
-				{
-					continue;
-				}
-			
-				// temporary -- for now, if we reference the same table, don't update -- TODO	
-				if( $foreignKey[ "table" ] == $this->tableName )
-				{
-					continue;
-				}
+				trigger_error( "Failed on Query: {$sSQL}", E_USER_ERROR );
+				exit;
+			}
 				
-				
-				// loop each copy of a foreign record of this table type (may only be one, or may
-				// have multiple (ie, line items):
-				
-				foreach( $this->$foreignKey[ "name" ] as $data )
-				{
-				
-					echo '<pre>' . print_r( $data, true ) . '</pre>';
-					
-					$primaryKey = reset( $this->aSchemas[ $foreignKey[ "table" ] ][ "primary_key" ] ); 
-					
-					if( isset( $data->$primaryKey ) )
-					{
-						$table = $foreignKey[ "table" ];
-						
-						//echo $table . "<br />";
-						
-						$this->updateQuery( $foreignKey[ "table" ], 
-							$data->$primaryKey );
-					}
-					else
-					{
-					//	$this->insertQuery( );
-					}
-				
-				} // foreach( instanceOf( foreign_table )
-
-			} // foreach( foreign_table )
-			*/			
+			//echo "<br />{$sSQL}<br /><br />";
 			
 		} // update()
 		
 		
 		
 		/////////////////////////////////////////////////////////////////////////////////////////////
-		public function updateQuery( $table, $id )
+		protected function UpdateQuery()
 		//
 		// Description:
-		//		Called by update() method for primary table and all foreign tables to facilitate
-		//		updating the data.
+		//		Called by update() method
 		//
 		{
-			/*
-			// grab a copy of this table's foreign key -- TODO : remove duplication:
-			$primaryKey = reset( $this->aSchemas[ $table ][ "primary_key" ] );
-			
-			// start the update query:
-			$sql = "UPDATE " . $table . " SET ";
-			
+			$aPrimaryKeys = $this->aSchemas[ $this->tableName ][ "primary_key" ];
+					
+			$sSet = "";
 
-			$set = "";
-			
-			
 			// loop each field in the table and specify it's data:
-			foreach( $this->aSchemas[ $table ][ "fields" ] as $field )
+			foreach( $this->aSchemas[ $this->tableName ][ "fields" ] as $field )
 			{
 				// do not update certain fields:
-				if( in_array( $field[ "field" ], array( "created_date", "created_stamp", "created_on", $primaryKey ) ) )
+				if( in_array( $field[ "field" ], array( "created_date", "created_stamp", "created_on" ) ) )
 				{
 					continue;
 				}
@@ -318,32 +509,39 @@
 				}
 				
 				// complete the query for this field:
-				$set .= ( !empty( $set ) ? ", " : "" ) . 
+				$sSet .= ( !empty( $sSet ) ? ", " : "" ) . 
 					$field[ "field" ] . " = " . 
 						$this->FormatData( $field[ "type" ], 
 							$this->$field[ "field" ] ) . " ";
 			}
 			
 			// if we found no fields to update, return:
-			if( empty( $set ) )
+			if( empty( $sSet ) )
 			{
 				return;
 			}
 			
-			// combine the query data:
-			$sql .= "{$set} WHERE {$primaryKey} = {$this->$primaryKey} "; 
+						
+			$sWhere = "";
+			
+			foreach( $aPrimaryKeys as $sKey )
+			{
+				$sWhere .= !empty( $sWhere ) ? ", " : "";
+				$sWhere .= "{$sKey} = {$this->$sKey} "; 
+			}
 			
 			
-			// for now:
-			echo "{$sql}<br /><br />";
-			*/
+			$sSQL = "UPDATE {$this->tableName} SET {$sSet} WHERE {$sWhere}";	
+			
+
+			return( $sSQL );
 			
 		} // updateQuery()
 		
 		
 		
 		/////////////////////////////////////////////////////////////////////////////////////////////
-		public function destroy( $cascade = true )
+		public function Destroy()
 		//
 		// Description:
 		//		Destroys (deletes) the current data. This method will delete the primary record
@@ -450,8 +648,23 @@
 			$query->rollback();
 			*/
 		
-		} // destroy()
+		} // Destroy()
 	
+	
+		////////////////////////////////////////////////////////////////////////////////////////////
+		public function DestroyAll()
+		{
+			
+			// destroy dependent data:
+			
+			
+			// destroy this:
+			
+			$this->destory();
+		
+			
+		
+		} // DestroyAll()
 		
 		//////////////////////////////////////////////////////////////////////////////////////////////
 		protected function buildWhereClause( $keys, $dataSet )
