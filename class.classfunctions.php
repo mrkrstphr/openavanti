@@ -13,9 +13,15 @@
 			{
 				public function __construct() 
 				{
-					parent::__construct( {$sConstructorArgs} );
+					\$aArguments = func_get_args();
+					
+					array_unshift( \$aArguments, {$sConstructorArgs} );
+					
+					call_user_func_array( array( 'parent', '__construct' ), \$aArguments );
 				}
 			};";
+			
+			//echo "<pre>" . htmlspecialchars( $sNewClass ) . "</pre>";
 			
 			
 			eval( $sNewClass );

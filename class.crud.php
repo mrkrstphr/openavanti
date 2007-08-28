@@ -7,15 +7,14 @@
 	//		
 	//
 	{
-		protected $tableName = null;
+		protected $tableName = null;		
+		protected $oSelect = null;
 		
 		protected $emptySet = true;
 		
-		protected $oSelect = null;
-		
 		
 		/////////////////////////////////////////////////////////////////////////////////////////////
-		public function __construct( $sTableName ) //, $iID = null, $sWhere = null )
+		public function __construct( $sTableName, $oData = null )
 		//
 		// Description:
 		//		Get the schema of the supplied table name, and, if an id is specified, load the 
@@ -23,14 +22,56 @@
 		//
 		{
 			parent::__construct();
+			
+			parent::CacheSchemas( true );
+			parent::SetCacheDirectory( BASE_PATH . "/cache/schemas" );
 
 			$this->tableName = $sTableName;
-			
-			$this->GetSchema( $this->tableName );
 		
+			self::GetSchema( $this->tableName );
+
+            if( is_object( $oData ) )
+            {
+                $this->LoadObject( $oData );
+            }
+            else if( is_array( $oData ) )
+            {
+                $this->LoadArray( $oData );
+            }
+
 		} // __construct()
 		
 		
+        ///////////////////////////////////////////////////////////////////////////////////////////
+        protected function LoadArray( $aArray )
+        {
+            $aFields = $this->GetTableFields( $this->tableName );
+
+			echo "Loading...<br />";
+
+            foreach( $aArray as $sKey => $xValue )
+            {
+                if( is_object( $xValue ) )
+                {
+
+                }
+                else if( is_array( $xValue ) )
+                {
+					
+                }
+                else
+                {
+                	//if( isset( $aFields[ $sKey ] ) )
+					//{
+						$this->$sKey = $xValue;
+						
+						echo "Setting {$sKey} => {$xValue}<br />";
+					//}    
+                }
+            }
+
+        } // LoadArray()
+
 		
 		/////////////////////////////////////////////////////////////////////////////////////////////
 		public function Find( $xId = null, $aClauses = array() )
@@ -39,7 +80,7 @@
 		//
 		//
 		{			
-			$aPrimaryKey = &$this->aSchemas[ $this->tableName ][ "primary_key" ];
+			$aPrimaryKey = &self::$aSchemas[ $this->tableName ][ "primary_key" ];
 			
 			if( !empty( $xId ) )
 			{
@@ -75,7 +116,7 @@
 				
 				foreach( $xId as $sField => $sValue )
 				{					
-					$sType = $this->GetFieldType( $this->tableName, $sField );
+					$sType = self::GetFieldType( $this->tableName, $sField );
 					
 					$sWhere .= !empty( $sWhere ) ? " AND " : " WHERE ";
 					$sWhere .= "{$sField} = " . $this->FormatData( $sType, $sValue ) . " ";
@@ -85,7 +126,7 @@
 			{
 				// we have a singular primary key -- put the data in the WHERE clause:
 				$sKey = reset( $aPrimaryKey );
-				$sType = $this->GetFieldType( $this->tableName, $sKey );
+				$sType = self::GetFieldType( $this->tableName, $sKey );
 				
 				$sWhere .= !empty( $sWhere ) ? " AND " : " WHERE ";
 				$sWhere .= "{$sKey} = " . $this->FormatData( $sType, $xId ) . " ";
@@ -126,9 +167,12 @@
 			
 			$sFields = "_" . StringFunctions::ToSingular( $this->tableName ) . ".*";
 			
+			$sOrder = isset( $aClauses[ "order" ] ) ? 
+				"ORDER BY " . $aClauses[ "order" ] : "";
+			
 			// Concatenate all the pieces of the query together:
 			$sSQL = "SELECT {$sFields} FROM {$this->tableName} AS _" . 
-				StringFunctions::ToSingular( $this->tableName ) . " {$sJoins} {$sWhere}";		
+				StringFunctions::ToSingular( $this->tableName ) . " {$sJoins} {$sWhere} {$sOrder}";		
 
 			//echo "<b>Finished Query</b>: {$sSQL}<br /><br />";
 
@@ -158,7 +202,7 @@
 			}
 		
 			
-			foreach( $this->aSchemas[ $this->tableName ][ "foreign_key" ] as $oForeignKey )
+			foreach( self::$aSchemas[ $this->tableName ][ "foreign_key" ] as $oForeignKey )
 			{
 				if( $oForeignKey[ "name" ] == $sName || $oForeignKey[ "table" ] == $sTable )
 				{
@@ -242,13 +286,24 @@
 		////////////////////////////////////////////////////////////////////////////////////////////
 		public function Next()
 		{
+			$this->emptySet = true;
+				
 			if( !is_null( $this->oSelect ) && $this->oSelect->Fetch() )
 			{
+				foreach( $this as $sName => $xVar )
+				{
+
+					if( ( is_object( $xVar ) && is_subclass_of( $xVar, "crud" ) ) || 
+						( is_object( $xVar ) && strtolower( get_class( $xVar ) ) == "crud" ) )
+					{
+						unset( $this->$sName );
+					}
+				}
+			
 				$this->Load( $this->oSelect->GetRecord() );
 			}
 			else
 			{
-				$this->emptySet = true;
 				return( false );
 			}
 			
@@ -259,22 +314,23 @@
 		
 		////////////////////////////////////////////////////////////////////////////////////////////
 		public function __get( $sName )
-		{			
+		{
+			
 			// first, determine if a relationship by this name exists		
 			$aRelationship = array();
 	
-			foreach( $this->aSchemas[ $this->tableName ][ "foreign_key" ] as $aTmpRelationship )
+			foreach( self::$aSchemas[ $this->tableName ][ "foreign_key" ] as $aTmpRelationship )
 			{			
-				if( strtolower( $sName ) == strtolower( $aTmpRelationship[ "name" ] ) )
+                if( strtolower( $sName ) == strtolower( $aTmpRelationship[ "name" ] ) )
 				{
-					$aRelationship = $aTmpRelationship;
+                    $aRelationship = $aTmpRelationship;
 					break;
 				}
 			}
 			
-			if( !$aRelationship )
+			if( !count( $aRelationship ) )
 			{
-				trigger_error( "", E_USER_ERROR );
+				trigger_error( "Relationship {$sName} does not exist", E_USER_ERROR );
 				exit;
 			}	
 			
@@ -342,7 +398,7 @@
 		//
 		{
 			// grab a copy of the primary key:
-			$aPrimaryKeys = $this->aSchemas[ $this->tableName ][ "primary_key" ];
+			$aPrimaryKeys = self::$aSchemas[ $this->tableName ][ "primary_key" ];
 			
 			$bInsert = false;
 			
@@ -413,10 +469,10 @@
 			$sFields = "";
 			$sValues = "";
 			
-			$aPrimaryKeys = $this->aSchemas[ $this->tableName ][ "primary_key" ];			
+			$aPrimaryKeys = self::$aSchemas[ $this->tableName ][ "primary_key" ];			
 			
 			// loop each field in the table and specify it's data:
-			foreach( $this->aSchemas[ $this->tableName ][ "fields" ] as $field )
+			foreach( self::$aSchemas[ $this->tableName ][ "fields" ] as $field )
 			{
 				// automate updating update date fields:
 				if( in_array( $field[ "field" ], array( "created_date", "created_stamp", "created_on" ) ) )
@@ -463,7 +519,7 @@
 		//
 		{	
 			// get the primary key of the primary table:
-			$primaryKey = reset( $this->aSchemas[ $this->tableName ][ "primary_key" ] );
+			$primaryKey = reset( self::$aSchemas[ $this->tableName ][ "primary_key" ] );
 		
 			// update the primary record:
 			$sSQL = $this->UpdateQuery();
@@ -489,12 +545,14 @@
 		//		Called by update() method
 		//
 		{
-			$aPrimaryKeys = $this->aSchemas[ $this->tableName ][ "primary_key" ];
+			$aSchema = self::$aSchemas[ $this->tableName ];
+			
+			$aPrimaryKeys = $aSchema[ "primary_key" ];
 					
 			$sSet = "";
 
 			// loop each field in the table and specify it's data:
-			foreach( $this->aSchemas[ $this->tableName ][ "fields" ] as $field )
+			foreach( $aSchema[ "fields" ] as $field )
 			{
 				// do not update certain fields:
 				if( in_array( $field[ "field" ], array( "created_date", "created_stamp", "created_on" ) ) )
@@ -555,7 +613,7 @@
 			$query->begin();
 			
 			// for now, assume we only have one column in the primary key:
-			$primaryKey = reset( $this->aSchemas[ $this->tableName ][ "primary_key" ] );
+			$primaryKey = reset( self::$aSchemas[ $this->tableName ][ "primary_key" ] );
 			
 			if( !isset( $this->$primaryKey ) )
 			{
@@ -570,7 +628,7 @@
 				// (generally not a good idea to shut cascade off)
 				
 				// loop each foreign table:	
-				foreach( $this->aSchemas[ $this->tableName ][ "foreign_key" ] as $foreignKey )
+				foreach( self::$aSchemas[ $this->tableName ][ "foreign_key" ] as $foreignKey )
 				{
 					// quick access to the pertinant data:
 					$name = $foreignKey[ "name" ];
@@ -591,7 +649,7 @@
 						{
 							// build a where clause of the related table:
 							$where = $this->buildWhereClause( 
-								$this->aSchemas[ $table ][ "primary_key" ],
+								self::$aSchemas[ $table ][ "primary_key" ],
 								$dataSet 
 							);
 								
@@ -612,7 +670,7 @@
 						
 						// put the query together and execute it:
 						$where = $this->buildWhereClause( 
-							$this->aSchemas[ $table ][ "primary_key" ],
+							self::$aSchemas[ $table ][ "primary_key" ],
 							$dataSet 
 						);
 							

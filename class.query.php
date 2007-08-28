@@ -12,7 +12,7 @@
         private $oRecord = null;
 
         ///////////////////////////////////////////////////////////////////////////////////////////
-        public function __construct( $oDB )
+        public function __construct( Database $oDB )
         //
         // Description:
         //      Constructor()
@@ -107,15 +107,15 @@
 
 
         ///////////////////////////////////////////////////////////////////////////////////////////
-        public function Value( $sField )
+        public function Value( $sColumn )
         //
         // Description:
         //      Returns the value of sField in the current database record (if one exists)
         //
         {
-            if( isset( $this->oRecord->$sField ) )
+            if( isset( $this->oRecord->$sColumn ) )
             {
-                return( $this->oRecord->$sField );
+                return( $this->oRecord->$sColumn );
             }
             else
             {
@@ -144,8 +144,10 @@
         //      Begins a new database transaction
         //
         {
-            @pg_query( "BEGIN" ) or
+            $rResult = @pg_query( "BEGIN" ) or
                 trigger_error( "Failed to begin transaction", E_USER_ERROR );
+
+			return( $rResult ? true : false );
 
         } // Begin()
 
@@ -157,8 +159,10 @@
         //      Commits the current database transaction
         //
         {
-            @pg_query( "COMMIT" ) or
+            $rResult = @pg_query( "COMMIT" ) or
                 trigger_error( "Failed to commit transaction", E_USER_ERROR );
+
+			return( $rResult ? true : false );
 
         } // Commit()
 
@@ -170,8 +174,10 @@
         //      Rolls back/aborts the database transaction
         //
         {
-            @pg_query( "ROLLBACK" ) or
+            $rResult = @pg_query( "ROLLBACK" ) or
                 trigger_error( "Failed to rollback transaction", E_USER_ERROR );
+
+			return( $rResult ? true : false );
 
         } // Rollback()
 
