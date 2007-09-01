@@ -32,10 +32,10 @@
         {
             $this->rResult = pg_query( $sSQL );
 
-				if( !$this->rResult )
-				{
-					return( false );
-				}
+			if( !$this->rResult )
+			{
+				return( false );
+			}
 
             return( true );
         

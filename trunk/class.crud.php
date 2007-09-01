@@ -1,7 +1,7 @@
 <?php
 
 	////////////////////////////////////////////////////////////////////////////////////////////////
-	class Crud extends database
+	class Crud extends database implements Iterator
 	//
 	// Description:
 	//		
@@ -10,8 +10,7 @@
 		protected $tableName = null;		
 		protected $oSelect = null;
 		
-		protected $emptySet = true;
-		
+		protected $emptySet = true;		
 		
 		/////////////////////////////////////////////////////////////////////////////////////////////
 		public function __construct( $sTableName, $oData = null )
@@ -28,7 +27,7 @@
 
 			$this->tableName = $sTableName;
 		
-			self::GetSchema( $this->tableName );
+			$this->GetSchema( $this->tableName );
 
             if( is_object( $oData ) )
             {
@@ -61,12 +60,12 @@
                 }
                 else
                 {
-                	//if( isset( $aFields[ $sKey ] ) )
-					//{
+                	if( isset( $aFields[ $sKey ] ) )
+					{
 						$this->$sKey = $xValue;
 						
 						echo "Setting {$sKey} => {$xValue}<br />";
-					//}    
+					}    
                 }
             }
 
@@ -79,8 +78,9 @@
 		// Description:
 		//
 		//
-		{			
-			$aPrimaryKey = &self::$aSchemas[ $this->tableName ][ "primary_key" ];
+		{
+			//echo $this->tableName . '<pre>'; print_r( self::$aSchemas[ $this->tableName ] ); echo '</pre>';
+			$aPrimaryKey = $this->GetTablePrimaryKey( $this->tableName );
 			
 			if( !empty( $xId ) )
 			{
@@ -116,7 +116,7 @@
 				
 				foreach( $xId as $sField => $sValue )
 				{					
-					$sType = self::GetFieldType( $this->tableName, $sField );
+					$sType = $this->GetFieldType( $this->tableName, $sField );
 					
 					$sWhere .= !empty( $sWhere ) ? " AND " : " WHERE ";
 					$sWhere .= "{$sField} = " . $this->FormatData( $sType, $sValue ) . " ";
@@ -126,7 +126,7 @@
 			{
 				// we have a singular primary key -- put the data in the WHERE clause:
 				$sKey = reset( $aPrimaryKey );
-				$sType = self::GetFieldType( $this->tableName, $sKey );
+				$sType = $this->GetFieldType( $this->tableName, $sKey );
 				
 				$sWhere .= !empty( $sWhere ) ? " AND " : " WHERE ";
 				$sWhere .= "{$sKey} = " . $this->FormatData( $sType, $xId ) . " ";
@@ -143,9 +143,9 @@
 				{
 					$aRelationship = $this->FindRelationship( $sJoin );
 					
-					if( !$aRelationship )
+					if( !count( $aRelationship ) )
 					{
-						new Exception( "Unknown join relationship specified: {$sJoin}" );
+						throw new Exception( "Unknown join relationship specified: {$sJoin}" );
 					}
 					
 					$sJoins .= " INNER JOIN " . $aRelationship[ "table" ] . " AS " . 
@@ -201,12 +201,13 @@
 				return( null );
 			}
 		
+			$aForeignKeys = $this->GetTableForeignKeys( $this->tableName );
 			
-			foreach( self::$aSchemas[ $this->tableName ][ "foreign_key" ] as $oForeignKey )
+			foreach( $aForeignKeys as $aForeignKey )
 			{
-				if( $oForeignKey[ "name" ] == $sName || $oForeignKey[ "table" ] == $sTable )
+				if( $aForeignKey[ "name" ] == $sName ) // || $aForeignKey[ "table" ] == $sTable )
 				{
-					return( $oForeignKey );
+					return( $aForeignKey );
 				}
 			}
 			
@@ -258,68 +259,17 @@
 			return( 0 );
 		
 		} // GetCount()
-		
-		
-		////////////////////////////////////////////////////////////////////////////////////////////
-		public function Reset()
-		{
-			// this method is untested ---
 			
-			
-			if( !is_null( $this->oSelect ) && $this->oSelect->Fetch() )
-			{
-				$this->oSelect->Reset();
-				$this->Load( $this->oSelect->GetRecord() );
-			}
-			else
-			{
-				$this->emptySet = true;
-				return( false );
-			}
-			
-			return( true );
-			
-		
-		} // Reset()
-		
-		
-		////////////////////////////////////////////////////////////////////////////////////////////
-		public function Next()
-		{
-			$this->emptySet = true;
-				
-			if( !is_null( $this->oSelect ) && $this->oSelect->Fetch() )
-			{
-				foreach( $this as $sName => $xVar )
-				{
-
-					if( ( is_object( $xVar ) && is_subclass_of( $xVar, "crud" ) ) || 
-						( is_object( $xVar ) && strtolower( get_class( $xVar ) ) == "crud" ) )
-					{
-						unset( $this->$sName );
-					}
-				}
-			
-				$this->Load( $this->oSelect->GetRecord() );
-			}
-			else
-			{
-				return( false );
-			}
-			
-			return( true );
-			
-		} // Next()
-		
 		
 		////////////////////////////////////////////////////////////////////////////////////////////
 		public function __get( $sName )
 		{
-			
+			$aRelationships = $this->GetTableForeignKeys( $this->tableName );
+				
 			// first, determine if a relationship by this name exists		
 			$aRelationship = array();
 	
-			foreach( self::$aSchemas[ $this->tableName ][ "foreign_key" ] as $aTmpRelationship )
+			foreach( $aRelationships as $aTmpRelationship )
 			{			
                 if( strtolower( $sName ) == strtolower( $aTmpRelationship[ "name" ] ) )
 				{
@@ -398,7 +348,7 @@
 		//
 		{
 			// grab a copy of the primary key:
-			$aPrimaryKeys = self::$aSchemas[ $this->tableName ][ "primary_key" ];
+			$aPrimaryKeys = $this->GetTablePrimaryKey( $this->tableName );
 			
 			$bInsert = false;
 			
@@ -444,15 +394,30 @@
 		{
 			$this->Save();
 		
-			foreach( $this as &$xVar )
+			$aForeignKeys = $this->GetTableForeignKeys( $this->tableName );
+		
+			foreach( $aForeignKeys as $aRelationship )
 			{
-				if( ( is_object( $xVar ) && is_subclass_of( $xVar, "crud" ) ) || 
-					( is_object( $xVar ) && strtolower( get_class( $xVar ) ) == "crud" ) )
+				$sRelationshipName = $aRelationship[ "name" ];
+				
+				if( isset( $this->$sRelationshipName ) )
 				{
-					$xVar->SaveAll();
+					// If the relationship type is 1 to Many, than iterate each
+					// related data set and invoke SaveAll()
+					
+					if( $aRelationship[ "type" ] == "1-m" )
+					{
+						foreach( $this->$sRelationshipName as $oRelatedData )
+						{
+							$oRelatedData->SaveAll();
+						}
+					}
+					else
+					{
+						$this->$sRelationshipName->SaveAll();
+					}
 				}
 			}
-		
 		
 		} // SaveAll()
 		
@@ -469,10 +434,11 @@
 			$sFields = "";
 			$sValues = "";
 			
-			$aPrimaryKeys = self::$aSchemas[ $this->tableName ][ "primary_key" ];			
+			$aPrimaryKeys = $this->GetTablePrimaryKey( $this->tableName );			
+			$aFields = $this->GetTableFields( $this->tableName );
 			
 			// loop each field in the table and specify it's data:
-			foreach( self::$aSchemas[ $this->tableName ][ "fields" ] as $field )
+			foreach( $aFields as $field )
 			{
 				// automate updating update date fields:
 				if( in_array( $field[ "field" ], array( "created_date", "created_stamp", "created_on" ) ) )
@@ -506,7 +472,7 @@
 				throw new Exception( "Failed on Query: " . $oQuery->GetLastError() );
 			}
 		
-		} // insert()
+		} // Insert()
 		
 		
 		
@@ -519,7 +485,7 @@
 		//
 		{	
 			// get the primary key of the primary table:
-			$primaryKey = reset( self::$aSchemas[ $this->tableName ][ "primary_key" ] );
+			//$primaryKey = reset( self::$aSchemas[ $this->tableName ][ "primary_key" ] );
 		
 			// update the primary record:
 			$sSQL = $this->UpdateQuery();
@@ -531,10 +497,8 @@
 				trigger_error( "Failed on Query: {$sSQL}", E_USER_ERROR );
 				exit;
 			}
-				
-			//echo "<br />{$sSQL}<br /><br />";
 			
-		} // update()
+		} // Update()
 		
 		
 		
@@ -545,7 +509,7 @@
 		//		Called by update() method
 		//
 		{
-			$aSchema = self::$aSchemas[ $this->tableName ];
+			$aSchema = $this->GetSchema( $this->tableName );
 			
 			$aPrimaryKeys = $aSchema[ "primary_key" ];
 					
@@ -607,104 +571,7 @@
 		//		will also delete all data that is related through a 1-1 or 1-Many relationship
 		//
 		{
-			/*
-			$query = $this->spawnQuery();
-			
-			$query->begin();
-			
-			// for now, assume we only have one column in the primary key:
-			$primaryKey = reset( self::$aSchemas[ $this->tableName ][ "primary_key" ] );
-			
-			if( !isset( $this->$primaryKey ) )
-			{
-				// if we don't have a primary key defined, we cannot delete
-				return( false );
-			}
-			
-						
-			if( $cascade )
-			{
-				// if cascade is true, delete data from 1-1 and 1-M relationships:
-				// (generally not a good idea to shut cascade off)
-				
-				// loop each foreign table:	
-				foreach( self::$aSchemas[ $this->tableName ][ "foreign_key" ] as $foreignKey )
-				{
-					// quick access to the pertinant data:
-					$name = $foreignKey[ "name" ];
-					$table = $foreignKey[ "table" ];
-						
-					if( !isset( $this->$name ) )
-					{
-						// if no data is stored for this relationship, skip
-						continue;
-					}
-						
-					if( $foreignKey[ "type" ] == "1-m" )
-					{
-						// if the relationship is 1-to-many, we could have many pieces of data,
-						// so we must loop the relationship data:
-										
-						foreach( $this->$name as $dataSet )
-						{
-							// build a where clause of the related table:
-							$where = $this->buildWhereClause( 
-								self::$aSchemas[ $table ][ "primary_key" ],
-								$dataSet 
-							);
-								
-							// put the query together and execute it:
-							$sql = "DELETE FROM {$table} {$where}";
-							
-							if( !$query->execute( $sql ) )
-							{
-								trigger_error( "Query Failed: " . $query->getLastError(), E_USER_ERROR );
-								$query->rollback();
-							}
-						}
-					}
-					else if( $foreignKey[ "type" ] == "1-1" )
-					{						
-						// if the relationship is 1-to-1, then we only have one piece of data
-						// to delete, and it is not stored as an array
-						
-						// put the query together and execute it:
-						$where = $this->buildWhereClause( 
-							self::$aSchemas[ $table ][ "primary_key" ],
-							$dataSet 
-						);
-							
-						// put the query together and execute it:
-						$sql = "DELETE FROM {$table} {$where}";
-						
-						if( !$query->execute( $sql ) )
-						{
-							trigger_error( "Query Failed: " . $query->getLastError(), E_USER_ERROR );
-							$query->rollback();
-						}
-						
-					} // if( relationship-type )
-				
-				} // foreach( relationship )
-			
-			} // if( cascade )
 
-
-			// delete the primary record last:
-			
-			$sql = "DELETE FROM 
-				{$this->tableName}
-			WHERE 
-				{$primaryKey} = " . $this->$primaryKey;
-			
-			if( !$query->execute( $sql ) )
-			{
-				trigger_error( "Query Failed: " . $query->getLastError(), E_USER_ERROR );
-				$query->rollback();
-			}
-			
-			$query->rollback();
-			*/
 		
 		} // Destroy()
 	
@@ -749,6 +616,112 @@
 		} // buildWhereClause()
 	
 	
-	} // crud()
+		//
+		// ITERATOR DEFINITION
+		//
+
+		////////////////////////////////////////////////////////////////////////////////////////////
+	    public function Rewind()  
+	    //
+	    // Description:
+	    //		See http://www.php.net/~helly/php/ext/spl/interfaceIterator.html
+	    //
+		{		
+			if( !is_null( $this->oSelect ) )
+			{
+				$this->oSelect->Reset();
+				
+				return( $this->next() );
+			}
+			
+			return( null );
+	
+	    } // Rewind()
+    	
+
+		////////////////////////////////////////////////////////////////////////////////////////////
+	    public function Current() 
+	    //
+	    // Description:
+	    //		See http://www.php.net/~helly/php/ext/spl/interfaceIterator.html
+	    // 
+		{
+			if( !$this->emptySet )
+			{
+	    		return( $this );
+			}
+			
+			return( null );
+	
+	    } // Current()
+	
+		
+		////////////////////////////////////////////////////////////////////////////////////////////
+	    public function Key() 
+	    //
+	    // Description:
+	    //		See http://www.php.net/~helly/php/ext/spl/interfaceIterator.html
+	    //
+		{			
+			// It might be a good idea to return the primary key of the current record here,
+			// but what if that primary key is compound? Return an array? Hmm...
+		
+			return( null );
+	    
+		} // Key()
+	
+	
+		////////////////////////////////////////////////////////////////////////////////////////////
+	    public function Next() 
+	    //
+	    // Description:
+	    //		See http://www.php.net/~helly/php/ext/spl/interfaceIterator.html
+	    // 
+		{			
+			$this->emptySet = true;
+				
+			if( !is_null( $this->oSelect ) && $this->oSelect->Fetch() )
+			{
+				$aRelationships = $this->GetTableForeignKeys( $this->tableName );
+				
+				foreach( $aRelationships as $aRelationship )
+				{
+					$sRelationshipName = $aRelationship[ "name" ];
+					
+					if( isset( $this->$sRelationshipName ) )
+					{
+						unset( $this->$sRelationshipName );
+					}
+				}
+			
+				$this->Load( $this->oSelect->GetRecord() );
+			}
+			else
+			{
+				return( null );
+			}
+			
+			return( $this );
+		
+		} // Next()
+
+	
+		////////////////////////////////////////////////////////////////////////////////////////////////
+	    public function Valid()  
+	    //
+	    // Description:
+	    //		See http://www.php.net/~helly/php/ext/spl/interfaceIterator.html
+	    //
+		{ 			
+	    	if( !$this->emptySet )
+	    	{
+	    		return( $this );
+	    	}
+	    	
+	    	return( null );
+	    	
+	    } // Valid()
+
+	}; // CRUD()
 
 ?>

@@ -30,7 +30,7 @@
 				$sString .= " password={$sPassword}";
 			}
         		
-            $this->hDatabase = pg_connect( $sString )
+            $this->hDatabase = @pg_connect( $sString )
                 or trigger_error( "Failed to connect to Postgres server", E_USER_ERROR );
 
         } // __construct()
@@ -48,7 +48,7 @@
 		public function CacheSchemas( $bEnable )
 		{
 			self::$bCacheSchemas = $bEnable;
-		
+
 		} // CacheSchemas()
 
 
@@ -97,7 +97,7 @@
 
 
         ///////////////////////////////////////////////////////////////////////////////////////////
-        public static function GetSchema( $sTableName )
+        public function GetSchema( $sTableName )
         //
         // Description:
         //      Collects all fields/columns in the specified database table, as well as data type
@@ -117,11 +117,11 @@
 			}
 			else
 			{
-            	self::GetTableFields( $sTableName );
-            	self::GetTablePrimaryKey( $sTableName );
-            	self::GetTableForeignKeys( $sTableName );
+            	$this->GetTableFields( $sTableName );
+            	$this->GetTablePrimaryKey( $sTableName );
+            	$this->GetTableForeignKeys( $sTableName );
             	
-            	if( $this->bCacheSchemas )
+            	if( self::$bCacheSchemas )
             	{
             		file_put_contents( $sCacheFile, serialize( self::$aSchemas[ $sTableName ] ) );
             	}
@@ -133,7 +133,7 @@
 
 
 		////////////////////////////////////////////////////////////////////////////////////////////
-		public static function GetTableFields( $sTableName )
+		public function GetTableFields( $sTableName )
 		{
 			if( isset( self::$aSchemas[ $sTableName ][ "fields" ] ) )
 			{
@@ -198,14 +198,14 @@
 		
 		
 		////////////////////////////////////////////////////////////////////////////////////////////
-		public static function GetTablePrimaryKey( $sTableName )
+		public function GetTablePrimaryKey( $sTableName )
 		{
 			if( isset( self::$aSchemas[ $sTableName ][ "primary_key" ] ) )
 			{
 				return( self::$aSchemas[ $sTableName ][ "primary_key" ] );
 			}
 		
-			$aLocalTable = self::GetTableFields( $sTableName );
+			$aLocalTable = $this->GetTableFields( $sTableName );
 			
 			self::$aSchemas[ $sTableName ][ "primary_key" ] = array();
 		
@@ -255,21 +255,25 @@
 		
 
 		////////////////////////////////////////////////////////////////////////////////////////////
-		public static function GetTableForeignKeys( $sTableName )
+		public function GetTableForeignKeys( $sTableName )
 		{
 			if( isset( self::$aSchemas[ $sTableName ][ "foreign_key" ] ) )
 			{
 				return( self::$aSchemas[ $sTableName ][ "foreign_key" ] );
 			}
+		
+			//
+			// This method needs to be cleaned up and consolidated
+			//
 			
-			$aLocalTable = self::GetTableFields( $sTableName );
+			$aLocalTable = $this->GetTableFields( $sTableName );
 			
 			$aReferences = array();
 			
 			$oQ = $this->SpawnQuery();
-			$oQ2 = $this->SpawnQuery();
 		
 			$sSQL = "SELECT 
+				rpt.typname,
 				pc.confrelid,
 				pc.conkey,
 				pc.confkey
@@ -279,13 +283,16 @@
 				pg_type AS pt 
 			ON 
 				pt.typrelid = pc.conrelid 
+			INNER JOIN
+				pg_type AS rpt
+			ON
+				rpt.typrelid = confrelid
 			WHERE
 				pt.typname = '{$sTableName}'
 			AND
 				contype = 'f'
 			AND
 				confrelid IS NOT NULL";
-				
 				
 			if( !$oQ->Execute( $sSQL ) )
 			{
@@ -303,27 +310,8 @@
 				$aForeignFields = $aArray = explode( ",", 
 					str_replace( array( "{", "}" ), "", $oQ->Value( "confkey" ) ) );
 			
-				// get the table name of the reference:
-         	
-	         	$sSQL = "SELECT
-	         		pt.typname
-	         	FROM
-	         		pg_type AS pt
-	         	WHERE
-	         		pt.typrelid = " . $oQ->Value( "confrelid" );
-	         		
-	         	if( !$oQ2->Execute( $sSQL ) )
-	         	{
-						trigger_error( "Failed on Query: " . $sSQL, E_USER_ERROR );
-						exit;
-	         	}
-         	
-	         	if( !$oQ2->Fetch() )
-	         	{
-	         		continue;
-	         	}
-         	
-	         	$aFields = self::GetTableFields( $oQ2->Value( "typname" ) );
+			         	
+	         	$aFields = $this->GetTableFields( $oQ->Value( "typname" ) );
 	         	
 	         	foreach( $aForeignFields as $iIndex => $iField )
 	         	{
@@ -339,13 +327,14 @@
 
 				$localField = current( $aLocalFields );
 
-	         	$name = substr( $localField, strlen( $localField ) - 3 ) == "_id" ? 
+	         	$sName = substr( $localField, strlen( $localField ) - 3 ) == "_id" ? 
 	         		substr( $localField, 0, strlen( $localField ) - 3 ) : $localField;
 	         	
+	         	$sName = StringFunctions::ToSingular( $sName );
 	         	
 	         	$aReferences[ $iCount ] = array(
-	         		"table" => $oQ2->Value( "typname" ),
-	         		"name" => $name,
+	         		"table" => $oQ->Value( "typname" ),
+	         		"name" => $sName,
 	         		"local" => $aLocalFields,
 	         		"foreign" => $aForeignFields,
 	         		"type" => "m-1"
@@ -358,8 +347,6 @@
 			
 			
 			// find tables that reference us:
-			
-			$aReferences = array();
 			
 			$oQ = $this->SpawnQuery();
 			$oQ2 = $this->SpawnQuery();
@@ -423,9 +410,9 @@
 	         		//continue;
 	         	}
          	
-	         	self::GetSchema( $oQ2->Value( "typname" ) );
+	            $this->GetSchema( $oQ2->Value( "typname" ) );
 	         	
-	         	$aFields = self::GetTableFields( $oQ2->Value( "typname" ) );
+	         	$aFields = $this->GetTableFields( $oQ2->Value( "typname" ) );
 	         	
 	         	foreach( $aForeignFields as $iIndex => $iField )
 	         	{
@@ -481,9 +468,9 @@
 
 
 		////////////////////////////////////////////////////////////////////////////////////////////
-		public static function GetFieldType( $sTable, $sField )
+		public function GetFieldType( $sTable, $sField )
 		{
-			$aFields = self::GetTableFields( $sTable );
+			$aFields = $this->GetTableFields( $sTable );
 			
 			foreach( $aFields as $aField )
 			{
@@ -501,6 +488,11 @@
 		////////////////////////////////////////////////////////////////////////////////////////////
 		public function TableExists( $sTable )
 		{
+			if( isset( self::$aSchemas[ $sTable ] ) )
+			{
+				return( true );
+			}
+			
 			$oQuery = $this->SpawnQuery();
 			
 			$sSQL = "SELECT
@@ -509,8 +501,8 @@
 				pg_tables
 			WHERE
 				LOWER( tablename ) = '" . strtolower( addslashes( $sTable ) ) . "'";
-								
-			if( !$oQuery->Execute( $sSQL ) )
+							
+			if( !( $oResultSet = $oQuery->Execute( $sSQL ) ) )
 			{
 				trigger_error( "Failed on Query: {$sSQL}", E_USER_ERROR );
 				exit;
