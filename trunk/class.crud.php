@@ -7,10 +7,10 @@
 	//		
 	//
 	{
-		protected $tableName = null;		
-		protected $oSelect = null;
+		protected $sTableName = null;		
+		protected $oDataSet = null;
 		
-		protected $emptySet = true;		
+		protected $bEmptySet = true;		
 		
 		/////////////////////////////////////////////////////////////////////////////////////////////
 		public function __construct( $sTableName, $oData = null )
@@ -22,12 +22,14 @@
 		{
 			parent::__construct();
 			
-			parent::CacheSchemas( true );
+			parent::CacheSchemas( false );
 			parent::SetCacheDirectory( BASE_PATH . "/cache/schemas" );
 
-			$this->tableName = $sTableName;
+			$this->sTableName = $sTableName;
 		
-			$this->GetSchema( $this->tableName );
+			$this->GetSchema( $this->sTableName );
+			
+			$this->PrepareFields();
 
             if( is_object( $oData ) )
             {
@@ -41,10 +43,27 @@
 		} // __construct()
 		
 		
+		////////////////////////////////////////////////////////////////////////////////////////////
+		protected function PrepareFields()
+		//
+		// Description:
+		//		Setup variables for each database field for this table
+		//
+		{
+			$aFields = $this->GetTableFields( $this->sTableName );
+			
+			foreach( $aFields as $aField )
+			{
+				$this->{$aField[ "field" ]} = "";
+			}
+		
+		} // PrepareFields()
+		
+		
         ///////////////////////////////////////////////////////////////////////////////////////////
         protected function LoadArray( $aArray )
         {
-            $aFields = $this->GetTableFields( $this->tableName );
+            $aFields = $this->GetTableFields( $this->sTableName );
 
 			echo "Loading...<br />";
 
@@ -60,12 +79,15 @@
                 }
                 else
                 {
-                	if( isset( $aFields[ $sKey ] ) )
+                	// problem is that the key of aFields is numeric.
+                	
+                /*	if( isset( $aFields[ $sKey ] ) )
 					{
 						$this->$sKey = $xValue;
 						
 						echo "Setting {$sKey} => {$xValue}<br />";
-					}    
+					} 
+				*/   
                 }
             }
 
@@ -79,8 +101,8 @@
 		//
 		//
 		{
-			//echo $this->tableName . '<pre>'; print_r( self::$aSchemas[ $this->tableName ] ); echo '</pre>';
-			$aPrimaryKey = $this->GetTablePrimaryKey( $this->tableName );
+			//echo $this->sTableName . '<pre>'; print_r( self::$aSchemas[ $this->sTableName ] ); echo '</pre>';
+			$aPrimaryKey = $this->GetTablePrimaryKey( $this->sTableName );
 			
 			if( !empty( $xId ) )
 			{
@@ -100,8 +122,6 @@
 			
 			$sWhere = isset( $aClauses[ "where" ] ) ? $aClauses[ "where" ] : "";
 			
-			
-			$this->oSelect = $this->spawnQuery();
 					
 			// Handle our provided key:	
 			
@@ -116,7 +136,7 @@
 				
 				foreach( $xId as $sField => $sValue )
 				{					
-					$sType = $this->GetFieldType( $this->tableName, $sField );
+					$sType = $this->GetFieldType( $this->sTableName, $sField );
 					
 					$sWhere .= !empty( $sWhere ) ? " AND " : " WHERE ";
 					$sWhere .= "{$sField} = " . $this->FormatData( $sType, $sValue ) . " ";
@@ -126,7 +146,7 @@
 			{
 				// we have a singular primary key -- put the data in the WHERE clause:
 				$sKey = reset( $aPrimaryKey );
-				$sType = $this->GetFieldType( $this->tableName, $sKey );
+				$sType = $this->GetFieldType( $this->sTableName, $sKey );
 				
 				$sWhere .= !empty( $sWhere ) ? " AND " : " WHERE ";
 				$sWhere .= "{$sKey} = " . $this->FormatData( $sType, $xId ) . " ";
@@ -156,7 +176,7 @@
 					foreach( $aRelationship[ "local" ] as $iIndex => $sField )
 					{
 						$sOn .= ( !empty( $sOn ) ? " AND " : "" ) . 
-							"_" . StringFunctions::ToSingular( $this->tableName ) . 
+							"_" . StringFunctions::ToSingular( $this->sTableName ) . 
 							"." . $sField . " = " . "_" . $aRelationship[ "name" ] . 
 							"." . $aRelationship[ "foreign" ][ $iIndex ];
 					}
@@ -165,29 +185,29 @@
 				}
 			}
 			
-			$sFields = "_" . StringFunctions::ToSingular( $this->tableName ) . ".*";
+			$sFields = "_" . StringFunctions::ToSingular( $this->sTableName ) . ".*";
 			
 			$sOrder = isset( $aClauses[ "order" ] ) ? 
 				"ORDER BY " . $aClauses[ "order" ] : "";
 			
 			// Concatenate all the pieces of the query together:
-			$sSQL = "SELECT {$sFields} FROM {$this->tableName} AS _" . 
-				StringFunctions::ToSingular( $this->tableName ) . " {$sJoins} {$sWhere} {$sOrder}";		
+			$sSQL = "SELECT {$sFields} FROM {$this->sTableName} AS _" . 
+				StringFunctions::ToSingular( $this->sTableName ) . " {$sJoins} {$sWhere} {$sOrder}";		
 
 			//echo "<b>Finished Query</b>: {$sSQL}<br /><br />";
 
 			// Execute and pray:
-			if( !$this->oSelect->execute( $sSQL ) )
+			if( !( $this->oDataSet = $this->Query( $sSQL ) ) )
 			{
 				trigger_error( "Failed on Query. Error: " . 
-					$this->oSelect->getLastError() . "\n Query: {$sSQL}", E_USER_ERROR );
+					$this->getLastError() . "\n Query: {$sSQL}", E_USER_ERROR );
 				exit;
 			}
 			
 			// Loop the data and create member variables
-			if( $this->oSelect->fetch() )
+			if( $this->oDataSet->Count() != 0 )
 			{
-				$this->Load( $this->oSelect->GetRecord() );
+				$this->Load( $this->oDataSet->Rewind() );
 			}	
 			
 		} // Find()
@@ -201,7 +221,7 @@
 				return( null );
 			}
 		
-			$aForeignKeys = $this->GetTableForeignKeys( $this->tableName );
+			$aForeignKeys = $this->GetTableForeignKeys( $this->sTableName );
 			
 			foreach( $aForeignKeys as $aForeignKey )
 			{
@@ -223,7 +243,7 @@
 		//	
 		{
 		
-			if( !is_null( $oRecord ) )
+			if( !is_null( $oRecord ) && is_object( $oRecord ) )
 			{
 				// Loop each field
 				foreach( $oRecord as $sKey => $sValue )
@@ -233,7 +253,7 @@
 					$this->$sKey = $sValue;
 				}
 				
-				$this->emptySet = false;
+				$this->bEmptySet = false;
 			}
 	
 		} // Load()
@@ -242,7 +262,7 @@
 		////////////////////////////////////////////////////////////////////////////////////////////
 		protected function IsEmpty()
 		{
-			return( $this->emptySet );
+			return( $this->bEmptySet );
 			
 		} // IsEmpty()
 		
@@ -251,9 +271,9 @@
 		protected function GetCount() 
 		{
 		
-			if( !is_null( $this->oSelect ) )
+			if( !is_null( $this->oDataSet ) )
 			{
-				return( $this->oSelect->RowCount() );
+				return( $this->oDataSet->Count() );
 			}
 			
 			return( 0 );
@@ -264,8 +284,8 @@
 		////////////////////////////////////////////////////////////////////////////////////////////
 		public function __get( $sName )
 		{
-			$aRelationships = $this->GetTableForeignKeys( $this->tableName );
-				
+			$aRelationships = $this->GetTableForeignKeys( $this->sTableName );
+			
 			// first, determine if a relationship by this name exists		
 			$aRelationship = array();
 	
@@ -280,8 +300,7 @@
 			
 			if( !count( $aRelationship ) )
 			{
-				trigger_error( "Relationship {$sName} does not exist", E_USER_ERROR );
-				exit;
+				throw new Exception( "Relationship [{$sName}] does not exist" );
 			}	
 			
 			// the relationship exists, attempt to load the data:
@@ -348,7 +367,7 @@
 		//
 		{
 			// grab a copy of the primary key:
-			$aPrimaryKeys = $this->GetTablePrimaryKey( $this->tableName );
+			$aPrimaryKeys = $this->GetTablePrimaryKey( $this->sTableName );
 			
 			$bInsert = false;
 			
@@ -394,7 +413,7 @@
 		{
 			$this->Save();
 		
-			$aForeignKeys = $this->GetTableForeignKeys( $this->tableName );
+			$aForeignKeys = $this->GetTableForeignKeys( $this->sTableName );
 		
 			foreach( $aForeignKeys as $aRelationship )
 			{
@@ -429,13 +448,11 @@
 		//
 		//
 		{
-			$oQuery = $this->SpawnQuery();
-
 			$sFields = "";
 			$sValues = "";
 			
-			$aPrimaryKeys = $this->GetTablePrimaryKey( $this->tableName );			
-			$aFields = $this->GetTableFields( $this->tableName );
+			$aPrimaryKeys = $this->GetTablePrimaryKey( $this->sTableName );			
+			$aFields = $this->GetTableFields( $this->sTableName );
 			
 			// loop each field in the table and specify it's data:
 			foreach( $aFields as $field )
@@ -461,15 +478,15 @@
 					$this->FormatData( $field[ "type" ], $sValue );
 			}
 			
-			$sSQL = "INSERT INTO " . $this->tableName . " (
+			$sSQL = "INSERT INTO " . $this->sTableName . " (
 				{$sFields}
 			) VALUES (
 				{$sValues}
 			)";
 			
-			if( !$oQuery->Execute( $sSQL ) )
+			if( !$this->Query( $sSQL ) )
 			{
-				throw new Exception( "Failed on Query: " . $oQuery->GetLastError() );
+				throw new Exception( "Failed on Query: " . $this->GetLastError() );
 			}
 		
 		} // Insert()
@@ -485,14 +502,12 @@
 		//
 		{	
 			// get the primary key of the primary table:
-			//$primaryKey = reset( self::$aSchemas[ $this->tableName ][ "primary_key" ] );
+			//$primaryKey = reset( self::$aSchemas[ $this->sTableName ][ "primary_key" ] );
 		
 			// update the primary record:
 			$sSQL = $this->UpdateQuery();
 			
-			$oQuery = $this->SpawnQuery();
-			
-			if( !$oQuery->Execute( $sSQL ) )
+			if( !$this->Query( $sSQL ) )
 			{
 				trigger_error( "Failed on Query: {$sSQL}", E_USER_ERROR );
 				exit;
@@ -509,7 +524,7 @@
 		//		Called by update() method
 		//
 		{
-			$aSchema = $this->GetSchema( $this->tableName );
+			$aSchema = $this->GetSchema( $this->sTableName );
 			
 			$aPrimaryKeys = $aSchema[ "primary_key" ];
 					
@@ -553,7 +568,7 @@
 			}
 			
 			
-			$sSQL = "UPDATE {$this->tableName} SET {$sSet} WHERE {$sWhere}";	
+			$sSQL = "UPDATE {$this->sTableName} SET {$sSet} WHERE {$sWhere}";	
 			
 
 			return( $sSQL );
@@ -627,11 +642,11 @@
 	    //		See http://www.php.net/~helly/php/ext/spl/interfaceIterator.html
 	    //
 		{		
-			if( !is_null( $this->oSelect ) )
+			if( !is_null( $this->oDataSet ) )
 			{
-				$this->oSelect->Reset();
+				$this->oDataSet->Rewind();
 				
-				return( $this->next() );
+				return( $this->Next() );
 			}
 			
 			return( null );
@@ -646,7 +661,7 @@
 	    //		See http://www.php.net/~helly/php/ext/spl/interfaceIterator.html
 	    // 
 		{
-			if( !$this->emptySet )
+			if( !$this->bEmptySet )
 			{
 	    		return( $this );
 			}
@@ -678,11 +693,11 @@
 	    //		See http://www.php.net/~helly/php/ext/spl/interfaceIterator.html
 	    // 
 		{			
-			$this->emptySet = true;
+			$this->bEmptySet = true;
 				
-			if( !is_null( $this->oSelect ) && $this->oSelect->Fetch() )
+			if( !is_null( $this->oDataSet ) && $this->oDataSet->Count() != 0 )
 			{
-				$aRelationships = $this->GetTableForeignKeys( $this->tableName );
+				$aRelationships = $this->GetTableForeignKeys( $this->sTableName );
 				
 				foreach( $aRelationships as $aRelationship )
 				{
@@ -694,7 +709,7 @@
 					}
 				}
 			
-				$this->Load( $this->oSelect->GetRecord() );
+				$this->Load( $this->oDataSet->Next() );
 			}
 			else
 			{
@@ -713,7 +728,7 @@
 	    //		See http://www.php.net/~helly/php/ext/spl/interfaceIterator.html
 	    //
 		{ 			
-	    	if( !$this->emptySet )
+	    	if( !$this->bEmptySet )
 	    	{
 	    		return( $this );
 	    	}
