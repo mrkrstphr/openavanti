@@ -36,6 +36,185 @@
         } // __construct()
 
 
+        ///////////////////////////////////////////////////////////////////////////////////////////
+        public function Query( $sSQL )
+        //
+        // Description:
+        //      Executes the supplied query and stores the result in rResult
+        //
+        {
+            $rResult = @pg_query( $sSQL );
+
+			if( !$rResult )
+			{
+				return( null );
+			}
+
+            return( new ResultSet( $rResult ) );
+        
+        } // Query()
+
+
+        ///////////////////////////////////////////////////////////////////////////////////////////
+        public function Begin()
+        //
+        // Description:
+        //      Begins a new database transaction
+        //
+        {
+            $rResult = @pg_query( "BEGIN" ) or
+                trigger_error( "Failed to begin transaction", E_USER_ERROR );
+
+			return( $rResult ? true : false );
+
+        } // Begin()
+
+
+        ///////////////////////////////////////////////////////////////////////////////////////////
+        public function Commit()
+        //
+        // Description:
+        //      Commits the current database transaction
+        //
+        {
+            $rResult = @pg_query( "COMMIT" ) or
+                trigger_error( "Failed to commit transaction", E_USER_ERROR );
+
+			return( $rResult ? true : false );
+
+        } // Commit()
+
+
+        ///////////////////////////////////////////////////////////////////////////////////////////
+        public function Rollback()
+        //
+        // Description:
+        //      Rolls back/aborts the database transaction
+        //
+        {
+            $rResult = @pg_query( "ROLLBACK" ) or
+                trigger_error( "Failed to rollback transaction", E_USER_ERROR );
+
+			return( $rResult ? true : false );
+
+        } // Rollback()
+        
+        
+			///////////////////////////////////////////////////////////////////////////////////////////
+			public function NextVal( $sSequence )
+			{
+				$sSQL = "SELECT
+					NEXTVAL( '{$sSequence}' )
+				AS
+					next_val";
+                
+            $rResult = @pg_query( $sSQL ) or
+                trigger_error( "Failed to query sequence value: " . $this->getLastError(), 
+					 	E_USER_ERROR );
+                
+         	$oRecord = pg_fetch_object( $rResult );
+         	
+         	if( $oRecord )
+         	{
+         		return( $oRecord->next_val );
+         	}
+         	
+         	return( null );
+			}
+			
+			
+			///////////////////////////////////////////////////////////////////////////////////////////
+			public function CurrVal( $sSequence )
+			{
+				$sSQL = "SELECT
+					CURRVAL( '{$sSequence}' )
+				AS
+					current_value";
+                
+            $rResult = @pg_query( $sSQL ) or
+                trigger_error( "Failed to query sequence value: " . $this->getLastError(), 
+					 	E_USER_ERROR );
+                
+         	$oRecord = pg_fetch_object( $rResult );
+         	
+         	if( $oRecord )
+         	{
+         		return( $oRecord->current_value );
+         	}
+         	
+         	return( null );
+			}
+			
+			
+			///////////////////////////////////////////////////////////////////////////////////////////
+			public function SerialCurrVal( $sTable, $sColumn )
+			{
+				$sSQL = "SELECT
+					CURRVAL(
+						PG_GET_SERIAL_SEQUENCE(
+							'{$sTable}', 
+							'{$sColumn}'
+						)
+					)
+				AS
+					current_value";
+                
+            $rResult = @pg_query( $sSQL ) or
+                trigger_error( "Failed to query sequence value: " . $this->getLastError(), 
+					 	E_USER_ERROR );
+                
+         	$oRecord = pg_fetch_object( $rResult );
+         	
+         	if( $oRecord )
+         	{
+         		return( $oRecord->current_value );
+         	}
+         	
+         	return( null );
+			}
+
+
+			///////////////////////////////////////////////////////////////////////////////////////////
+			public function SerialNextVal( $sTable, $sColumn )
+			{
+				$sSQL = "SELECT
+					NEXTVAL(
+						PG_GET_SERIAL_SEQUENCE(
+							'{$sTable}', 
+							'{$sColumn}'
+						)
+					)
+				AS
+					next_value";
+                
+            $rResult = @pg_query( $sSQL ) or
+                trigger_error( "Failed to query sequence value: " . $this->getLastError(), 
+					 	E_USER_ERROR );
+                
+         	$oRecord = pg_fetch_object( $rResult );
+         	
+         	if( $oRecord )
+         	{
+         		return( $oRecord->next_value );
+         	}
+         	
+         	return( null );
+			}
+
+
+        ///////////////////////////////////////////////////////////////////////////////////////////
+        public function GetLastError()
+        //
+        // Description:
+        //      Returns the last database error, if any
+        //
+        {
+            return( pg_last_error() );
+
+        } // GetLastError()
+        
+
+
 		////////////////////////////////////////////////////////////////////////////////////////////
 		public function SetCacheDirectory( $sDirectory )
 		{
@@ -50,18 +229,6 @@
 			self::$bCacheSchemas = $bEnable;
 
 		} // CacheSchemas()
-
-
-        ///////////////////////////////////////////////////////////////////////////////////////////
-        public function SpawnQuery()
-        //
-        // Description:
-        //      Generates a query object for this database
-        //
-        {
-            return( new Query( $this ) );
-
-        } // SpawnQuery()
 
 
         ///////////////////////////////////////////////////////////////////////////////////////////
@@ -139,8 +306,6 @@
 			{
 				return( self::$aSchemas[ $sTableName ][ "fields" ] );
 			}
-		
-         	$oQ = $this->SpawnQuery();
 
          	$aFields = array();
 
@@ -167,29 +332,28 @@
 			ORDER BY 
 				pa.attnum";
 				
-			if( !$oQ->Execute( $sSQL ) )
+			if( !( $oFields = $this->Query( $sSQL ) ) )
 			{
-				trigger_error( "Failed on Query. Error: " . $oQ->GetLastError() . ". SQL: {$sSQL}", E_USER_ERROR );
+				trigger_error( "Failed on Query. Error: " . $this->GetLastError() . ". SQL: {$sSQL}", E_USER_ERROR );
 				exit;
 			}
             
             
-			while( $oQ->Fetch() )
+			foreach( $oFields as $oField )
 			{
-				$sField = $oQ->Value( "attname" );
+				$sField = $oField->attname;
 
-				$aFields[ $oQ->Value( "attnum" ) ] = array(
-					"field" => $sField, 
-					"type" => $oQ->Value( "typname" )
+				$aFields[ $oField->attnum ] = array(
+					"field" => $oField->attname, 
+					"type" => $oField->typname
 				);
 				 
-				if( $oQ->Value( "typname" ) == "_varchar" )
+				if( $oField->typname == "_varchar" )
 				{
-					$aFields[ $oQ->Value( "attnum" ) ][ "size" ] =
-					$oQ->Value( "atttypmod" ) - 4;
+					$aFields[ $oField->attnum ][ "size" ] = $oField->atttypmod - 4;
 				}
 			}
-
+			
 			self::$aSchemas[ $sTableName ][ "fields" ] = $aFields;
  
 			return( $aFields );
@@ -208,9 +372,7 @@
 			$aLocalTable = $this->GetTableFields( $sTableName );
 			
 			self::$aSchemas[ $sTableName ][ "primary_key" ] = array();
-		
-			$oQ = $this->SpawnQuery();
-			
+					
 			$sSQL = "SELECT 
 				pi.indkey,
 				pi.indnatts
@@ -231,15 +393,17 @@
 			AND 
 				pi.indisprimary = true";
 			
-			if( !$oQ->Execute( $sSQL ) )
+			if( !( $oPrimaryKeys = $this->Query( $sSQL ) ) )
 			{
 				trigger_error( "SQL Error", E_USER_ERROR );
 				exit;
 			}
 
-			if( $oQ->Fetch() )
+			if( $oPrimaryKeys->Count() != 0 )
 			{
-				$aIndexFields = explode( " ", $oQ->Value( "indkey" ) );
+				$oPrimaryKey = $oPrimaryKeys->Rewind();
+				
+				$aIndexFields = explode( " ", $oPrimaryKey->indkey );
 				
 				foreach( $aIndexFields as $iField )
 				{
@@ -269,8 +433,6 @@
 			$aLocalTable = $this->GetTableFields( $sTableName );
 			
 			$aReferences = array();
-			
-			$oQ = $this->SpawnQuery();
 		
 			$sSQL = "SELECT 
 				rpt.typname,
@@ -294,7 +456,7 @@
 			AND
 				confrelid IS NOT NULL";
 				
-			if( !$oQ->Execute( $sSQL ) )
+			if( !( $oForeignKeys = $this->Query( $sSQL ) ) )
 			{
 				trigger_error( "Failed on Query: " . $sSQL, E_USER_ERROR );
 				exit;
@@ -302,16 +464,16 @@
             
 			$iCount = 0;
 			
-			while( $oQ->Fetch() )
+			foreach( $oForeignKeys as $oForeignKey )
 			{
 				$aLocalFields = $aArray = explode( ",", 
-					str_replace( array( "{", "}" ), "", $oQ->Value( "conkey" ) ) );
+					str_replace( array( "{", "}" ), "", $oForeignKey->conkey ) );
 			
 				$aForeignFields = $aArray = explode( ",", 
-					str_replace( array( "{", "}" ), "", $oQ->Value( "confkey" ) ) );
+					str_replace( array( "{", "}" ), "", $oForeignKey->confkey ) );
 			
 			         	
-	         	$aFields = $this->GetTableFields( $oQ->Value( "typname" ) );
+	         	$aFields = $this->GetTableFields( $oForeignKey->typname );
 	         	
 	         	foreach( $aForeignFields as $iIndex => $iField )
 	         	{
@@ -333,7 +495,7 @@
 	         	$sName = StringFunctions::ToSingular( $sName );
 	         	
 	         	$aReferences[ $iCount ] = array(
-	         		"table" => $oQ->Value( "typname" ),
+	         		"table" => $oForeignKey->typname,
 	         		"name" => $sName,
 	         		"local" => $aLocalFields,
 	         		"foreign" => $aForeignFields,
@@ -347,10 +509,7 @@
 			
 			
 			// find tables that reference us:
-			
-			$oQ = $this->SpawnQuery();
-			$oQ2 = $this->SpawnQuery();
-		
+					
 			$sSQL = "SELECT 
 				ptr.typname,
 				pc.conrelid,
@@ -374,45 +533,24 @@
 				confrelid IS NOT NULL";
 				
 				
-			if( !$oQ->Execute( $sSQL ) )
+			if( !( $oForeignKeys = $this->Query( $sSQL ) ) )
 			{
 				trigger_error( "Failed on Query: " . $sSQL, E_USER_ERROR );
 				exit;
 			}
 
-	         while( $oQ->Fetch() )
-	         {
+	        foreach( $oForeignKeys as $oForeignKey )
+	        {
 	         	$aLocalFields = $aArray = explode( ",", 
-						str_replace( array( "{", "}" ), "", $oQ->Value( "confkey" ) ) );
+						str_replace( array( "{", "}" ), "", $oForeignKey->confkey ) );
 	
 	         	$aForeignFields = $aArray = explode( ",", 
-						str_replace( array( "{", "}" ), "", $oQ->Value( "conkey" ) ) );
+						str_replace( array( "{", "}" ), "", $oForeignKey->conkey ) );
 	         	
-	         	// get the table name of the reference:
-	         	
-	         	$sSQL = "SELECT
-	         		pt.typname
-	         	FROM
-	         		pg_type AS pt
-	         	WHERE
-	         		pt.typrelid = " . $oQ->Value( "conrelid" );
-	         		
-	         	if( !$oQ2->Execute( $sSQL ) )
-	         	{
-	         		trigger_error( "Failed on Query: " . $sSQL, E_USER_ERROR );
-	         		exit;
-	         	}
-	         	
-	         	if( !$oQ2->Fetch() )
-	         	{
-	         		trigger_error( "Failed to find table: " . $oQ->FieldVal( "conrelid" ), E_USER_ERROR );
-	         		exit;
-	         		//continue;
-	         	}
          	
-	            $this->GetSchema( $oQ2->Value( "typname" ) );
+	            $this->GetSchema( $oForeignKey->typname );
 	         	
-	         	$aFields = $this->GetTableFields( $oQ2->Value( "typname" ) );
+	         	$aFields = $this->GetTableFields( $oForeignKey->typname );
 	         	
 	         	foreach( $aForeignFields as $iIndex => $iField )
 	         	{
@@ -432,7 +570,7 @@
 				//		Relationship = 1-1
 				// end
 				
-				$aTmpForeignPrimaryKey = &self::$aSchemas[ $oQ2->Value( "typname" ) ][ "primary_key" ];
+				$aTmpForeignPrimaryKey = &self::$aSchemas[ $oForeignKey->typname ][ "primary_key" ];
 				$aTmpLocalPrimaryKey = &self::$aSchemas[ $sTableName ][ "primary_key" ];
 				
 				$bForeignFieldIsPrimary = count( $aTmpForeignPrimaryKey ) == 1 &&
@@ -450,8 +588,8 @@
 
 
 	         	$aReferences[ $iCount ] = array(
-	         		"table" => $oQ2->Value( "typname" ),
-	         		"name" => $oQ2->Value( "typname" ),
+	         		"table" => $oForeignKey->typname,
+	         		"name" => $oForeignKey->typname,
 					"local" => $aLocalFields,
 	         		"foreign" => $aForeignFields,
 	         		"type" => $sType
@@ -493,8 +631,6 @@
 				return( true );
 			}
 			
-			$oQuery = $this->SpawnQuery();
-			
 			$sSQL = "SELECT
 				1
 			FROM
@@ -502,13 +638,13 @@
 			WHERE
 				LOWER( tablename ) = '" . strtolower( addslashes( $sTable ) ) . "'";
 							
-			if( !( $oResultSet = $oQuery->Execute( $sSQL ) ) )
+			if( !( $oResultSet = $this->Query( $sSQL ) ) )
 			{
 				trigger_error( "Failed on Query: {$sSQL}", E_USER_ERROR );
 				exit;
 			}
 			
-			return( $oQuery->Fetch() );
+			return( $oResultSet->Count() );
 		
 		} // TableExists()
 
