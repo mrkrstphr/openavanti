@@ -1,108 +1,87 @@
 <?php
 
-	/////////////////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////////////////
 	class Dispatcher
-	//
-	// Description:
-	//		The dispatcher is used to route requests and map them to classes and methods. The URL
-	//		must follow the following format to be routed correctly:
-	//
-	//		/class/method[/extra parameters]
-	//
-	//		When a valid match is found, the class is instantiated and the method is called. 
-	//
 	{
-		protected $sModel;
-		protected $sAction;
-		protected $sID;
 	
-	
-		//////////////////////////////////////////////////////////////////////////////////////////////
-		public function __construct()
-		//
-		// Description:
-		//
-		//
-		{			
-			$sRequest = isset( $_REQUEST[ "request" ] ) ? 
-				$_REQUEST[ "request" ] : ""; 
-			
-			$_SESSION[ "request" ] = explode( "/", $sRequest );
-		
-			$this->sModel = isset( $_SESSION[ "request" ][ 0 ] ) && 
-				!empty( $_SESSION[ "request" ][ 0 ] ) ? 
-					$_SESSION[ "request" ][ 0 ] : "";
-				
-			$this->sAction = isset( $_SESSION[ "request" ][ 1 ] ) ? 
-				$_SESSION[ "request" ][ 1 ] : "";
-				
-			$this->sID = isset( $_SESSION[ "request" ][ 2 ] ) ? 
-				$_SESSION[ "request" ][ 2 ] : "";
-			
-		} // __construct()
-		
-		
-		//////////////////////////////////////////////////////////////////////////////////////////////
-		public function DefaultModel( $sModel )
-		//
-		// Description:
-		//
-		//
+		////////////////////////////////////////////////////////////////////////////////////////////
+		public static function Connect( $sRequest )
 		{
-			if( empty( $this->sModel ) )
-			{
-				$this->sModel = $sModel;
-			}
-			
-		} // DefaultModel()
-		
-		
-		//////////////////////////////////////////////////////////////////////////////////////////////
-		public function connect()
-		//
-		// Description:
-		//
-		//
-		{
-			$oModel = null;		
-		
-			if( !empty( $this->sModel ) && class_exists( $this->sModel, true ) )
-			{
-				$oModel = new $this->sModel();
-			}
-			else if( !empty( $this->sModel ) && class_exists( "model", true ) )
-			{
-				$sClass = ClassFunctions::Create( "{$this->sModel}Controller", "Model" );				
+			$aRequest = explode( "/", $sRequest );
+			$_SESSION[ "last-request" ] = $aRequest;
+						
+			$sController = isset( $aRequest[ 0 ] ) ? 
+				$aRequest[ 0 ] . "Controller" : "";
 				
-				$oModel = new $sClass();
+			$sAction = isset( $aRequest[ 1 ] ) ? 
+				$aRequest[ 1 ] : "";
+				
+			$iID = isset( $aRequest[ 2 ] ) ? 
+				intval( $aRequest[ 2 ] ) : null;
+			
+			$oController = null;
+			
+			if( !empty( $sController ) && class_exists( $sController, true ) )
+			{
+				$oController = new $sController();
+								
+				self::InvokeAction( $oController, $sAction, $iID );
 			}
 			else
 			{
-				return;
-			}
+				$_SESSION[ "view" ] = "404.php";
+			}		
 			
-			if( !empty( $this->sAction ) && method_exists( $oModel, $this->sAction ) )
-			{
-				$sAction = &$this->sAction;
-				
-				$oModel->$sAction( $this->sID );
+			self::LoadView( $oController );
+		
+		} // Connect()
+		
+		
+		////////////////////////////////////////////////////////////////////////////////////////////
+		private static function InvokeAction( &$oController, $sAction, $iID )
+		{
+			if( !empty( $sAction ) && method_exists( $oController, $sAction ) )
+			{				
+				$oController->$sAction( $iID );
 			}
-			else if( empty( $this->sAction ) )
+			else if( empty( $sAction ) )
 			{
-				$oModel->__default();
+				$oController->index();
 			}
 			else
 			{
 				$_SESSION[ "view" ] = "404.php";
 			}
-			
+		
+		} // InvokeAction()
+		
+		
+		////////////////////////////////////////////////////////////////////////////////////////////
+		private static function LoadView( &$oController )
+		{
 			if( isset( $_SESSION[ "view" ] ) )
 			{
-				require( $_SESSION[ "view" ] );
-			}
+				if( !isset( $_SERVER[ "HTTP_X_REQUESTED_WITH" ] ) )
+				{
+					require( "header.php" );
+				}
 			
-		} // connect()
+				$aData = &$oController->aData;
+			
+				require( $_SESSION[ "view" ] );
+				
+				
+				if( !isset( $_SERVER[ "HTTP_X_REQUESTED_WITH" ] ) )
+				{
+					require( "footer.php" );
+				}
+				
+				unset( $_SESSION[ "view" ] );
+			}
+		
+		} // LoadView()
+		
 	
-	};
+	}; // Dispatcher()
 
 ?>
