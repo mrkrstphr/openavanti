@@ -72,8 +72,9 @@
 			}
 			else if( !empty( $this->sModel ) && class_exists( "model", true ) )
 			{
-				ClassFunctions::Create( "$this->sModel}Controller", "Model" );				
-				$oModel = new {"{$this->sModel}Controller"}();
+				$sClass = ClassFunctions::Create( "{$this->sModel}Controller", "Model" );				
+				
+				$oModel = new $sClass();
 			}
 			else
 			{

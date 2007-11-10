@@ -26,6 +26,8 @@
 			
 			eval( $sNewClass );
 			
+			return( $sClass );
+			
 		} // Create()
 	
 	};
