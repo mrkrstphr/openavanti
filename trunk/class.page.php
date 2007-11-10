@@ -85,9 +85,19 @@
 				$oPageContent->title = $oContentLanguage->title; //$oPage->page_content->content->title;
 				$oPageContent->body = $oContentLanguage->body; //$oPage->page_content->content->body;
 				
+				$oPageContent->custom = array();
+
+				while( !$oPage->page_content->page_content_custom_fields->Empty() )
+				{
+					$oCustomField = $oPage->page_content->page_content_custom_fields;
+					
+					$oPageContent->custom[ $oCustomField->field->name ] = $oCustomField->field_value;
+					
+					$oPage->page_content->page_content_custom_fields->Next();
+				}
+				
 				$oTemplate->set( $oPage->page_content->template_content_area->tag, $oPageContent );
-				
-				
+
 				$oPage->page_content->Next();
 			}
 			
@@ -95,47 +105,12 @@
 			$sOutput = $oTemplate->execute();
 			
 			$oXML = new SimpleXMLElement( $sOutput );
-			
-			/*$oScript = $oXML->head->addChild( "script", " " );
-			$oScript[ "type" ] = "text/javascript";
-			$oScript[ "src" ] = "/js/cms.js";
-			
-			$oScript = $oXML->head->addChild( "script", " " );
-			$oScript[ "type" ] = "text/javascript";
-			$oScript[ "src" ] = "/js/tiny_mce/tiny_mce.js";
-			
-			$oContentAreas = $oXML->xpath( "//div[@class='cms-area']" );
-			
-			foreach( $oContentAreas as $oContentArea )
-			{
-			    self::CreateCMSLinks( $oContentArea, $sPageTag, (string)$oContentArea[ "id" ] );
-			}*/
+
 			
 			// Return the generated page:
 			return( $oXML->asXML() );
 
       } // ParseTemplate()
-
-
-      ///////////////////////////////////////////////////////////////////////////////////////////
-      protected function CreateCMSLinks( $oParent, $sPageTag, $sContentArea )
-      {
-			/*
-			$oLinks = $oParent->addChild( "div" );
-			$oLinks[ "class" ] = "cms-action-links";
-			$oLinks[ "id" ] = $sContentArea . "-cms-links";
-			
-			$oEditLink = $oLinks->addChild( "a" );
-			$oEditLink[ "href" ] = "#";
-			$oEditLink[ "onclick" ] = "editContent( '{$sPageTag}', '{$sContentArea}' );"; 
-			
-			$oEdit = $oEditLink->addChild( "img" );
-			$oEdit[ "alt" ] = "Edit";
-			$oEdit[ "title" ] = "Edit Content";
-			$oEdit[ "src" ] = "/images/edit.png";
-			*/
-				
-      } // CreateCMSLinks()
 
     }; // Page()
 
