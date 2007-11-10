@@ -1,7 +1,26 @@
 <?php
-
-	////////////////////////////////////////////////////////////////////////////////////////////////
-	class Crud extends database implements Iterator
+/***************************************************************************************************
+ * OpenAvanti
+ *
+ * OpenAvanti is an open source, object oriented framework for PHP 5+
+ *
+ * @author			Kristopher Wilson
+ * @dependencies 	Database, StringFunctions
+ * @copyright		Copyright (c) 2008, Kristopher Wilson
+ * @license			http://www.openavanti.com/license
+ * @link				http://www.openavanti.com
+ * @version			0.05
+ *
+ */
+ 
+	/**
+	 * Database abstraction layer implementing CRUD procedures
+	 *
+	 * @category	Database
+	 * @author		Kristopher Wilson
+	 * @link			http://www.openavanti.com/docs/database
+	 */
+	class CRUD extends Database implements Iterator
 	//
 	// Description:
 	//		
@@ -11,6 +30,7 @@
 		protected $oDataSet = null;
 		
 		protected $bEmptySet = true;		
+		
 		
 		/////////////////////////////////////////////////////////////////////////////////////////////
 		public function __construct( $sTableName, $oData = null )
@@ -31,14 +51,14 @@
 			
 			$this->PrepareFields();
 
-            if( is_object( $oData ) )
-            {
-                $this->LoadObject( $oData );
-            }
-            else if( is_array( $oData ) )
-            {
-                $this->LoadArray( $oData );
-            }
+         if( is_object( $oData ) )
+         {
+         	$this->LoadObject( $oData );
+         }
+         else if( is_array( $oData ) )
+         {
+            $this->LoadArray( $oData );
+         }
 
 		} // __construct()
 		
@@ -60,38 +80,37 @@
 		} // PrepareFields()
 		
 		
-        ///////////////////////////////////////////////////////////////////////////////////////////
-        protected function LoadArray( $aArray )
-        {
-            $aFields = $this->GetTableFields( $this->sTableName );
+      ///////////////////////////////////////////////////////////////////////////////////////////
+      protected function LoadArray( $aArray )
+      {
+      	$aFields = $this->GetTableFields( $this->sTableName );
 
 			echo "Loading...<br />";
 
-            foreach( $aArray as $sKey => $xValue )
+         foreach( $aArray as $sKey => $xValue )
+         {
+         	if( is_object( $xValue ) )
             {
-                if( is_object( $xValue ) )
-                {
-
-                }
-                else if( is_array( $xValue ) )
-                {
-					
-                }
-                else
-                {
-                	// problem is that the key of aFields is numeric.
-                	
-                /*	if( isset( $aFields[ $sKey ] ) )
+                
+            }
+            else if( is_array( $xValue ) )
+            {
+					if( isset( self::$aSchemas[ $this->sTableName ][ "foreign_key" ][ $sKey ] ) )
+					{
+						$this->$sKey = new $sKey( $xValue );
+					}					
+            }
+            else
+            {
+               // problem is that the key of aFields is numeric
+               if( isset( $aFields[ $sKey ] ) )
 					{
 						$this->$sKey = $xValue;
-						
-						echo "Setting {$sKey} => {$xValue}<br />";
-					} 
-				*/   
-                }
-            }
+					}
+         	}
+			}
 
-        } // LoadArray()
+		} // LoadArray()
 
 		
 		/////////////////////////////////////////////////////////////////////////////////////////////
@@ -101,7 +120,6 @@
 		//
 		//
 		{
-			//echo $this->sTableName . '<pre>'; print_r( self::$aSchemas[ $this->sTableName ] ); echo '</pre>';
 			$aPrimaryKey = $this->GetTablePrimaryKey( $this->sTableName );
 			
 			if( !empty( $xId ) )
@@ -128,7 +146,7 @@
 			if( !empty( $sWhere ) )
 			{
 				$sWhere = " WHERE {$sWhere} ";
-			}		
+			}
 
 			if( is_array( $xId ) && count( $aPrimaryKey ) > 0 )
 			{
@@ -285,23 +303,14 @@
 		public function __get( $sName )
 		{
 			$aRelationships = $this->GetTableForeignKeys( $this->sTableName );
-			
-			// first, determine if a relationship by this name exists		
-			$aRelationship = array();
-	
-			foreach( $aRelationships as $aTmpRelationship )
-			{			
-                if( strtolower( $sName ) == strtolower( $aTmpRelationship[ "name" ] ) )
-				{
-                    $aRelationship = $aTmpRelationship;
-					break;
-				}
-			}
-			
-			if( !count( $aRelationship ) )
+
+			if( !isset( self::$aSchemas[ $this->sTableName ][ "foreign_key" ][ $sName ] ) )
 			{
 				throw new Exception( "Relationship [{$sName}] does not exist" );
-			}	
+			}
+
+			$aRelationship = self::$aSchemas[ $this->sTableName ][ "foreign_key" ][ $sName ];
+			
 			
 			// the relationship exists, attempt to load the data:
 			
@@ -483,6 +492,8 @@
 			) VALUES (
 				{$sValues}
 			)";
+			
+			echo $sSQL;
 			
 			if( !$this->Query( $sSQL ) )
 			{
