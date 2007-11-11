@@ -19,7 +19,7 @@
 	 * @author		Kristopher Wilson
 	 * @link			http://www.openavanti.com/docs/templating
 	 */
-	class Page
+	class TemplatedPage
 	{
 
 		///////////////////////////////////////////////////////////////////////////////////////////
