@@ -406,12 +406,12 @@
 			{
 				// if there is no data in the primary key field of this object, we need to insert
 				// a new record:
-				$this->insert();
+				return( $this->Insert() );
 			}
 			else
 			{
 				// if we do have data supplied in the primary key field, we need to update the data:
-				$this->update();
+				return( $this->Update() );
 			}
 		
 		} // Save()
@@ -493,13 +493,20 @@
 				{$sValues}
 			)";
 			
-			echo $sSQL;
-			
 			if( !$this->Query( $sSQL ) )
 			{
 				throw new Exception( "Failed on Query: " . $this->GetLastError() );
 			}
-		
+			
+			if( count( $aPrimaryKeys ) == 1 )
+			{
+				$iKey = $this->SerialCurrVal( $this->sTableName, reset( $aPrimaryKeys ) );
+				
+				return( $iKey );
+			}
+			
+			return( true );
+			
 		} // Insert()
 		
 		

@@ -30,7 +30,38 @@
 		                                       
 		   return( $sExt );
 		                                   
-		} // getFileExtension()
+		} // GetFileExtension()
+		
+		
+		//////////////////////////////////////////////////////////////////////////////////////////////
+		public static function GetMimeType( $sFileName )
+		{
+			$rFinfo = finfo_open( FILEINFO_MIME );
+
+    		$sMimeType = finfo_file( $rFinfo, $sFileName );
+
+			finfo_close( $rFinfo );
+			
+			return( $sMimeType );
+		
+		} // GetMimeType()
+		
+		
+		//////////////////////////////////////////////////////////////////////////////////////////////
+		public static function HandleUploadedFile( $sTmpFile, $sUploadName, $sDirectory )
+		{
+			$sExt = self::GetFileExtension( $sUploadName );
+			
+			$sFileName = microtime( true ) . "." . $sExt;
+			
+			if( !copy( $sTmpFile, $sDirectory . "/" . $sFileName ) )
+			{
+				return( false );
+			}
+			
+			return( $sFileName );
+		
+		} // HandleUploadedFile()
                                                                                     
                                                                               
       //////////////////////////////////////////////////////////////////////////////////////////////
