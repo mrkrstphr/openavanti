@@ -1,41 +1,94 @@
 <?php
 
+	/////////////////////////////////////////////////////////////////////////////////////////////////
 	class Validation
 	{
-		private $errors = array();
+		private static $errors = array();
 		
-		public function __construct()
+		
+		//////////////////////////////////////////////////////////////////////////////////////////////
+		private function __construct()
 		{
 		
-		} 
+		} // __construct()
 		
-		public function hasErrors()
+		
+		//////////////////////////////////////////////////////////////////////////////////////////////
+		public static function HasErrors()
+		{		
+			return( count( self::$errors ) > 0 );
+		
+		} // HasErrors()
+		
+		
+		//////////////////////////////////////////////////////////////////////////////////////////////
+		public static function GetErrors()
 		{
-			return( count( $this->errors ) );
-		}
+			return( self::$errors );
+			
+		} // GetErrors()
 		
-		public function getErrors()
+		
+		//////////////////////////////////////////////////////////////////////////////////////////////
+		public static function Clear()
 		{
-			return( $this->errors );
-		}
+			self::$errors = array();
 		
-		public function clear()
-		{
-			$this->errors = array();
-		}
+		} // Clear()
 		
 		
-		public function validateInteger( $value, $error )
+		//////////////////////////////////////////////////////////////////////////////////////////////
+		public function ValidateInteger( $value, $error )
 		{
 			if( !filter_var( $value, FILTER_VALIDATE_INT ) )
 			{
-				$this->errors[] = $error;
+				self::$errors[] = $error;
 			}
-		}
+		
+		} // ValidateInteger()
 		
 		
+		//////////////////////////////////////////////////////////////////////////////////////////////
+		public static function ValidateLength( $sName, $sValue, $iMin = null, $iMax = null )
+		{
+		
+			if( ( !is_null( $iMin ) && strlen( $sValue ) < $iMin ) || 
+				( !is_null( $iMax ) && strlen( $sValue > $iMax ) ) )
+			{
+				self::$errors[ $sName ] = ucwords( str_replace( "_", " ", $sName ) ) . 
+					" must be ";
+					
+				if( !is_null( $iMin ) )
+				{
+					self::$errors[ $sName ] .= " more than {$iMin} characters ";
+				}
+				
+				self::$errors[ $sName ] .= !is_null( $iMin ) && !is_null( $iMax ) ? 
+					" and " : "";
+										
+				if( !is_null( $iMax ) )
+				{
+					self::$errors[ $sName ] .= " less than {$iMax} characters ";
+				}
+				
+				self::$errors[ $sName ] .= "in length.";
+			}
+		
+		} // ValidateLength()
 		
 		
-	};
+		//////////////////////////////////////////////////////////////////////////////////////////////
+		public static function ValidateFilePresent( $sName, $sValue )
+		{
+		
+			if( empty( $sValue ) )
+			{
+				self::$errors[ $sName ] = ucwords( str_replace( "_", " ", $sName ) ) . " is required.";
+			}
+		
+		} // ValidateFilePresent()
+				
+		
+	}; // Validation()
 
 ?>
