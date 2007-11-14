@@ -3,9 +3,9 @@
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	class ResultSet implements Iterator
 	{
-        private $rResult = null;
-        private $oRecord = null;
-	
+		private $rResult = null;
+      private $oRecord = null;
+		
 		////////////////////////////////////////////////////////////////////////////////////////////
 		public function __construct( $rResult )
 		{
@@ -17,14 +17,14 @@
 		////////////////////////////////////////////////////////////////////////////////////////////
 		public function Count()
 		{
-            if( $this->rResult )
-            {
-                return( pg_num_rows( $this->rResult ) );
-            }
-            else
-            {
-                return( 0 );
-            }
+         if( $this->rResult )
+         {
+             return( pg_num_rows( $this->rResult ) );
+         }
+         else
+         {
+             return( 0 );
+         }
             
 		} // Count()
 	
@@ -48,16 +48,16 @@
 		////////////////////////////////////////////////////////////////////////////////////////////
  		public function Next()
 		{
-            if( $this->rResult )
-            {
-                $this->oRecord = pg_fetch_object( $this->rResult );
-            }
-            else
-            {
-                $this->oRecord = null;
-            }
+         if( $this->rResult )
+         {
+             $this->oRecord = pg_fetch_object( $this->rResult );
+         }
+         else
+         {
+             $this->oRecord = null;
+         }
 
-            return( $this->oRecord );
+         return( $this->oRecord );
 		
 		} // Next()
 	

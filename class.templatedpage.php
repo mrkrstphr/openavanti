@@ -47,7 +47,7 @@
 			$oPage->Find( null, array(
 				"where" => "url_alias = '{$sPageTag}'"
 			) );
-			
+						
 			// Throw an exception if the page does not exist:
 			if( $oPage->Empty() )
 			{
@@ -55,15 +55,15 @@
 			}
 			
 			// Find the template file:
-			$sTemplateFile = $oPage->template->file_name;
+			$sTemplateFile = $oPage->template->template_file->system_name;
 			$sTemplateFile = FileFunctions::FileExistsInPath( $sTemplateFile );
-			
-			if( !$sTemplateFile )
+						
+			if( $sTemplateFile === false )
 			{
-				return( "Failed to load template: {$oPage->template->file_name}" );
+				throw new Exception( "Failed to load template: {$oPage->template->template_file->system_name}" );
 			}
 			
-			// Load the template:        
+			// Load the template:
 			$oTemplate = new PHPTAL( $sTemplateFile );
 			$oTemplate->title = $oPage->title;
 			
@@ -107,8 +107,13 @@
 			$oXML = new SimpleXMLElement( $sOutput );
 
 			
+			$sPage = $oXML->asXML();
+			
+			// This is a hack:
+			$sPage = str_replace( "tal:", "", $sPage );
+			
 			// Return the generated page:
-			return( $oXML->asXML() );
+			return( $sPage );
 
       } // ParseTemplate()
 

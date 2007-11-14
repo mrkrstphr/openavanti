@@ -49,6 +49,18 @@
 		
 		
 		//////////////////////////////////////////////////////////////////////////////////////////////
+		public static function ValidatePresent( $sName, $sValue )
+		{
+		
+			if( empty( $sValue ) )
+			{
+				self::$errors[ $sName ] = ucwords( str_replace( "_", " ", $sName ) ) . " is required.";
+			}
+		
+		} // ValidateFilePresent()
+		
+		
+		//////////////////////////////////////////////////////////////////////////////////////////////
 		public static function ValidateLength( $sName, $sValue, $iMin = null, $iMax = null )
 		{
 		

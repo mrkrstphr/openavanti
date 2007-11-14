@@ -101,10 +101,10 @@
         
         
 		///////////////////////////////////////////////////////////////////////////////////////////
-		public function NextVal( $sSequence )
+		public function NextVal( $sSequenceName )
 		{
 			$sSQL = "SELECT
-				NEXTVAL( '{$sSequence}' )
+				NEXTVAL( '{$sSequenceName}' )
 			AS
 				next_val";
             
@@ -125,7 +125,7 @@
 			
 			
 		///////////////////////////////////////////////////////////////////////////////////////////
-		public function CurrVal( $sSequence )
+		public function CurrVal( $sSequenceName )
 		{
 			$sSQL = "SELECT
 				CURRVAL( '{$sSequence}' )
@@ -149,13 +149,13 @@
 			
 			
 		///////////////////////////////////////////////////////////////////////////////////////////
-		public function SerialCurrVal( $sTable, $sColumn )
+		public function SerialCurrVal( $sTableName, $sColumnName )
 		{
 			$sSQL = "SELECT
 				CURRVAL(
 					PG_GET_SERIAL_SEQUENCE(
-						'{$sTable}', 
-						'{$sColumn}'
+						'{$sTableName}', 
+						'{$sColumnName}'
 					)
 				)
 			AS
@@ -178,13 +178,13 @@
 
      
 		///////////////////////////////////////////////////////////////////////////////////////////
-		public function SerialNextVal( $sTable, $sColumn )
+		public function SerialNextVal( $sTableName, $sColumnName )
 		{
 			$sSQL = "SELECT
 				NEXTVAL(
 					PG_GET_SERIAL_SEQUENCE(
-						'{$sTable}', 
-						'{$sColumn}'
+						'{$sTableName}', 
+						'{$sColumnName}'
 					)
 				)
 			AS
@@ -220,9 +220,9 @@
 
 
 		////////////////////////////////////////////////////////////////////////////////////////////
-		public function SetCacheDirectory( $sDirectory )
+		public function SetCacheDirectory( $sDirectoryName )
 		{
-			self::$sCacheDirectory = $sDirectory;
+			self::$sCacheDirectory = $sDirectoryName;
 		
 		} // SetCacheDirectory()
 
@@ -248,11 +248,11 @@
 
 
 		///////////////////////////////////////////////////////////////////////////////////////////
-		public function FormatData( $sType, $sValue )
+		public static function FormatData( $sType, $sValue )
 		{
 			$aQuoted_Types = array( "/text/", "/varchar/", "/date/", "/timestamp/", "/bool/" );
-		
-		   if( empty( $sValue ) )
+				
+		   if( strlen( $sValue ) == 0 )
 		   {
 		       return( "NULL" );
 		   }
@@ -288,7 +288,7 @@
 			}
 			else
 			{
-		   	$this->GetTableFields( $sTableName );
+		   	$this->GetTableColumns( $sTableName );
 		   	$this->GetTablePrimaryKey( $sTableName );
 		   	$this->GetTableForeignKeys( $sTableName );
 		   	
@@ -300,11 +300,11 @@
 		   
 		   return( self::$aSchemas[ $sTableName ] );
 		
-		} // GetFields()
+		} // GetSchema()
 
 
 		////////////////////////////////////////////////////////////////////////////////////////////
-		public function GetTableFields( $sTableName )
+		public function GetTableColumns( $sTableName )
 		{
 			if( isset( self::$aSchemas[ $sTableName ][ "fields" ] ) )
 			{
@@ -370,7 +370,7 @@
  
 			return( $aFields );
             
-		} // GetTableFields()
+		} // GetTableColumns()
 		
 		
 		////////////////////////////////////////////////////////////////////////////////////////////
@@ -381,7 +381,7 @@
 				return( self::$aSchemas[ $sTableName ][ "primary_key" ] );
 			}
 		
-			$aLocalTable = $this->GetTableFields( $sTableName );
+			$aLocalTable = $this->GetTableColumns( $sTableName );
 			
 			self::$aSchemas[ $sTableName ][ "primary_key" ] = array();
 					
@@ -412,7 +412,7 @@
 				
 				foreach( $aIndexFields as $iField )
 				{
-					$aField = $this->GetFieldByNumber( $sTableName, $iField );
+					$aField = $this->GetColumnByNumber( $sTableName, $iField );
 					
 					self::$aSchemas[ $sTableName ][ "primary_key" ][] = 
 						$aField[ "field" ];
@@ -436,7 +436,7 @@
 			// This method needs to be cleaned up and consolidated
 			//
 			
-			$aLocalTable = $this->GetTableFields( $sTableName );
+			$aLocalTable = $this->GetTableColumns( $sTableName );
 			
 			$aReferences = array();
 		
@@ -479,17 +479,17 @@
 					str_replace( array( "{", "}" ), "", $oForeignKey->confkey ) );
 			
 		         	
-         	$aFields = $this->GetTableFields( $oForeignKey->typname );
+         	$aFields = $this->GetTableColumns( $oForeignKey->typname );
          	
          	foreach( $aForeignFields as $iIndex => $iField )
          	{
-         		$aField = $this->GetFieldByNumber( $oForeignKey->typname, $iField );
+         		$aField = $this->GetColumnByNumber( $oForeignKey->typname, $iField );
          		$aForeignFields[ $iIndex ] = $aField[ "field" ];
          	}
          	
          	foreach( $aLocalFields as $iIndex => $iField )
          	{
-         		$aField = $this->GetFieldByNumber( $sTableName, $iField );
+         		$aField = $this->GetColumnByNumber( $sTableName, $iField );
          		$aLocalFields[ $iIndex ] = $aField[ "field" ];
          	}
          	
@@ -558,17 +558,17 @@
          	
 	         $this->GetSchema( $oForeignKey->typname );
 	         	
-	         $aFields = $this->GetTableFields( $oForeignKey->typname );
+	         $aFields = $this->GetTableColumns( $oForeignKey->typname );
 	         	
 	         foreach( $aForeignFields as $iIndex => $iField )
 	         {
-	         	$aField = $this->GetFieldByNumber( $oForeignKey->typname, $iField );
+	         	$aField = $this->GetColumnByNumber( $oForeignKey->typname, $iField );
 	         	$aForeignFields[ $iIndex ] = $aField[ "field" ];
 	         }
 	         	
 	         foreach( $aLocalFields as $iIndex => $iField )
 	         {
-	         	$aField = $this->GetFieldByNumber( $sTableName, $iField );
+	         	$aField = $this->GetColumnByNumber( $sTableName, $iField );
 	         	$aLocalFields[ $iIndex ] = $aField[ "field" ];
 	         }
 
@@ -616,13 +616,13 @@
 
 
 		////////////////////////////////////////////////////////////////////////////////////////////
-		public function GetFieldType( $sTable, $sField )
+		public function GetColumnType( $sTableName, $sFieldName )
 		{
-			$aFields = $this->GetTableFields( $sTable );
+			$aFields = $this->GetTableColumns( $sTableName );
 			
 			foreach( $aFields as $aField )
 			{
-				if( $sField == $aField[ "field" ] )
+				if( $sFieldName == $aField[ "field" ] )
 				{
 					return( $aField[ "type" ] );
 				}
@@ -630,13 +630,13 @@
 			
 			return( null );
 		
-		} // GetFieldType()
+		} // GetColumnType()
 		
 		
 		////////////////////////////////////////////////////////////////////////////////////////////
-		public function TableExists( $sTable )
+		public function TableExists( $sTableName )
 		{
-			if( isset( self::$aSchemas[ $sTable ] ) )
+			if( isset( self::$aSchemas[ $sTableName ] ) )
 			{
 				return( true );
 			}
@@ -646,7 +646,7 @@
 			FROM
 				pg_tables
 			WHERE
-				LOWER( tablename ) = '" . strtolower( addslashes( $sTable ) ) . "'";
+				LOWER( tablename ) = '" . strtolower( addslashes( $sTableName ) ) . "'";
 							
 			if( !( $oResultSet = $this->Query( $sSQL ) ) )
 			{
@@ -660,11 +660,11 @@
 
 
 		////////////////////////////////////////////////////////////////////////////////////////////
-		protected function GetFieldByNumber( $sTableName, $iFieldNumber )
+		protected function GetColumnByNumber( $sTableName, $iColumnNumber )
 		{
 			foreach( self::$aSchemas[ $sTableName ][ "fields" ] as $aField )
 			{
-				if( $aField[ "number" ] == $iFieldNumber )
+				if( $aField[ "number" ] == $iColumnNumber )
 				{
 					return( $aField );
 				}
@@ -672,7 +672,7 @@
 		
 			return( null );
 		
-		} // GetFieldByNumber()
+		} // GetColumnByNumber()
 
     }; // Database()
 
