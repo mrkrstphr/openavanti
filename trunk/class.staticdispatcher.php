@@ -1,82 +1,85 @@
 <?php
 
-	/////////////////////////////////////////////////////////////////////////////////////////////////
-	class StaticDispatcher extends Dispatcher
-	//
-	// Description:
-	//		Extends the standard dispatcher  ...
-	//
-	{		
-		
-		//////////////////////////////////////////////////////////////////////////////////////////////
-		public function __construct()
-		//
-		// Description:
-		//		Constructor
-		//
+	////////////////////////////////////////////////////////////////////////////////////////////////
+	class StaticDispatcher
+	{
+	
+		////////////////////////////////////////////////////////////////////////////////////////////
+		public static function Connect( $sRequest )
 		{
-			parent::__construct();
+			$aRequest = explode( "/", $sRequest );
+			$_SESSION[ "last-request" ] = $aRequest;
+						
+			$sController = isset( $aRequest[ 0 ] ) ? 
+				$aRequest[ 0 ] . "Controller" : "";
+				
+			$sAction = isset( $aRequest[ 1 ] ) ? 
+				$aRequest[ 1 ] : "";
+				
+			$iID = isset( $aRequest[ 2 ] ) ? 
+				intval( $aRequest[ 2 ] ) : null;
 			
-		} // __construct()
-		
-		
-		//////////////////////////////////////////////////////////////////////////////////////////////
-		public function connect()
-		//
-		// Description:
-		//		
-		//
-		{
-			$oModel = null;	
-		
-			if( !empty( $this->sModel ) && class_exists( $this->sModel, true ) )
+			$oController = null;
+			
+			if( !empty( $sController ) && class_exists( $sController, true ) )
 			{
-				$oModel = new $this->sModel();
-			}
-			else if( file_exists( BASE_PATH . "/views/static-" . $this->sModel . ".php" ) )
-			{
-				$_SESSION[ "view" ] = BASE_PATH . "/views/static-" . $this->sModel . ".php";
+				$oController = new $sController();
+								
+				self::InvokeAction( $oController, $sAction, $iID );
 			}
 			else
 			{
-				$sModel = "class {$this->sModel} extends Model 
-				{
-					public function __construct() 
-					{
-						parent::__construct();
-					}
-				};";
-				
-				eval( $sModel );
-				
-				$oModel = new $this->sModel();
+				$_SESSION[ "view" ] = "404.php";
+			}		
+			
+			self::LoadView( $oController );
+		
+		} // Connect()
+		
+		
+		////////////////////////////////////////////////////////////////////////////////////////////
+		private static function InvokeAction( &$oController, $sAction, $iID )
+		{
+			if( !empty( $sAction ) && method_exists( $oController, $sAction ) )
+			{				
+				$oController->$sAction( $iID );
 			}
-			
-			if( !is_null( $oModel ) )
+			else if( empty( $sAction ) )
 			{
-				if( !empty( $this->sAction ) && method_exists( $oModel, $this->sAction ) )
-				{
-					$sAction = &$this->sAction;
-					
-					$oModel->$sAction( $this->sID );
-				}
-				else if( empty( $this->sAction ) )
-				{
-					$oModel->__default();
-				}
-				else
-				{
-					$_SESSION[ "view" ] = "404.php";
-				}
+				$oController->index();
 			}
-			
-			
-			if( isset( $_SESSION[ "view" ] ) )
+			else
 			{
-				require( $_SESSION[ "view" ] );
+				$_SESSION[ "view" ] = "404.php";
 			}
 		
-		} // connect()
+		} // InvokeAction()
+		
+		
+		////////////////////////////////////////////////////////////////////////////////////////////
+		private static function LoadView( &$oController )
+		{
+			if( isset( $_SESSION[ "view" ] ) )
+			{
+				if( !isset( $_SERVER[ "HTTP_X_REQUESTED_WITH" ] ) )
+				{
+					require( "header.php" );
+				}
+			
+				$aData = &$oController->aData;
+			
+				require( $_SESSION[ "view" ] );
+				
+				
+				if( !isset( $_SERVER[ "HTTP_X_REQUESTED_WITH" ] ) )
+				{
+					require( "footer.php" );
+				}
+				
+				unset( $_SESSION[ "view" ] );
+			}
+		
+		} // LoadView()
 		
 	
 	}; // StaticDispatcher()

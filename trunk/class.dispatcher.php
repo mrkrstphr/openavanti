@@ -40,7 +40,9 @@
 		////////////////////////////////////////////////////////////////////////////////////////////
 		private static function InvokeAction( &$oController, $sAction, $iID )
 		{
-			if( !empty( $sAction ) && method_exists( $oController, $sAction ) )
+			// is_callable() is used over method_exists() in order to properly utilize __call()
+			
+			if( !empty( $sAction ) && is_callable( array( $oController, $sAction ) ) )
 			{				
 				$oController->$sAction( $iID );
 			}

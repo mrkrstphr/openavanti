@@ -71,7 +71,7 @@
 			$aPaths = explode( PATH_SEPARATOR, get_include_path() );
 			
 			foreach( $aPaths as $sPath )
-			{
+			{				
 				if( file_exists( "{$sPath}/{$sFile}" ) )
 			   {
 			   	return( "{$sPath}/{$sFile}" );

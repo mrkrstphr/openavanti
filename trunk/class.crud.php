@@ -29,28 +29,37 @@
 		protected $sTableName = null;		
 		protected $oDataSet = null;
 		
-		protected $bEmptySet = true;		
+		protected $bEmptySet = true;
+		
+		
+		protected $bDirty = true;
 		
 		
 		/////////////////////////////////////////////////////////////////////////////////////////////
 		public function __construct( $sTableName, $oData = null )
 		//
 		// Description:
-		//		Get the schema of the supplied table name, and, if an id is specified, load the 
-		//		specified data into this object
+		//		Get the schema of the supplied table name
 		//
 		{
 			parent::__construct();
 			
-			parent::CacheSchemas( false );
+			// Enable/disable schema caching:
+			$bCache = defined( "ENABLE_SCHEMA_CACHING" ) ? 
+				ENABLE_SCHEMA_CACHING : false;
+			
+			parent::CacheSchemas( $bCache );
 			parent::SetCacheDirectory( BASE_PATH . "/cache/schemas" );
 
 			$this->sTableName = $sTableName;
 		
+			// Get the schema for this table:
 			$this->GetSchema( $this->sTableName );
 			
-			$this->PrepareFields();
+			// Prepare the fields for this table for CRUD->column access:
+			$this->PrepareColumns();
 
+			// If data is supplied, load it, depending on data type:
          if( is_object( $oData ) )
          {
          	$this->LoadObject( $oData );
@@ -64,28 +73,27 @@
 		
 		
 		////////////////////////////////////////////////////////////////////////////////////////////
-		protected function PrepareFields()
+		protected function PrepareColumns()
 		//
 		// Description:
-		//		Setup variables for each database field for this table
+		//		Setup variables for each database column for this table
 		//
 		{
-			$aFields = $this->GetTableFields( $this->sTableName );
+			$aColumns = $this->GetTableColumns( $this->sTableName );
 			
-			foreach( $aFields as $aField )
+			// Loop each column in the table and create a member variable for it:			
+			foreach( $aColumns as $aColumn )
 			{
-				$this->{$aField[ "field" ]} = "";
+				$this->{$aColumn[ "field" ]} = null;
 			}
 		
-		} // PrepareFields()
+		} // PrepareColumns()
 		
 		
       ///////////////////////////////////////////////////////////////////////////////////////////
       protected function LoadArray( $aArray )
       {
-      	$aFields = $this->GetTableFields( $this->sTableName );
-
-			echo "Loading...<br />";
+      	$aColumns = $this->GetTableColumns( $this->sTableName );
 
          foreach( $aArray as $sKey => $xValue )
          {
@@ -103,7 +111,7 @@
             else
             {
                // problem is that the key of aFields is numeric
-               if( isset( $aFields[ $sKey ] ) )
+               if( isset( $aColumns[ $sKey ] ) )
 					{
 						$this->$sKey = $xValue;
 					}
@@ -133,8 +141,8 @@
 			
 			if( empty( $xId ) && !isset( $aClauses[ "where" ] ) )
 			{
-				trigger_error( "Invalid Key Provided", E_USER_ERROR );
-				exit;
+				//trigger_error( "Invalid Key Provided", E_USER_ERROR );
+				//exit;
 			}
 			
 			
@@ -154,7 +162,7 @@
 				
 				foreach( $xId as $sField => $sValue )
 				{					
-					$sType = $this->GetFieldType( $this->sTableName, $sField );
+					$sType = $this->GetColumnType( $this->sTableName, $sField );
 					
 					$sWhere .= !empty( $sWhere ) ? " AND " : " WHERE ";
 					$sWhere .= "{$sField} = " . $this->FormatData( $sType, $sValue ) . " ";
@@ -164,7 +172,7 @@
 			{
 				// we have a singular primary key -- put the data in the WHERE clause:
 				$sKey = reset( $aPrimaryKey );
-				$sType = $this->GetFieldType( $this->sTableName, $sKey );
+				$sType = $this->GetColumnType( $this->sTableName, $sKey );
 				
 				$sWhere .= !empty( $sWhere ) ? " AND " : " WHERE ";
 				$sWhere .= "{$sKey} = " . $this->FormatData( $sType, $xId ) . " ";
@@ -228,7 +236,23 @@
 				$this->Load( $this->oDataSet->Rewind() );
 			}	
 			
+			$this->bDirty = false;
+			
 		} // Find()
+		
+		
+		/*protected function Set( $sVariable, $sValue )
+		{
+		
+			if( isset( $this->$sVariable ) )
+			{
+				$this->$sVariable = $sValue;
+				
+				$this->bDirty = true;
+			}
+		
+		} // Set()
+		*/
 		
 		
 		////////////////////////////////////////////////////////////////////////////////////////////
@@ -419,13 +443,12 @@
 		
 		////////////////////////////////////////////////////////////////////////////////////////////
 		public function SaveAll()
-		{
-			$this->Save();
-		
+		{		
 			$aForeignKeys = $this->GetTableForeignKeys( $this->sTableName );
 		
 			foreach( $aForeignKeys as $aRelationship )
 			{
+				//echo '<div class="printr"><pre>' . print_r( $aRelationship , true ) . '</pre></div>';
 				$sRelationshipName = $aRelationship[ "name" ];
 				
 				if( isset( $this->$sRelationshipName ) )
@@ -443,9 +466,21 @@
 					else
 					{
 						$this->$sRelationshipName->SaveAll();
+					
+						// If the relationship is many to one, then we have to set the foreign key
+						// value for this record
+						if( $aRelationship[ "type" ] == "m-1" )
+						{
+							// do we need to handle multiple columns?
+							
+							$this->{$aRelationship[ "local" ][ 0 ]} = 
+								$this->{$sRelationshipName}->{$aRelationship[ "foreign" ][ 0 ]};
+						}
 					}
 				}
 			}
+			
+			$this->Save();
 		
 		} // SaveAll()
 		
@@ -457,54 +492,71 @@
 		//
 		//
 		{
-			$sFields = "";
+			$sColumns = "";
 			$sValues = "";
 			
 			$aPrimaryKeys = $this->GetTablePrimaryKey( $this->sTableName );			
-			$aFields = $this->GetTableFields( $this->sTableName );
+			$aColumns = $this->GetTableColumns( $this->sTableName );
 			
-			// loop each field in the table and specify it's data:
-			foreach( $aFields as $field )
+			// loop each column in the table and specify it's data:
+			foreach( $aColumns as $aColumn )
 			{
-				// automate updating update date fields:
-				if( in_array( $field[ "field" ], array( "created_date", "created_stamp", "created_on" ) ) )
+				// automate updating created date column:
+				if( in_array( $aColumn[ "field" ], array( "created_date", "created_stamp", "created_on" ) ) )
 				{
-					$this->$field[ "field" ] = gmdate( "Y-m-d H:i:s" );
+					// dates are stored as GMT
+					$this->{$aColumn[ "field" ]} = gmdate( "Y-m-d H:i:s" );
 				}
 				
-				if( in_array( $field[ "field" ], $aPrimaryKeys ) )
+				// If the primary key is singular, do not provide a value for it:				
+				if( in_array( $aColumn[ "field" ], $aPrimaryKeys ) && count( $aPrimaryKeys ) == 1 )
 				{
 					continue;
 				}				
 				
-				$sFields .= ( !empty( $sFields ) ? ", " : "" ) . 
-					$field[ "field" ];
-					
-				$sValue = isset( $this->$field[ "field" ] ) ? 
-					$this->$field[ "field" ] : "";
-					
+				// Create a list of columns to insert into:
+				$sColumns .= ( !empty( $sColumns ) ? ", " : "" ) . 
+					$aColumn[ "field" ];
+				
+				// Get the value for the column (if present):
+				$sValue = isset( $this->{$aColumn[ "field" ]} ) ? 
+					$this->{$aColumn[ "field" ]} : "";
+				
+				// Create a list of values to insert into the above columns:
 				$sValues .= ( !empty( $sValues ) ? ", " : "" ) . 
-					$this->FormatData( $field[ "type" ], $sValue );
+					$this->FormatData( $aColumn[ "type" ], $sValue );
 			}
 			
-			$sSQL = "INSERT INTO " . $this->sTableName . " (
-				{$sFields}
+			$sSQL = "INSERT INTO {$this->sTableName} (
+				{$sColumns}
 			) VALUES (
 				{$sValues}
 			)";
 			
 			if( !$this->Query( $sSQL ) )
 			{
-				throw new Exception( "Failed on Query: " . $this->GetLastError() );
+				throw new Exception( "Failed on Query: {$sSQL} <br />" . $this->GetLastError() );
 			}
 			
+			// Note: an assumption is made that if the primary key is not singular, then there all
+			// the data for the compound primary key should already be present -- meaning, we should 
+			// not have a serial value on the table for a compound primary key.
+			
+			// If we have a singular primary key:
 			if( count( $aPrimaryKeys ) == 1 )
-			{
+			{				
+				// Get the current value of the serial for the primary key column:
 				$iKey = $this->SerialCurrVal( $this->sTableName, reset( $aPrimaryKeys ) );
 				
+				// Store the primary key:
+				$this->{$aPrimaryKeys[0]} = $iKey;
+				
+				// return the primary key:
 				return( $iKey );
 			}
 			
+			
+			// If we have a compound primary key, return true:
 			return( true );
 			
 		} // Insert()
@@ -518,16 +570,13 @@
 		//		Responsible for updating the currently stored data for primary table and all foreign
 		//		tables referenced.
 		//
-		{	
-			// get the primary key of the primary table:
-			//$primaryKey = reset( self::$aSchemas[ $this->sTableName ][ "primary_key" ] );
-		
+		{			
 			// update the primary record:
 			$sSQL = $this->UpdateQuery();
 			
 			if( !$this->Query( $sSQL ) )
 			{
-				trigger_error( "Failed on Query: {$sSQL}", E_USER_ERROR );
+				throw new Exception( "Failed on Query: {$sSQL} <br />" . $this->GetLastError() );
 				exit;
 			}
 			
@@ -566,8 +615,7 @@
 				// complete the query for this field:
 				$sSet .= ( !empty( $sSet ) ? ", " : "" ) . 
 					$field[ "field" ] . " = " . 
-						$this->FormatData( $field[ "type" ], 
-							$this->$field[ "field" ] ) . " ";
+						$this->FormatData( $field[ "type" ], $this->{$field[ "field" ]} ) . " ";
 			}
 			
 			// if we found no fields to update, return:
@@ -581,7 +629,7 @@
 			
 			foreach( $aPrimaryKeys as $sKey )
 			{
-				$sWhere .= !empty( $sWhere ) ? ", " : "";
+				$sWhere .= !empty( $sWhere ) ? " AND " : "";
 				$sWhere .= "{$sKey} = {$this->$sKey} "; 
 			}
 			
