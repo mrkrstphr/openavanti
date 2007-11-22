@@ -1,107 +1,132 @@
 <?php
-
-	class image
+/***************************************************************************************************
+ * OpenAvanti
+ *
+ * OpenAvanti is an open source, object oriented framework for PHP 5+
+ *
+ * @author			Kristopher Wilson
+ * @dependencies 	FileFunctions
+ * @copyright		Copyright (c) 2008, Kristopher Wilson
+ * @license			http://www.openavanti.com/license
+ * @link				http://www.openavanti.com
+ * @version			0.05a
+ *
+ */
+ 
+ 
+	/**
+	 * A library for manipulating images
+	 *
+	 * @category	Images
+	 * @author		Kristopher Wilson
+	 * @link			http://www.openavanti.com/docs/imagefunctions
+	 */
+	class ImageFunctions
 	{
 	
-		public function generateThumb( $filename, $thumbname, $size )
+		/**
+		 * This method creates a thumbnail image of the supplied image, assuming it exists,
+		 * based on the supplied width and height. The generated thumbnail will not be
+		 * these exact dimensions, but instead is generated based on these rules:
+		 * 
+		 * 1. If the width and height of the image are less than the supplied with and height for
+		 *    the thumbnail, then the actual size of the image is used.
+		 * 2. If the ratio of the max height / current height is < current height, then
+		 *    an image is generated with a height of height * ratio and width of max width.
+		 * 3. If the ratio of the max width / current width is < current width, then
+		 *    an image is generated with a width of width * ratio and height of max height.		 		 		 		 		 		 		 		 
+		 * 
+		 * @argument string The path and file name to the file to create a thumbnail from
+		 * @argument string The path and file name of the thumbnail to create
+		 * @argument array An array of width and height to limit the image to 0 => x, 1 => y
+		 * @returns bool True if the thumbnail is created, false otherwise
+		 */
+		public function GenerateThumb( $sFileName, $sThumbName, $aSize )
 		{
-			$maxWidth = $size[ 0 ];
-			$maxHeight = $size[ 1 ];
+			$iMaxWidth = $aSize[ 0 ];
+			$iMaxHeight = $aSize[ 1 ];
 			
-			$ext = substr( $filename, strrpos( $filename, "." ) + 1 );
+			$sExtension = FileFunctions::GetFileExtension( $sFileName );
 			
-			if( file_exists( $filename ) )
+			if( !file_exists( $sFileName ) )
 			{	
-				$img = null;
-				
-				switch( $ext )
-				{
-					case "jpg":
-					case "jpeg":
-						$img = imagecreatefromjpeg( $filename );
-					break;
-					
-					case "gif":
-						$img = imagecreatefromgif( $filename );
-					break;
-					
-					case "png":
-						$img = imagecreatefrompng( $filename );
-					break;
-					
-					default:
-						trigger_error( "Invalid image type: {$ext}", E_USER_ERROR );
-						exit;
-				}
-				
-				
-				// stolen from luxury fabrics:
-			
-				$aImage = getimagesize( $filename );
-			
-			
-				list( $width, $height, $type, $attr ) = $aImage;
-			
-			   $iMax_Width = is_null( $maxWidth ) ? $width : $maxWidth;
-			   $iMax_Height = is_null( $maxHeight ) ? $height : $maxHeight;
-			
-			   $xRatio = $iMax_Width / $width;
-			   $yRatio = $iMax_Height / $height;
-			
-			   if ( ( $width <= $iMax_Width ) && ( $height <= $iMax_Height ) )
-			   {
-			      $newWidth = $width;
-			      $newHeight = $height;
-			   }
-			   else if ( ( $xRatio * $height ) < $iMax_Height )
-			   {
-			      $newHeight = ceil( $xRatio * $height );
-			      $newWidth = $iMax_Width;
-			   }
-			   else
-			   {
-			      $newWidth = ceil( $yRatio * $width );
-			      $newHeight = $iMax_Height;
-			   }
-			
-			
-				$img_thumb = imagecreatetruecolor( $newWidth, $newHeight );
-			
-				imagecopyresampled(
-					$img_thumb,
-					$img,
-					0, 0, 0, 0,
-					$newWidth,
-					$newHeight,
-					imagesx( $img ),
-					imagesy( $img )
-				);
-
-
-			
-				switch( $ext )
-				{
-					case "jpg":
-					case "jpeg":
-						imagejpeg( $img_thumb, $thumbname );
-					break;
-					
-					case "gif":
-						imagegif( $img_thumb, $thumbname );
-					break;
-					
-					case "png":
-						imagepng( $img_thumb, $thumbname );
-					break;
-				}
-			
-				imagedestroy ($img_thumb);
-				imagedestroy ($img);
+				return( false );
 			}
+		
+			$rImage = null;
 			
-		}
+			switch( $sExtension )
+			{
+				case "jpg":
+				case "jpeg":
+					$rImage = imagecreatefromjpeg( $sFileName );
+				break;
+				
+				case "gif":
+					$rImage = imagecreatefromgif( $sFileName );
+				break;
+				
+				case "png":
+					$rImage = imagecreatefrompng( $sFileName );
+				break;
+				
+				default:
+					throw new Exception( "Invalid image type: {$sExtension}" );
+			}
+		
+			$aImage = getimagesize( $sFileName );
+		
+			list( $iWidth, $iHeight, $sType, $sAttr ) = $aImage;
+		
+		   $fXRatio = $iMaxWidth / $iWidth;
+		   $fYRatio = $iMaxHeight / $iHeight;
+		
+		   if( ( $iWidth <= $iMaxWidth ) && ( $iHeight <= $iMaxHeight ) )
+		   {
+		      $iNewWidth = $iWidth;
+		      $iNewHeight = $iHeight;
+		   }
+		   else if( ( $xRatio * $iHeight ) < $iMaxHeight )
+		   {
+		      $iNewHeight = ceil( $fXRatio * $iHeight );
+		      $iNewWidth = $iMaxWidth;
+		   }
+		   else
+		   {
+		      $iNewWidth = ceil( $fYRatio * $iWidth );
+		      $iNewHeight = $iMaxHeight;
+		   }
+		
+			$rImgThumb = imagecreatetruecolor( $newWidth, $newHeight );
+		
+			imagecopyresampled( $rImgThumb, $rImage, 0, 0, 0, 0, $iNewWidth,
+				$iNewHeight, imagesx( $rImage ), imagesy( $rImage ) );
+
+			switch( $sExtension )
+			{
+				case "jpg":
+				case "jpeg":
+					imagejpeg( $rImgThumb, $sThumbName );
+				break;
+				
+				case "gif":
+					imagegif( $rImgThumb, $sThumbName );
+				break;
+				
+				case "png":
+					imagepng( $rImgThumb, $sThumbName );
+				break;
+			}
+		
+			imagedestroy( $rImgThumb );
+			imagedestroy( $rImage );
+			
+			
+			return( true );			
+			
+		} // GenerateThumb()
 		
 		
-	}
+	}; // ImageFunctions()
 
 ?>

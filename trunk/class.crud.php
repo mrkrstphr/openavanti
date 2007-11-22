@@ -29,10 +29,10 @@
 		protected $sTableName = null;		
 		protected $oDataSet = null;
 		
-		protected $bEmptySet = true;
+		protected $bEmptySet = true; // This could possibily be removed now that we are an iterator
 		
 		
-		protected $bDirty = true;
+		protected $bDirty = true; // I don't know if this is used
 		
 		
 		/////////////////////////////////////////////////////////////////////////////////////////////
@@ -132,7 +132,9 @@
 			
 			if( !empty( $xId ) )
 			{
-				if( count( $aPrimaryKey ) > 1 && ( !is_array( $xId ) || count( $xId ) != count( $aPrimaryKey ) ) )
+				// If we have a primary key specified, make sure it the number of columsn matches:
+				if( count( $aPrimaryKey ) > 1 && ( !is_array( $xId ) || 
+					count( $xId ) != count( $aPrimaryKey ) ) )
 				{
 					trigger_error( "Invalid Key Provided", E_USER_ERROR );
 					exit;
@@ -217,8 +219,14 @@
 				"ORDER BY " . $aClauses[ "order" ] : "";
 			
 			// Concatenate all the pieces of the query together:
-			$sSQL = "SELECT {$sFields} FROM {$this->sTableName} AS _" . 
-				StringFunctions::ToSingular( $this->sTableName ) . " {$sJoins} {$sWhere} {$sOrder}";		
+			$sSQL = "SELECT 
+				{$sFields} 
+			FROM 
+				{$this->sTableName} AS _" . 
+					StringFunctions::ToSingular( $this->sTableName ) . " 
+			{$sJoins} 
+			{$sWhere} 
+			{$sOrder}";		
 
 			//echo "<b>Finished Query</b>: {$sSQL}<br /><br />";
 
@@ -256,13 +264,8 @@
 		
 		
 		////////////////////////////////////////////////////////////////////////////////////////////
-		protected function FindRelationship( $sName = "", $sTable = "" )
+		protected function FindRelationship( $sName )
 		{
-			if( empty( $sName ) && empty( $sTableName ) )
-			{
-				return( null );
-			}
-		
 			$aForeignKeys = $this->GetTableForeignKeys( $this->sTableName );
 			
 			foreach( $aForeignKeys as $aForeignKey )
@@ -381,8 +384,6 @@
 					return( $this->GetCount() );
 				break;
 				
-				
-				
 				default:
 					throw new Exception( "Call to undefined method: {$sName}" );
 				break;
@@ -404,37 +405,35 @@
 			
 			$bInsert = false;
 			
-			foreach( $aPrimaryKeys as $sPrimaryKey )
+			// If we have a compound primary key, we must first determine if the record
+			// already exists in the database. If it does, we're doing an update.
+			
+			// If we have a singular primary key, we can rely on whether the primary key
+			// value of this object is null
+			
+			
+			if( count( $aPrimaryKeys ) == 1 )
 			{
+				$sPrimaryKey = reset( $aPrimaryKeys );
+				
 				if( empty( $this->$sPrimaryKey ) )
 				{
 					$bInsert = true;
-					break;
 				}
 			}
-			
-			// Fundamental flaw in this logic: if we are in a relationship table, which has
-			// two primary keys, such as item_id and quantity, then both of those keys will
-			// more than likely be present, even though the data might not be in the database.
-			
-			// In other words, when a compound key is comprised entirely of foreign keys,
-			// this logic will not work.
-			
-			// Recommend possibly keeping track of whether or not we pulled the data from the
-			// database (using Find()), or if it was programmer supplied.
-			
-			// Recommendation above is flawed as objects loaded from post may already exist in
-			// the database but were not loaded from the database
+			else
+			{
+				$bInsert = !$this->RecordExists();
+			}
+
+
 			
 			if( $bInsert )
 			{
-				// if there is no data in the primary key field of this object, we need to insert
-				// a new record:
 				return( $this->Insert() );
 			}
 			else
 			{
-				// if we do have data supplied in the primary key field, we need to update the data:
 				return( $this->Update() );
 			}
 		
@@ -633,7 +632,6 @@
 				$sWhere .= "{$sKey} = {$this->$sKey} "; 
 			}
 			
-			
 			$sSQL = "UPDATE {$this->sTableName} SET {$sSet} WHERE {$sWhere}";	
 			
 
@@ -641,6 +639,38 @@
 			
 		} // updateQuery()
 		
+		
+		/////////////////////////////////////////////////////////////////////////////////////////////
+		private function RecordExists()
+		{
+			$aPrimaryKeys = $this->GetTablePrimaryKey( $this->sTableName );
+		
+			$sSQL = "SELECT
+				1
+			FROM
+				{$this->sTableName} ";
+			
+			$sWhere = "";
+			
+			foreach( $aPrimaryKeys as $sPrimaryKey )
+			{
+				$sType = $this->GetColumnType( $this->sTableName, $sPrimaryKey );
+				
+				$sWhere .= empty( $sWhere ) ? " WHERE " : " AND ";
+				$sWhere .= $sPrimaryKey . " = " . 
+					$this->FormatData( $sType, $this->$sPrimaryKey ) . " ";
+			}
+			
+			$sSQL .= $sWhere;
+			
+			if( !( $oResultSet = $this->Query( $sSQL ) ) )
+			{
+				throw new Exception( "Failed on Query: {$sSQL}<br />" . $this->GetLastError() );
+			}
+			
+			return( $oResultSet->Count() != 0 );
+		
+		} // RecordExists()
 		
 		
 		/////////////////////////////////////////////////////////////////////////////////////////////
@@ -702,11 +732,11 @@
 		//
 
 		////////////////////////////////////////////////////////////////////////////////////////////
-	    public function Rewind()  
-	    //
-	    // Description:
-	    //		See http://www.php.net/~helly/php/ext/spl/interfaceIterator.html
-	    //
+	   public function Rewind()  
+	   //
+	   // Description:
+	   //		See http://www.php.net/~helly/php/ext/spl/interfaceIterator.html
+	   //
 		{		
 			if( !is_null( $this->oDataSet ) )
 			{
@@ -717,15 +747,15 @@
 			
 			return( null );
 	
-	    } // Rewind()
+	   } // Rewind()
     	
 
 		////////////////////////////////////////////////////////////////////////////////////////////
-	    public function Current() 
-	    //
-	    // Description:
-	    //		See http://www.php.net/~helly/php/ext/spl/interfaceIterator.html
-	    // 
+	   public function Current() 
+	   //
+	   // Description:
+	   //		See http://www.php.net/~helly/php/ext/spl/interfaceIterator.html
+	   // 
 		{
 			if( !$this->bEmptySet )
 			{
@@ -734,7 +764,7 @@
 			
 			return( null );
 	
-	    } // Current()
+	   } // Current()
 	
 		
 		////////////////////////////////////////////////////////////////////////////////////////////
