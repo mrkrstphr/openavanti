@@ -3,12 +3,14 @@
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	class ResultSet implements Iterator
 	{
+		private $oDatabase = null;
 		private $rResult = null;
       private $oRecord = null;
 		
 		////////////////////////////////////////////////////////////////////////////////////////////
-		public function __construct( $rResult )
+		public function __construct( &$oDatabase, &$rResult )
 		{
+			$this->oDatabase = &$oDatabase;
 			$this->rResult = &$rResult;
 		
 		} // __construct()
