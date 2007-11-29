@@ -82,6 +82,43 @@
 			
 		} // Input()
 		
+		public static function Select( $aAttributes, $bReturn = false )
+		{
+			$sDefault = "";
+			
+			if( isset( self::$aFields[ $aAttributes[ "name" ] ] ) )
+			{
+				$sDefault = self::$aFields[ $aAttributes[ "name" ] ];
+			}
+			else if( isset( $aAttributes[ "default" ] ) )
+			{
+				$sDefault = $aAttributes[ "default" ];
+			}
+		
+			$sSelect = "<select name=\"" . $aAttributes[ "name" ] . "\">\n";
+			
+			foreach( $aAttributes[ "options" ] as $sKey => $sValue )
+			{
+				$sSelected = $sKey == $sDefault ? 
+					" selected=\"selected\" " : "";
+					
+				$sSelect .= "\t<option value=\"{$sKey}\"{$sSelected}>{$sValue}</option>\n";
+			}
+			
+			$sSelect .= "\n</select>\n";
+			
+			
+			if( $bReturn )
+			{
+				return( $sSelect );
+			}
+			else
+			{
+				echo $sSelect;
+			}
+		}
+		
+		
 
 		public static function TextArea( $aAttributes, $bReturn = false )
 		{		
