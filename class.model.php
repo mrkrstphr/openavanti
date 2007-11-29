@@ -6,7 +6,7 @@
 		
 		public function __construct()
 		{
-			$this->oDatabase = new Database();
+			$this->oDatabase = new PostgresDatabase();
 			
 		} // __construct()
 	
