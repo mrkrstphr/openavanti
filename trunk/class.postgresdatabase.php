@@ -25,7 +25,7 @@
 	 * @author		Kristopher Wilson
 	 * @link			http://www.openavanti.com/docs/postgresdatabase
 	 */
-	class PostgresDatabase implements Database
+	class PostgresDatabase
 	{
 		private $hDatabase = null;
         
@@ -46,9 +46,12 @@
 				$sString .= " password={$sPassword}";
 			}
 			
-			$this->hDatabase = @pg_connect( $sString )
-			    or trigger_error( "Failed to connect to Postgres server", E_USER_ERROR );
-
+			$this->hDatabase = @pg_connect( $sString );
+			
+			if( !$this->hDatabase )
+			{
+				throw new Exception( "Failed to connect to Postgres server" );
+			}
 		} // __construct()
 
 
