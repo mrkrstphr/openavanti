@@ -20,7 +20,7 @@
 	 * @author		Kristopher Wilson
 	 * @link			http://www.openavanti.com/docs/database
 	 */
-	class CRUD extends Database implements Iterator
+	class CRUD extends PostgresDatabase implements Iterator
 	//
 	// Description:
 	//		
@@ -180,6 +180,12 @@
 				$sWhere .= "{$sKey} = " . $this->FormatData( $sType, $xId ) . " ";
 			}
 			
+			$iLimit = isset( $aClauses[ "limit" ] ) ? 
+				" LIMIT " . intval( $aClauses[ "limit" ] ) : "";
+			
+			$iOffset = isset( $aClauses[ "offset" ] ) ? 
+				" OFFSET " . intval( $aClauses[ "offset" ] ) : "";
+			
 			
 			// Setup supplied joins:
 			
@@ -217,6 +223,11 @@
 			
 			$sOrder = isset( $aClauses[ "order" ] ) ? 
 				"ORDER BY " . $aClauses[ "order" ] : "";
+				
+			if( isset( $aClauses[ "distinct" ] ) && $aClauses[ "distinct" ] === true )
+			{
+				$sFields = " DISTINCT {$sFields} ";
+			}
 			
 			// Concatenate all the pieces of the query together:
 			$sSQL = "SELECT 
@@ -226,16 +237,17 @@
 					StringFunctions::ToSingular( $this->sTableName ) . " 
 			{$sJoins} 
 			{$sWhere} 
-			{$sOrder}";		
+			{$sOrder}
+			{$iLimit}
+			{$iOffset}";
 
-			//echo "<b>Finished Query</b>: {$sSQL}<br /><br />";
+			// echo "Final Query: {$sSQL}<br />";
 
 			// Execute and pray:
 			if( !( $this->oDataSet = $this->Query( $sSQL ) ) )
 			{
-				trigger_error( "Failed on Query. Error: " . 
-					$this->getLastError() . "\n Query: {$sSQL}", E_USER_ERROR );
-				exit;
+				throw new Exception( "Failed on Query. Error: " . 
+					$this->getLastError() . "\n Query: {$sSQL}" );
 			}
 			
 			// Loop the data and create member variables
@@ -247,6 +259,124 @@
 			$this->bDirty = false;
 			
 		} // Find()
+		
+		
+		/////////////////////////////////////////////////////////////////////////////////////////////
+		public function FindCount( $xId = null, $aClauses = array() )
+		//
+		// Description:
+		//
+		//
+		{
+			$aPrimaryKey = $this->GetTablePrimaryKey( $this->sTableName );
+			
+			if( !empty( $xId ) )
+			{
+				// If we have a primary key specified, make sure it the number of columsn matches:
+				if( count( $aPrimaryKey ) > 1 && ( !is_array( $xId ) || 
+					count( $xId ) != count( $aPrimaryKey ) ) )
+				{
+					trigger_error( "Invalid Key Provided", E_USER_ERROR );
+					exit;
+				}
+			}
+			
+			if( empty( $xId ) && !isset( $aClauses[ "where" ] ) )
+			{
+				//trigger_error( "Invalid Key Provided", E_USER_ERROR );
+				//exit;
+			}
+			
+			
+			$sWhere = isset( $aClauses[ "where" ] ) ? $aClauses[ "where" ] : "";
+			
+					
+			// Handle our provided key:	
+			
+			if( !empty( $sWhere ) )
+			{
+				$sWhere = " WHERE {$sWhere} ";
+			}
+
+			if( is_array( $xId ) && count( $aPrimaryKey ) > 0 )
+			{
+				// our primary key value is an array -- put the data in the WHERE clause:
+				
+				foreach( $xId as $sField => $sValue )
+				{					
+					$sType = $this->GetColumnType( $this->sTableName, $sField );
+					
+					$sWhere .= !empty( $sWhere ) ? " AND " : " WHERE ";
+					$sWhere .= "{$sField} = " . $this->FormatData( $sType, $sValue ) . " ";
+				}
+			}
+			else if( !empty( $xId ) )
+			{
+				// we have a singular primary key -- put the data in the WHERE clause:
+				$sKey = reset( $aPrimaryKey );
+				$sType = $this->GetColumnType( $this->sTableName, $sKey );
+				
+				$sWhere .= !empty( $sWhere ) ? " AND " : " WHERE ";
+				$sWhere .= "{$sKey} = " . $this->FormatData( $sType, $xId ) . " ";
+			}
+			
+			
+			// Setup supplied joins:
+			
+			$sJoins = "";
+			
+			if( isset( $aClauses[ "join" ] ) )
+			{
+				foreach( $aClauses[ "join" ] as $sJoin )
+				{
+					$aRelationship = $this->FindRelationship( $sJoin );
+					
+					if( !count( $aRelationship ) )
+					{
+						throw new Exception( "Unknown join relationship specified: {$sJoin}" );
+					}
+					
+					$sJoins .= " INNER JOIN " . $aRelationship[ "table" ] . " AS " . 
+						"_" . $aRelationship[ "name" ] . " ON ";
+					
+					$sOn = "";
+					
+					foreach( $aRelationship[ "local" ] as $iIndex => $sField )
+					{
+						$sOn .= ( !empty( $sOn ) ? " AND " : "" ) . 
+							"_" . StringFunctions::ToSingular( $this->sTableName ) . 
+							"." . $sField . " = " . "_" . $aRelationship[ "name" ] . 
+							"." . $aRelationship[ "foreign" ][ $iIndex ];
+					}
+					
+					$sJoins .= " {$sOn} ";
+				}
+			}
+			
+			// Concatenate all the pieces of the query together:
+			$sSQL = "SELECT 
+				COUNT( * ) AS count 
+			FROM 
+				{$this->sTableName} AS _" . 
+					StringFunctions::ToSingular( $this->sTableName ) . " 
+			{$sJoins} 
+			{$sWhere}";		
+
+
+			// Execute and pray:
+			if( !( $this->oDataSet = $this->Query( $sSQL ) ) )
+			{
+				trigger_error( "Failed on Query. Error: " . 
+					$this->getLastError() . "\n Query: {$sSQL}", E_USER_ERROR );
+				exit;
+			}
+			
+			
+			$oData = $this->oDataSet->Rewind();
+						
+			return( $oData->count );
+			
+		} // FindCount()
 		
 		
 		/*protected function Set( $sVariable, $sValue )
@@ -261,6 +391,14 @@
 		
 		} // Set()
 		*/
+		
+		
+		public function GetRecord()
+		{
+		
+			return( $this->oDataSet->GetRecord() );
+		
+		} // GetRecord()
 		
 		
 		////////////////////////////////////////////////////////////////////////////////////////////
@@ -362,14 +500,20 @@
 			{
 				$sLocalColumn = current( $aRelationship[ "local" ] );
 				
-				$this->$sName = new crud( $aRelationship[ "table" ] );		
-				$this->$sName->Find( $this->$sLocalColumn );
+				if( !is_null( $this->$sLocalColumn ) )
+				{
+					$this->$sName = new crud( $aRelationship[ "table" ] );		
+					$this->$sName->Find( $this->$sLocalColumn );
+				}
+				else
+				{
+					$this->{$sName} = null;
+				}
 			}
 			
 			return( $this->$sName );
 			
 		} // __get()
-		
 		
 		////////////////////////////////////////////////////////////////////////////////////////////
 		public function __call( $sName, $aArguments )
@@ -742,7 +886,7 @@
 			{
 				$this->oDataSet->Rewind();
 				
-				return( $this->Next() );
+				return( $this->oDataSet->Rewind() );
 			}
 			
 			return( null );
