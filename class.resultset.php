@@ -16,6 +16,14 @@
 		} // __construct()
 	
 		
+		public function GetRecord()
+		{
+		
+			return( $this->oRecord );
+		
+		} // GetRecord()
+		
+		
 		////////////////////////////////////////////////////////////////////////////////////////////
 		public function Count()
 		{
@@ -69,7 +77,9 @@
 		{
 			pg_result_seek( $this->rResult, 0 );
 			
-			return( $this->Next() );
+			$oRecord = $this->Next();
+			
+			return( $oRecord );
 		
 		} // Rewind()
 	
