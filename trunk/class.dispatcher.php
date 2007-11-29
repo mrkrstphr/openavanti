@@ -86,8 +86,15 @@
 			// is_callable() is used over method_exists() in order to properly utilize __call()
 			
 			if( !empty( $sAction ) && is_callable( array( $oController, $sAction ) ) )
-			{				
-				$oController->$sAction( $iID );
+			{
+				$aArguments = $_SESSION[ "last-request" ]; // prepare array of arguments
+				
+				array_shift( $aArguments ); // shift off the controller
+				array_shift( $aArguments ); // shift off the action
+				
+				// call $oController->$sAction() with arguments $aArguments:
+				
+				call_user_func_array( array( $oController, $sAction ), $aArguments );
 			}
 			else if( empty( $sAction ) )
 			{
