@@ -1,23 +1,53 @@
 <?php
-
+/***************************************************************************************************
+ * OpenAvanti
+ *
+ * OpenAvanti is an open source, object oriented framework for PHP 5+
+ *
+ * @author			Kristopher Wilson
+ * @dependencies 	FileInfo
+ * @copyright		Copyright (c) 2008, Kristopher Wilson
+ * @license			http://www.openavanti.com/license
+ * @link				http://www.openavanti.com
+ * @version			0.05a
+ *
+ */
+ 
+	/**
+	 * A library of form field generation helpers to automate data preservation
+	 *
+	 * @category	Forms
+	 * @author		Kristopher Wilson
+	 * @link			http://www.openavanti.com/docs/form
+	 */
 	class Form 
 	{
 		public static $aFields = array();
 		
-		
+		/**
+		 * Loads the specified array into the classes aFields array. These values are later
+		 * used by the field generation helpers for setting the value of the form field.		 
+		 * 
+		 * @argument array An array of keys and values to load into the forms data array
+		 * @returns void
+		 */
 		public static function LoadArray( $aArray )
 		{
-			foreach( $aArray as $sKey => $sValue )
-			{
-				self::$aFields[ $sKey ] = $sValue;
-			}
+			self::$aFields += $aArray;
 		
 		} // LoadArray()
 		
 		
+		/**
+		 * Generate a label for the form. Note that the supplied attributes are not validated to be
+		 * valid attributes for the element. Each element provided is added to the XHTML tag.		  
+		 * 
+		 * @argument array An array of attributes for the HTML element
+		 * @argument bool Controls whether or not to return the HTML, otherwise echo it, default false
+		 * @returns void
+		 */
 		public static function Label( $aAttributes, $bReturn = false )
 		{
-			
 			$sLabel = "Element";
 			
 			if( isset( $aAttributes[ "label" ] ) )
@@ -27,7 +57,6 @@
 				unset( $aAttributes[ "label" ] );
 			}	
 			
-			
 			$sInput = "<label ";
 			
 			foreach( $aAttributes as $sKey => $sValue )
@@ -35,11 +64,7 @@
 				$sInput .= "{$sKey}=\"{$sValue}\" ";
 			}
 			
-			$sInput .= ">";
-			
-			$sInput .= "{$sLabel}:";
-			
-			$sInput .= "</label>";
+			$sInput .= ">{$sLabel}:</label>";
 			
 			
 			if( $bReturn )
@@ -54,6 +79,15 @@
 		} // Label()
 		
 		
+		/**
+		 * Generate an input element for the form. Note that the supplied attributes are not 
+		 * validated to be valid attributes for the element. Each element provided is added to the 
+		 * XHTML tag.		  
+		 * 
+		 * @argument array An array of attributes for the HTML element
+		 * @argument bool Controls whether or not to return the HTML, otherwise echo it, default false
+		 * @returns void
+		 */
 		public static function Input( $aAttributes, $bReturn = false )
 		{
 			if( isset( self::$aFields[ $aAttributes[ "name" ] ] ) )
@@ -82,6 +116,22 @@
 			
 		} // Input()
 		
+		
+		/**
+		 * Generate a select element for the form. Note that the supplied attributes are not 
+		 * validated to be valid attributes for the element. Each element provided is added to the 
+		 * XHTML tag.
+		 * 
+		 * The options are specified by aAttributes[ options ] as an array of key => values to
+		 * display in the select		 
+		 *		 		 
+		 * The default (selected) attribute is controlled by aAttributes[ default ], which should
+		 * match a valid key in aAttributes[ options ]		 		 		   
+		 * 
+		 * @argument array An array of attributes for the HTML element
+		 * @argument bool Controls whether or not to return the HTML, otherwise echo it, default false
+		 * @returns void
+		 */
 		public static function Select( $aAttributes, $bReturn = false )
 		{
 			$sDefault = "";
@@ -116,10 +166,19 @@
 			{
 				echo $sSelect;
 			}
-		}
+		
+		} // Select()
 		
 		
-
+		/**
+		 * Generate a textarea element for the form. Note that the supplied attributes are not 
+		 * validated to be valid attributes for the element. Each element provided is added to the 
+		 * XHTML tag.		  
+		 * 
+		 * @argument array An array of attributes for the HTML element
+		 * @argument bool Controls whether or not to return the HTML, otherwise echo it, default false
+		 * @returns void
+		 */
 		public static function TextArea( $aAttributes, $bReturn = false )
 		{		
 			$sInput = "<textarea ";
