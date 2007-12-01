@@ -277,15 +277,10 @@
 		//      Collects all fields/columns in the specified database table, as well as data type
 		//      and key information.
 		//
-		{
-			if( isset( self::$aSchemas[ $sTableName ] ) )
-			{
-				return( self::$aSchemas[ $sTableName ] );
-			}
-		
+		{		
 			$sCacheFile = self::$sCacheDirectory . "/" . md5( $sTableName );
 		
-		   if( self::$bCacheSchemas && file_exists( $sCacheFile ) )
+		   if( self::$bCacheSchemas && file_exists( $sCacheFile ) && !isset( self::$aSchemas[ $sTableName ] ) )
 			{
 				self::$aSchemas[ $sTableName ] = unserialize( file_get_contents( $sCacheFile ) );	
 			}
@@ -441,7 +436,7 @@
 			
 			$aLocalTable = $this->GetTableColumns( $sTableName );
 			
-			$aReferences = array();
+			self::$aSchemas[ $sTableName ][ "foreign_key" ] = array();
 		
 			$sSQL = "SELECT 
 				rpt.typname,
@@ -467,14 +462,13 @@
 				
 			if( !( $oForeignKeys = $this->Query( $sSQL ) ) )
 			{
-				trigger_error( "Failed on Query: " . $sSQL, E_USER_ERROR );
-				exit;
+				throw new Exception( "Failed on Query: " . $sSQL . "\n" . $this->GetLastError() );
 			}
             
 			$iCount = 0;
 			
 			foreach( $oForeignKeys as $oForeignKey )
-			{
+			{				
 				$aLocalFields = $aArray = explode( ",", 
 					str_replace( array( "{", "}" ), "", $oForeignKey->conkey ) );
 			
@@ -505,7 +499,7 @@
          	
          	$sName = StringFunctions::ToSingular( $sName );
          	
-         	$aReferences[ $sName ] = array(
+         	self::$aSchemas[ $sTableName ][ "foreign_key" ][ $sName ] = array(
          		"table" => $oForeignKey->typname,
          		"name" => $sName,
          		"local" => $aLocalFields,
@@ -515,8 +509,6 @@
       	
       		$iCount++;
 			}
-			
-			self::$aSchemas[ $sTableName ][ "foreign_key" ] = $aReferences;
 			
 			
 			// find tables that reference us:
@@ -600,7 +592,7 @@
 				}
 
 
-	         $aReferences[ $oForeignKey->typname ] = array(
+	         self::$aSchemas[ $sTableName ][ "foreign_key" ][ $oForeignKey->typname ] = array(
 	         	"table" => $oForeignKey->typname,
 	         	"name" => $oForeignKey->typname,
 					"local" => $aLocalFields,
@@ -611,9 +603,7 @@
          	$iCount++;
 			}
 			
-			self::$aSchemas[ $sTableName ][ "foreign_key" ] += $aReferences;
-			
-			return( $aReferences );
+			return( self::$aSchemas[ $sTableName ][ "foreign_key" ] );
 		
 		} // GetTableForeignKeys();
 
