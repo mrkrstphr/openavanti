@@ -42,17 +42,16 @@
 		
 		/**
 		 * Return the amount of time elapsed since starting the timer. If the timer was never
-		 * started, this will return the current time. This does not actually stop the timer.
-		 * For timing a series of events, Stop() can be called multiple time to get increments
-		 * in between various steps		 		 		  	 		 		 		 		 		 		 
+		 * started, this will return 0. This does not actually stop the timer. For timing a series 
+		 * of events, Stop() can be called multiple time to get increments in between various steps		 		 		  	 		 		 		 		 		 		 
 		 * 
-		 * @returns integer The amount of time that has passed since starting 
+		 * @returns double The amount of time that has passed since starting 
 		 */
 		public static function Stop()
 		{
 			self::Update( self::$iEnd );
 			
-			return( self::$iEnd - self::$iStart );
+			return( self::$iStart == 0 ? self::$iStart : ( self::$iEnd - self::$iStart ) );
 			
 		} // Stop()
 		
