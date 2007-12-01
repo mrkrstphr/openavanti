@@ -8,7 +8,7 @@
  * @dependencies 	FileInfo
  * @copyright		Copyright (c) 2008, Kristopher Wilson
  * @license			http://www.openavanti.com/license
- * @link			http://www.openavanti.com
+ * @link				http://www.openavanti.com
  * @version			0.05a
  *
  */
@@ -18,7 +18,7 @@
 	 *
 	 * @category	Files
 	 * @author		Kristopher Wilson
-	 * @link		http://www.openavanti.com/docs/filefunctions
+	 * @link			http://www.openavanti.com/docs/filefunctions
 	 */
 	class FileFunctions
  	{
