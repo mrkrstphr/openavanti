@@ -40,11 +40,12 @@
 		
 		/**
 		 * Generate a label for the form. Note that the supplied attributes are not validated to be
-		 * valid attributes for the element. Each element provided is added to the XHTML tag.		  
+		 * valid attributes for the element. Each element provided is added to the XHTML tag. The
+		 * "label" element of aAttributes specifies the text of the label.		 	  
 		 * 
 		 * @argument array An array of attributes for the HTML element
 		 * @argument bool Controls whether or not to return the HTML, otherwise echo it, default false
-		 * @returns void
+		 * @returns void/string If bReturn is true, returns a string with the XHTML, otherwise void
 		 */
 		public static function Label( $aAttributes, $bReturn = false )
 		{
@@ -86,7 +87,7 @@
 		 * 
 		 * @argument array An array of attributes for the HTML element
 		 * @argument bool Controls whether or not to return the HTML, otherwise echo it, default false
-		 * @returns void
+		 * @returns void/string If bReturn is true, returns a string with the XHTML, otherwise void
 		 */
 		public static function Input( $aAttributes, $bReturn = false )
 		{
@@ -130,7 +131,7 @@
 		 * 
 		 * @argument array An array of attributes for the HTML element
 		 * @argument bool Controls whether or not to return the HTML, otherwise echo it, default false
-		 * @returns void
+		 * @returns void/string If bReturn is true, returns a string with the XHTML, otherwise void
 		 */
 		public static function Select( $aAttributes, $bReturn = false )
 		{
@@ -177,7 +178,7 @@
 		 * 
 		 * @argument array An array of attributes for the HTML element
 		 * @argument bool Controls whether or not to return the HTML, otherwise echo it, default false
-		 * @returns void
+		 * @returns void/string If bReturn is true, returns a string with the XHTML, otherwise void
 		 */
 		public static function TextArea( $aAttributes, $bReturn = false )
 		{		
@@ -209,7 +210,6 @@
 			
 		} // TextArea()
 
-		
 	}; // Form()
 
 ?>
