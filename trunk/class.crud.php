@@ -32,6 +32,7 @@
 		
 		protected $bEmptySet = true; // This could possibily be removed now that we are an iterator
 		
+		protected $aData = array(); // because object member variables cannot be unset
 		
 		protected $bDirty = true; // I don't know if this is used
 		
@@ -42,9 +43,7 @@
 		// Description:
 		//		Get the schema of the supplied table name
 		//
-		{
-			//parent::__construct();
-			
+		{			
 			$sDatabaseClass = DATABASE_DRIVER . "Database";
 			
 			$this->oDatabase = new $sDatabaseClass();
@@ -90,7 +89,7 @@
 			// Loop each column in the table and create a member variable for it:			
 			foreach( $aColumns as $aColumn )
 			{
-				$this->{$aColumn[ "field" ]} = null;
+				$this->aData[ $aColumn[ "field" ] ] = null;
 			}
 		
 		} // PrepareColumns()
@@ -113,7 +112,7 @@
             {
 					if( isset( $aRelationships[ $sKey ] ) )
 					{
-						$this->$sKey = new CRUD( $aRelationships[ $sKey ][ "table" ], $xValue );
+						$this->aData[ $sKey ] = new CRUD( $aRelationships[ $sKey ][ "table" ], $xValue );
 					}					
             }
             else
@@ -121,7 +120,7 @@
                // problem is that the key of aFields is numeric
                if( isset( $aColumns[ $sKey ] ) )
 					{
-						$this->$sKey = $xValue;
+						$this->aData[ $sKey ] = $xValue;
 					}
          	}
 			}
@@ -147,12 +146,6 @@
 					trigger_error( "Invalid Key Provided", E_USER_ERROR );
 					exit;
 				}
-			}
-			
-			if( empty( $xId ) && !isset( $aClauses[ "where" ] ) )
-			{
-				//trigger_error( "Invalid Key Provided", E_USER_ERROR );
-				//exit;
 			}
 			
 			$sTableAlias = StringFunctions::ToSingular( $this->sTableName );
@@ -389,24 +382,20 @@
 		} // FindCount()
 		
 		
-		/*protected function Set( $sVariable, $sValue )
-		{
-		
-			if( isset( $this->$sVariable ) )
-			{
-				$this->$sVariable = $sValue;
-				
-				$this->bDirty = true;
-			}
-		
-		} // Set()
-		*/
-		
-		
+		/////////////////////////////////////////////////////////
 		public function GetRecord()
 		{
-		
-			return( $this->oDataSet->GetRecord() );
+			// ********************************************************************
+			// ********************************************************************
+			// ********************************************************************
+			// *****************             FIX THIS              ****************
+			// ********************************************************************
+			// ********************************************************************
+			// ********************************************************************
+			
+			return( $this->oDataSet->GetRecord() ); // not good...
+			// need to present data in aData, as it may have changed, but we need to return
+			// aData (an array) as an object... hmm...
 		
 		} // GetRecord()
 		
@@ -443,7 +432,7 @@
 				{
 					// otherwise this data is part of the primary table, 
 					// create a member variable:
-					$this->$sKey = $sValue;
+					$this->aData[ $sKey ] = $sValue;
 				}
 				
 				$this->bEmptySet = false;
@@ -474,9 +463,21 @@
 		} // GetCount()
 			
 		
+		public function __isset( $sName )
+		{
+			return( array_key_exists( $sName, $this->aData ) );
+			
+		} // __isset()
+		
+		
 		////////////////////////////////////////////////////////////////////////////////////////////
 		public function __get( $sName )
-		{
+		{			
+			if( array_key_exists( $sName, $this->aData ) )
+			{
+				return( $this->aData[ $sName ] );
+			}
+		
 			$aSchema = $this->oDatabase->GetSchema( $this->sTableName );
 			
 			$aRelationships = $aSchema[ "foreign_key" ];			
@@ -500,34 +501,57 @@
 					$sRelated = $aRelationship[ "local" ][ $iIndex ];
 					
 					$sWhere .= empty( $sWhere ) ? "" : " AND ";
-					$sWhere .= " {$sKey} = {$this->$sRelated} ";
+					$sWhere .= " {$sKey} = " . intval( $this->aData[ $sRelated ] );
 				}
 				
-				$this->$sName = new CRUD( $aRelationship[ "table" ] );
-				$this->$sName->Find( null, array(
+				$this->aData[ $sName ] = new CRUD( $aRelationship[ "table" ] );
+				$this->aData[ $sName ]->Find( null, array(
 					"where" => $sWhere 
 				) );
 			}
 			else
 			{
 				$sLocalColumn = current( $aRelationship[ "local" ] );
-				
-				if( !is_null( $this->$sLocalColumn ) )
+								
+				if( isset( $this->aData[ $sLocalColumn ] ) )
 				{
-					$this->$sName = new CRUD( $aRelationship[ "table" ] );		
-					$this->$sName->Find( $this->$sLocalColumn );
+					$this->aData[ $sName ] = new CRUD( $aRelationship[ "table" ] );		
+					$this->aData[ $sName ]->Find( $this->aData[ $sLocalColumn ] );
 				}
 				else
 				{
-					$this->{$sName} = null;
+					$this->aData[ $sName ] = null;
 				}
 			}
 			
-			return( $this->{$sName} );
+			return( $this->aData[ $sName ] );
 			
 		} // __get()
 		
-		////////////////////////////////////////////////////////////////////////////////////////////
+		
+		//////////////////////////////////////////////////////////////////////////////////////////////
+		public function __set( $sName, $sValue )
+		{
+		
+			$aColumns = $this->oDatabase->GetTableColumns( $this->sTableName );
+		
+			if( isset( $aColumns[ $sName ] ) )
+			{
+				$this->aData[ $sName ] = $sValue;
+			}
+			else if( !is_null( $this->FindRelationship( $sName ) ) )
+			{
+				$this->aData[ $sName ] = $sValue;
+			}
+			else
+			{
+				throw new Exception( "Unknown column [{$sName}] referenced" );
+			}
+		
+		} // __set()
+		
+		
+		//////////////////////////////////////////////////////////////////////////////////////////////
 		public function __call( $sName, $aArguments )
 		{
 			switch( strtolower( $sName ) )
@@ -572,7 +596,7 @@
 			{
 				$sPrimaryKey = reset( $aPrimaryKeys );
 				
-				if( empty( $this->$sPrimaryKey ) )
+				if( empty( $this->aData[ $sPrimaryKey ] ) )
 				{
 					$bInsert = true;
 				}
@@ -606,21 +630,21 @@
 				//echo '<div class="printr"><pre>' . print_r( $aRelationship , true ) . '</pre></div>';
 				$sRelationshipName = $aRelationship[ "name" ];
 				
-				if( isset( $this->$sRelationshipName ) )
+				if( isset( $this->aData[ $sRelationshipName ] ) )
 				{
 					// If the relationship type is 1 to Many, than iterate each
 					// related data set and invoke SaveAll()
 					
 					if( $aRelationship[ "type" ] == "1-m" )
 					{
-						foreach( $this->$sRelationshipName as $oRelatedData )
+						foreach( $this->aData[ $sRelationshipName ] as $oRelatedData )
 						{
 							$oRelatedData->SaveAll();
 						}
 					}
 					else
 					{
-						$this->$sRelationshipName->SaveAll();
+						$this->aData[ $sRelationshipName ]->SaveAll();
 					
 						// If the relationship is many to one, then we have to set the foreign key
 						// value for this record
@@ -628,8 +652,8 @@
 						{
 							// do we need to handle multiple columns?
 							
-							$this->{$aRelationship[ "local" ][ 0 ]} = 
-								$this->{$sRelationshipName}->{$aRelationship[ "foreign" ][ 0 ]};
+							$this->aData[ $aRelationship[ "local" ][ 0 ] ] = 
+								$this->aData[ $sRelationshipName ]->{$aRelationship[ "foreign" ][ 0 ]};
 						}
 					}
 				}
@@ -660,7 +684,7 @@
 				if( in_array( $aColumn[ "field" ], array( "created_date", "created_stamp", "created_on" ) ) )
 				{
 					// dates are stored as GMT
-					$this->{$aColumn[ "field" ]} = gmdate( "Y-m-d H:i:s" );
+					$this->aData[ $aColumn[ "field" ] ] = gmdate( "Y-m-d H:i:s" );
 				}
 				
 				// If the primary key is singular, do not provide a value for it:				
@@ -674,8 +698,8 @@
 					$aColumn[ "field" ];
 				
 				// Get the value for the column (if present):
-				$sValue = isset( $this->{$aColumn[ "field" ]} ) ? 
-					$this->{$aColumn[ "field" ]} : "";
+				$sValue = isset( $this->aData[ $aColumn[ "field" ] ] ) ? 
+					$this->aData[ $aColumn[ "field" ] ] : "";
 				
 				// Create a list of values to insert into the above columns:
 				$sValues .= ( !empty( $sValues ) ? ", " : "" ) . 
@@ -704,7 +728,7 @@
 				$iKey = $this->oDatabase->SerialCurrVal( $this->sTableName, reset( $aPrimaryKeys ) );
 				
 				// Store the primary key:
-				$this->{$aPrimaryKeys[0]} = $iKey;
+				$this->aData[ $aPrimaryKeys[0] ] = $iKey;
 				
 				// return the primary key:
 				return( $iKey );
@@ -764,13 +788,13 @@
 				// automate updating update date fields:
 				if( in_array( $field[ "field" ], array( "updated_date", "updated_stamp", "updated_on" ) ) )
 				{
-					$this->$field[ "field" ] = gmdate( "Y-m-d H:i:s" );
+					$this->aData[ $field[ "field" ] ] = gmdate( "Y-m-d H:i:s" );
 				}
 				
 				// complete the query for this field:
 				$sSet .= ( !empty( $sSet ) ? ", " : "" ) . 
 					$field[ "field" ] . " = " . 
-						$this->oDatabase->FormatData( $field[ "type" ], $this->{$field[ "field" ]} ) . " ";
+						$this->oDatabase->FormatData( $field[ "type" ], $this->aData[ $field[ "field" ] ] ) . " ";
 			}
 			
 			// if we found no fields to update, return:
@@ -785,7 +809,7 @@
 			foreach( $aPrimaryKeys as $sKey )
 			{
 				$sWhere .= !empty( $sWhere ) ? " AND " : "";
-				$sWhere .= "{$sKey} = {$this->$sKey} "; 
+				$sWhere .= "{$sKey} = " . intval( $this->aData[ $sKey ] );
 			}
 			
 			$sSQL = "UPDATE {$this->sTableName} SET {$sSet} WHERE {$sWhere}";	
@@ -814,7 +838,7 @@
 				
 				$sWhere .= empty( $sWhere ) ? " WHERE " : " AND ";
 				$sWhere .= $sPrimaryKey . " = " . 
-					$this->oDatabase->FormatData( $sType, $this->$sPrimaryKey ) . " ";
+					$this->oDatabase->FormatData( $sType, $this->aData[ $sPrimaryKey ] ) . " ";
 			}
 			
 			$sSQL .= $sWhere;
@@ -956,9 +980,9 @@
 				{
 					$sRelationshipName = $aRelationship[ "name" ];
 					
-					if( property_exists( $this, $sRelationshipName ) )
+					if( array_key_exists( $sRelationshipName, $this->aData ) )
 					{
-						unset( $this->$sRelationshipName );
+						unset( $this->aData[ $sRelationshipName ] );
 					}
 				}
 			
