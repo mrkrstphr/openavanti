@@ -125,7 +125,8 @@
 					require( "header.php" );
 				}
 			
-				if( ( $sView = FileFunctions::FileExistsInPath( $_SESSION[ "view" ] ) ) !== false )
+				if( isset( $_SESSION[ "view" ] ) && 
+					( $sView = FileFunctions::FileExistsInPath( $_SESSION[ "view" ] ) ) !== false )
 				{
 					require( $sView );
 				}
