@@ -43,7 +43,7 @@
 			  
 			if( trim( DATABASE_PASSWORD ) != "" )
 			{
-				$sString .= " password={$sPassword}";
+				$sString .= " password=" . DATABASE_PASSWORD;
 			}
 			
 			$this->hDatabase = @pg_connect( $sString );

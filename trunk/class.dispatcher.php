@@ -118,12 +118,12 @@
 		{
 			if( isset( $_SESSION[ "view" ] ) )
 			{
+				$aData = &$oController->aData;
+				
 				if( !self::IsAjaxRequest() )
 				{
 					require( "header.php" );
 				}
-			
-				$aData = &$oController->aData;
 			
 				if( ( $sView = FileFunctions::FileExistsInPath( $_SESSION[ "view" ] ) ) !== false )
 				{
