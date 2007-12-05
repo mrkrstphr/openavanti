@@ -23,6 +23,36 @@
 	 */
 	class Dispatcher
 	{
+		private static $aRoutes = array();
+		
+		private function __construct()
+		{
+			// this class cannot be instantiated
+			
+		} // __construct()
+	
+
+		/**
+		 * Adds a custom route based on matching the URI to a regular express. On a sucessful match,
+		 * the supplied controller is instantiated and it's method action is invoked, passing
+		 * along the individual parts of the URI as parameters		 		  
+		 * 
+		 * @argument string The regular expression to match against the URI
+		 * @argument string The controller to instantiate on a successful match
+		 * @argument string The action to invoke against the controller on a succesful match
+		 * @returns void
+		 */
+		public function AddRoute( $sPreg, $sController, $sAction )
+		{
+			self::$aRoutes[] = array(
+				"match" => $sPreg,
+				"controller" => $sController,
+				"action" => $sAction
+			);
+			
+		} // AddRoute()
+	
+	
 	
 		/**
 		 * Routes the specified request to an associated controller and action. Loads
@@ -33,19 +63,51 @@
 		 */
 		public static function Connect( $sRequest )
 		{
-			$aRequest = explode( "/", $sRequest );
-			$_SESSION[ "last-request" ] = $aRequest;
-						
-			$sController = isset( $aRequest[ 0 ] ) ? 
-				$aRequest[ 0 ] . "Controller" : "";
-				
-			$sAction = isset( $aRequest[ 1 ] ) ? 
-				$aRequest[ 1 ] : "";
-				
-			$iID = isset( $aRequest[ 2 ] ) ? 
-				intval( $aRequest[ 2 ] ) : null;
+			$bRouteFound = false;
+			
+			$sController = "";
+			$sAction = "";
+			$iID = "";
 			
 			$oController = null;
+			
+			foreach( self::$aRoutes as $aRoute )
+			{
+				if( preg_match( $aRoute[ "match" ], $sRequest ) )
+				{
+					$sController = $aRoute[ "controller" ] . "Controller";
+					$sAction = $aRoute[ "action" ];
+					
+					if( !empty( $sController ) && class_exists( $sController, true ) )
+					{
+						$oController = new $sController();
+										
+						self::InvokeAction( $oController, $sAction, $iID );
+					}
+					else
+					{
+						$_SESSION[ "view" ] = "404.php";
+					}
+					
+					$bRouteFound = true;
+				}
+			}
+			
+			if( !$bRouteFound )
+			{
+				$aRequest = explode( "/", $sRequest );
+				$_SESSION[ "last-request" ] = $aRequest;
+							
+				$sController = isset( $aRequest[ 0 ] ) ? 
+					$aRequest[ 0 ] . "Controller" : "";
+					
+				$sAction = isset( $aRequest[ 1 ] ) ? 
+					$aRequest[ 1 ] : "";
+					
+				$iID = isset( $aRequest[ 2 ] ) ? 
+					intval( $aRequest[ 2 ] ) : null;
+			}
+			
 			
 			if( !empty( $sController ) && class_exists( $sController, true ) )
 			{
