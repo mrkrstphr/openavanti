@@ -261,6 +261,8 @@
 			
 			$this->bDirty = false;
 			
+			return( $this );
+			
 		} // Find()
 		
 		
