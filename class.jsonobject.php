@@ -86,11 +86,11 @@
 				
 				
 				$sJSONAttributes .= !is_numeric( $sKey ) ? 
-					"\t'{$sKey}' => " : "";
+					"\t'{$sKey}': " : "";
 					
 				if( is_string( $xValue ) ) 
 				{
-					$sJSONAttributes .= "'{$xValue}'";
+					$sJSONAttributes .= "'" . addslashes( $xValue ) . "'";
 				}
 				else if( is_int( $xValue ) || is_float( $xValue ) )
 				{
