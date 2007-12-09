@@ -1199,12 +1199,72 @@
        * string. If bIncludeReferences is true, then each reference to the table is considered and 
        * added to the XML document.
        *
-       * @argument string The XML string to format
-       * @returns string A well formed XML document as a string representation
+       * @returns string A JSON string representing the CRUD object
        */
-		public function asJSON()
+		public function asJSON( $bIncludeReferences = false)
 		{
-		
+			$oJSON = new JSONObject();
+			
+			$aColumns = $this->oDatabase->GetTableColumns( $this->sTableName );
+			
+			foreach( $aColumns as $aColumn )
+			{
+				$oJSON->AddAttribute( $aColumn[ "field" ], $this->aData[ $aColumn[ "field" ] ] );
+			}
+			
+			if( $bIncludeReferences )
+			{
+				$aTableReferences = $this->oDatabase->GetTableForeignKeys( $this->sTableName );
+					
+				foreach( $aTableReferences as $aReference )
+				{
+					$oData = $this->{$aReference[ "name" ]};
+									
+					if( !empty( $oData ) && !$oData->Empty() )
+					{
+						$aReferenceColumns = $this->oDatabase->GetTableColumns( $aReference[ "table" ] );
+							
+						if( $aReference[ "type" ] == "1-m" )
+						{						
+							$aReferences = array();
+							
+							$sChildReferenceName = StringFunctions::ToSingular( $aReference[ "name" ] );
+							
+							//$oReference = $oElement->addChild( $aReference[ "name" ] );
+							
+							foreach( $oData as $oDataElement )
+							{
+								$oReferenceJSON = new JSONObject();
+							
+								foreach( $aReferenceColumns as $aColumn )
+								{
+									$oReferenceJSON->AddAttribute( $aColumn[ "field" ], $oData->{$aColumn[ "field" ]} );
+								}
+							
+								$aReferences[] = $oReferenceJSON;
+							}
+							
+							
+							$oJSON->AddAttribute( $aReference[ "name" ], $aReferences );							
+						}
+						else
+						{
+							$oReferenceJSON = new JSONObject();
+							
+							foreach( $aReferenceColumns as $aColumn )
+							{
+								$oReferenceJSON->AddAttribute( $aColumn[ "field" ], $oData->{$aColumn[ "field" ]} );
+							}
+							
+							$oJSON->AddAttribute( $aReference[ "name" ], $oReferenceJSON );
+						}
+					}
+					
+				}
+			}
+			
+			return( $oJSON->__toString() );
+			
 		} // asJSON()
 		
 		
