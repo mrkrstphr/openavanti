@@ -23,13 +23,13 @@
 	class StringFunctions
 	{
 
-        /**
-         * Attempts to turn a supplied string, preferably an English, singular word, into the
-         * plural version of the string.
-         *
-         * @argument string the singular word to attempt to make plural
-         * @returns string the result of attempting to make the word plural
-         */
+     /**
+      * Attempts to turn a supplied string, preferably an English, singular word, into the
+      * plural version of the string.
+      *
+      * @argument string the singular word to attempt to make plural
+      * @returns string the result of attempting to make the word plural
+      */
 		public static function ToSingular( $sString )
 		{
 			if( strtolower( $sString ) == "people" )
@@ -55,13 +55,13 @@
 		} // ToSingular()
 		
 		
-        /**
-         * Attempts to turn a supplied string, preferably an English, plural word, into the
-         * singular version of the string.
-         *
-         * @argument string the plural word to attempt to make singular
-         * @returns string the result of attempting to make the word singular
-         */
+     /**
+      * Attempts to turn a supplied string, preferably an English, plural word, into the
+      * singular version of the string.
+      *
+      * @argument string the plural word to attempt to make singular
+      * @returns string the result of attempting to make the word singular
+      */
 		public static function ToPlural( $sString )
 		{
 				
