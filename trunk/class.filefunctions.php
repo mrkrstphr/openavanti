@@ -40,6 +40,35 @@
 		
 		
 		/**
+		 * Determines the base name of a file by removing the directory structure before it, as
+		 * well as the extension of the file. Passing /path/to/file.ext will return "file"		 
+		 * 
+		 * @argument string The name of the file
+		 * @returns string The base name of the file without path or extension
+		 */
+		public static function GetFileBaseName( $sFileName )
+		{
+			$iLastSlash = strrpos( $sFileName, "/" );
+
+			if( $iLastSlash !== false )
+			{
+				$sFileName = substr( $sFileName, $iLastSlash + 1 );
+			}
+			
+			$iLastPeriod = strrpos( $sFileName, "." );
+			
+			if( $iLastPeriod !== false )
+			{
+				$sFileName = substr( $sFileName, 0, $iLastPeriod );
+			}
+			
+			
+			return( $sFileName );
+		
+		} // GetFileBaseName()
+		
+		
+		/**
 		 * Determines the mime type of the given file. This method uses the FileInfo
 		 * extension of PHP and may not always be accurate in determining the mime type
 		 * of all files. FileInfo must be installed for this to work properly.

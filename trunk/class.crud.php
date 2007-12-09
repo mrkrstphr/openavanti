@@ -18,7 +18,7 @@
 	 *
 	 * @category	Database
 	 * @author		Kristopher Wilson
-	 * @link			http://www.openavanti.com/docs/database
+	 * @link			http://www.openavanti.com/docs/crud
 	 */
 	class CRUD implements Iterator
 	//
@@ -37,12 +37,21 @@
 		protected $bDirty = true; // I don't know if this is used
 		
 		
-		/////////////////////////////////////////////////////////////////////////////////////////////
+		/**
+		 *  The constructor makes the necessary connection to the database (see Database::Construct) 
+		 *  and attempts to load the schema of the specified table.
+		 *  
+		 *  If the second argument of oData is supplied, the constructor will attempt to load that 
+		 *  data into the class for later saving.
+		 * 
+		 *  If there is a define defined called ENABLE_SCHEMA_CACHING, schema caching is turned on, 
+		 *  allowing for faster subsequent page loads. 	 	 
+		 * 		 
+		 * @argument string The name of the database table
+		 * @argument mixed An array or object of data to load into the CRUD object		 
+		 * @returns void
+		 */
 		public function __construct( $sTableName, $oData = null )
-		//
-		// Description:
-		//		Get the schema of the supplied table name
-		//
 		{			
 			$sDatabaseClass = DATABASE_DRIVER . "Database";
 			
@@ -128,7 +137,12 @@
 		} // LoadArray()
 
 		
-		/////////////////////////////////////////////////////////////////////////////////////////////
+		/**
+		 * 		 	 
+		 * @argument mixed The ID of the data being found
+		 * @argument array Additional databases clauses		 
+		 * @returns CRUD returns a reference to itself to allow chaining
+		 */
 		public function Find( $xId = null, $aClauses = array() )
 		//
 		// Description:
@@ -443,7 +457,14 @@
 		} // Load()
 		
 		
-		////////////////////////////////////////////////////////////////////////////////////////////
+		/**
+		 *  Determines whether or not there is currently data in the CRUD object. Data is loaded into 
+		 *  CRUD through the Find() method, through specifying data into fields manually, or by 
+		 *  passing data to the constructor. If any of these cases are met, this method will 
+		 *  return true.	 		 	 
+		 * 	
+		 * @returns boolean True if there is no data currently in CRUD, false otherwise
+		 */
 		protected function IsEmpty()
 		{
 			return( $this->bEmptySet );
@@ -451,7 +472,13 @@
 		} // IsEmpty()
 		
 		
-		////////////////////////////////////////////////////////////////////////////////////////////
+		/**
+		 *  Gets the number of rows returned by the last Find() call. If Find() has not yet been 
+		 *  called, this method will return This method is invoked through the __call() method to 
+		 *  allow using the method name Count(), which is a reserved word in PHP. 		 		 	 
+		 * 	
+		 * @returns integer The number of results in the data set
+		 */
 		protected function GetCount() 
 		{
 		
@@ -855,21 +882,26 @@
 		} // RecordExists()
 		
 		
-		/////////////////////////////////////////////////////////////////////////////////////////////
+		/**
+		 *	 Destroys (deletes) the current data. This method will delete the primary record 
+		 *	 (assuming that the primary key for the data is set).
+		 * 	
+		 * @returns void
+		 */
 		public function Destroy()
-		//
-		// Description:
-		//		Destroys (deletes) the current data. This method will delete the primary record
-		//		(assuming that the primary key for the data is set). If cascade is true, this method
-		//		will also delete all data that is related through a 1-1 or 1-Many relationship
-		//
 		{
 			throw new Exception( "Destroy() is not yet implemented." );
 		
 		} // Destroy()
 	
 	
-		////////////////////////////////////////////////////////////////////////////////////////////
+		/**
+		 *	 Destroys (deletes) the current data, assuming the primary key for this record is set,
+		 *	 and all dependent data, including 1-1 and 1-M relationships. This can be accomplished
+		 *	 through the Destroy() method if cascading deletes are set on the table.		 		 
+		 * 	
+		 * @returns void
+		 */
 		public function DestroyAll()
 		{
 			throw new Exception( "DestroyAll() is not yet implemented." );
@@ -933,12 +965,14 @@
 	   } // Rewind()
     	
 
-		////////////////////////////////////////////////////////////////////////////////////////////
+		/**
+		 *  Returns the current object from the DataSet generated from the last call to Find().
+		 *  This method is part of the PHP Iterator implementation, see
+		 *  http://www.php.net/~helly/php/ext/spl/interfaceIterator.html for reference.		 
+		 * 	
+		 * @returns CRUD Returns a CRUD object if there data, or null otherwise
+		 */
 		public function Current() 
-		//
-		// Description:
-		//		See http://www.php.net/~helly/php/ext/spl/interfaceIterator.html
-		// 
 		{
 			if( !$this->bEmptySet )
 			{
@@ -1000,7 +1034,7 @@
 		} // Next()
 
 	
-		////////////////////////////////////////////////////////////////////////////////////////////////
+		//////////////////////////////////////////////////////////////////////////////////////////////
 		public function Valid()  
 		//
 		// Description:
@@ -1015,6 +1049,177 @@
 			return( null );
 		
 		} // Valid()
+		
+		
+		/**
+       * Returns the table name associated with this CRUD object
+       *
+       * @returns string The name of the table associated with this CRUD object
+       */
+		public function GetTableName()
+		{
+			return( $this->sTableName );
+			
+		} // GetTableName() 
+		
+		
+		/**
+       * Returns the data currently stored in the CRUD object a well formed XML document as a
+       * string representation. This requires the DOM extension of PHP to be installed. If the DOM
+       * extension is not installed, this method will throw an exception. 
+       * 	        
+       * @argument bool Should this returned XML include references? Default false.
+       * @argument bool Should this returned XML include all records returned by the last Find()
+       * 	call? If not, only the current record stored is returned. Default false.      
+       * @returns string A well formed XML document as a string representation
+       */
+		public function asXMLString( $bIncludeReferences = false, $bProvideAll = false )
+		{
+			$oXML = $this->asXML( $bIncludeReferences, $bProvideAll );			
+			$sXML = XMLFunctions::PrettyPrint( $oXML->asXML() );
+			
+			return( $sXML );
+			
+		} // asXMLString()
+		
+		
+		/**
+       * Returns the data currently stored in the CRUD object a well formed XML document as a
+       * SimpleXMLElement(). 
+       * 	        
+       * @argument bool Should this returned XML include references? Default false.
+       * @argument bool Should this returned XML include all records returned by the last Find()
+       * 	call? If not, only the current record stored is returned. Default false.      
+       * @returns SimpleXMLElement The data requested as a SimpleXMLElement object
+       */
+		public function AsXML( $bIncludeReferences = false, $bProvideAll = false )
+		{
+			$oXML = null;
+			
+			if( $bProvideAll )
+			{
+				$sName = $this->sTableName;
+				$sElementName = StringFunctions::ToSingular( $this->sTableName );
+				
+				$oXML = new SimpleXMLElement( "<{$sName}></{$sName}>" );
+				
+				foreach( $this as $oObject )
+				{
+					$oElement = $oXML->addChild( $sElementName );
+					$this->AddColumns( $oElement, $oObject, $this->sTableName );
+					
+					if( $bIncludeReferences )
+					{
+						$this->AddReferences( $oElement, $oObject, $this->sTableName );
+					}
+				}
+			}
+			else
+			{
+				$sName = StringFunctions::ToSingular( $this->sTableName );
+				
+				$oXML = new SimpleXMLElement( "<{$sName}></{$sName}>" );
+				
+				$this->AddColumns( $oXML, $this, $this->sTableName );
+				$this->AddReferences( $oXML, $this, $this->sTableName );
+			}
+		
+			return( $oXML );
+				
+		} // AsXML()
+		
+	
+		/**
+       * Add the database table columns for the specified table, from the specified object, to
+       * the specfied SimpleXMLElement.       
+       * 	        
+       * @argument SimpleXMLElement 
+       * @argument CRUD
+       * @argument string		      
+       * @returns SimpleXMLElement The data requested as a SimpleXMLElement object
+       */
+		private function AddColumns( &$oElement, &$oObject, $sTableName )
+		{
+			$aColumns = $this->oDatabase->GetTableColumns( $sTableName );
+			
+			foreach( $aColumns as $aColumn )
+			{
+				$oElement->addChild( $aColumn[ "field" ], $oObject->{$aColumn[ "field" ]} );
+			}
+			
+		} // AddColumns()
+		
+
+		/**
+       * Add the database table references for the specified table, from the specified object, to
+       * the specfied SimpleXMLElement.       
+       * 	        
+       * @argument SimpleXMLElement 
+       * @argument CRUD
+       * @argument string		      
+       * @returns SimpleXMLElement The data requested as a SimpleXMLElement object
+       */
+		private function AddReferences( &$oElement, &$oObject, $sTableName )
+		{
+			$aTableReferences = $this->oDatabase->GetTableForeignKeys( $sTableName );
+				
+			foreach( $aTableReferences as $aReference )
+			{
+				$oData = $this->{$aReference[ "name" ]};
+								
+				if( !empty( $oData ) && !$oData->Empty() )
+				{
+					if( $aReference[ "type" ] == "1-m" )
+					{
+						$sChildReferenceName = StringFunctions::ToSingular( $aReference[ "name" ] );
+						
+						$oReference = $oElement->addChild( $aReference[ "name" ] );
+						
+						foreach( $oData as $oDataElement )
+						{
+							$oChildReference = $oReference->addChild( $sChildReferenceName );
+							
+							$this->AddColumns( $oChildReference, $oDataElement, $aReference[ "table" ] );
+						}
+					}
+					else
+					{
+						$oReference = $oElement->addChild( $aReference[ "name" ] );
+						$this->AddColumns( $oReference, $oData, $aReference[ "table" ] );
+					}
+				}
+				
+			}
+		
+		} // AddReferences()
+
+		
+		/**
+       * Returns the data currently stored in the CRUD object as a JSON (JavaScript object notation)
+       * string. If bIncludeReferences is true, then each reference to the table is considered and 
+       * added to the XML document.
+       *
+       * @argument string The XML string to format
+       * @returns string A well formed XML document as a string representation
+       */
+		public function asJSON()
+		{
+		
+		} // asJSON()
+		
+		
+		/**
+       * Creates a readable, string representation of the object using print_r and returns that
+       * string.       
+       *
+       * @returns string A readable, string representation of the object
+       */
+		public function __toString()
+		{
+			return( print_r( $this->aData, true ) );
+			
+		} // __toString()
+		
 
 	}; // CRUD()
 

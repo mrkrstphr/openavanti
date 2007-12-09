@@ -350,6 +350,14 @@
             
 			foreach( $oFields as $oField )
 			{
+				// When dropping a column with PostgreSQL, you get a lovely .pg.dropped. column
+				// in the PostgreSQL catalog
+				
+				if( strpos( $oField->attname, ".pg.dropped." ) !== false )
+				{
+					continue;
+				}
+				
 				$aFields[ $oField->attname ] = array(
 					"number" => $oField->attnum,
 					"field" => $oField->attname, 
