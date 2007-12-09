@@ -104,6 +104,10 @@
 				{
 					$sJSONAttributes .= 	JSONObject::ConvertJSONAttributes( $xValue->GetAttributes() );	
 				}	
+				else if( is_null( $xValue ) )
+				{
+					$sJSONAttributes .= "''";
+				}
 			}
 			
 			$sJSON = !empty( $sJSONAttributes ) ? 
