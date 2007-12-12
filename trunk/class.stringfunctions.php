@@ -83,6 +83,35 @@
 		
 		} // ToSingular())
 	
+	
+     /**
+      * Takes a string of PHP code and uses highlight_string() to syntax highlight the code,
+      * then explodes n each line and returns the code wrapped in a div with an ordered list,
+      * each line of code being a line in the ordered list to provide line numbers. It is
+      * up to the user to style this returned HTML.				      
+      *
+      * @argument string The string of PHP code to format
+      * @returns string The formatted PHP code
+      */
+		public function FormatPHPCode( $sCode ) 
+		{
+		   $sCode = highlight_string( trim( $sCode ), true );
+			$aCode = explode( "<br />", $sCode );
+		   
+		   $sCode = "";
+		
+		    
+			foreach( $aCode as $sLine )
+			{
+				$sCode .= "\t\t<li><code>{$sLine}</code></li>\n";
+			}
+		    
+			$sCode = "<div>\n\t<ol>\n{$sCode}</ol>\n</div>";
+			
+			return( $sCode );
+		
+		} // FormatPHPCode()
+	
 	}; // SringFunctions()
 
 ?>
