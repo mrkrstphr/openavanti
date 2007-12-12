@@ -52,10 +52,10 @@
 		 * @returns void
 		 */
 		public function __construct( $sTableName, $oData = null )
-		{			
-			$sDatabaseClass = DATABASE_DRIVER . "Database";
+		{
+			// relies on there only being one database profile or a default profile set:
+			$this->oDatabase = Database::GetConnection();
 			
-			$this->oDatabase = new $sDatabaseClass();
 			
 			// Enable/disable schema caching:
 			$bCache = defined( "ENABLE_SCHEMA_CACHING" ) ? 
@@ -1065,27 +1065,29 @@
 		
 		/**
        * Returns the data currently stored in the CRUD object a well formed XML document as a
-       * string representation. This requires the DOM extension of PHP to be installed. If the DOM
-       * extension is not installed, this method will throw an exception. 
+       *	string representation. This requires the DOM and SimpleXML extensions of PHP to be 
+		 *	installed. If either extension is not installed, this method will throw an exception.
        * 	        
        * @argument bool Should this returned XML include references? Default false.
        * @argument bool Should this returned XML include all records returned by the last Find()
        * 	call? If not, only the current record stored is returned. Default false.      
        * @returns string A well formed XML document as a string representation
        */
-		public function asXMLString( $bIncludeReferences = false, $bProvideAll = false )
+		public function AsXMLString( $bIncludeReferences = false, $bProvideAll = false )
 		{
 			$oXML = $this->asXML( $bIncludeReferences, $bProvideAll );			
 			$sXML = XMLFunctions::PrettyPrint( $oXML->asXML() );
 			
 			return( $sXML );
 			
-		} // asXMLString()
+		} // AsXMLString()
 		
 		
 		/**
-       * Returns the data currently stored in the CRUD object a well formed XML document as a
-       * SimpleXMLElement(). 
+       * Returns the data currently stored in the CRUD object a well formed XML document as a 
+       * SimpleXMLElement object. This method requires the SimpleXML extension of PHP to be
+       * installed. If the SimpleXML extension is not installed, this method will throw an 
+       * exception.
        * 	        
        * @argument bool Should this returned XML include references? Default false.
        * @argument bool Should this returned XML include all records returned by the last Find()
@@ -1199,9 +1201,10 @@
        * string. If bIncludeReferences is true, then each reference to the table is considered and 
        * added to the XML document.
        *
+       * @argument bool Toggles whether references/relationships should be stored in the JSON string       
        * @returns string A JSON string representing the CRUD object
        */
-		public function asJSON( $bIncludeReferences = false)
+		public function AsJSON( $bIncludeReferences = false)
 		{
 			$oJSON = new JSONObject();
 			
@@ -1265,7 +1268,7 @@
 			
 			return( $oJSON->__toString() );
 			
-		} // asJSON()
+		} // AsJSON()
 		
 		
 		/**
