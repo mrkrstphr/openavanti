@@ -138,16 +138,17 @@
 
 		
 		/**
-		 * 		 	 
+		 * This method attempts to load a record from the database based on the passed ID, or a 
+		 * passed set of SQL query clauses. This method can be used retrieve one record from the 
+		 * database, or a set of records that can be iterated through.
+		 * 		 		 
 		 * @argument mixed The ID of the data being found
-		 * @argument array Additional databases clauses		 
+		 * @argument array Additional databases clauses, including: join, where, order, offset and 
+		 * 		 limit. All except for join are string that are directly appended to the query. 
+		 * 		 Join is an array of referenced tables to inner join.
 		 * @returns CRUD returns a reference to itself to allow chaining
 		 */
 		public function Find( $xId = null, $aClauses = array() )
-		//
-		// Description:
-		//
-		//
 		{
 			$aPrimaryKey = $this->oDatabase->GetTablePrimaryKey( $this->sTableName );
 			
@@ -157,8 +158,7 @@
 				if( count( $aPrimaryKey ) > 1 && ( !is_array( $xId ) || 
 					count( $xId ) != count( $aPrimaryKey ) ) )
 				{
-					trigger_error( "Invalid Key Provided", E_USER_ERROR );
-					exit;
+					throw new Exception( "Invalid Key Provided" );
 				}
 			}
 			
@@ -280,65 +280,27 @@
 		} // Find()
 		
 		
-		/////////////////////////////////////////////////////////////////////////////////////////////
-		public function FindCount( $xId = null, $aClauses = array() )
-		//
-		// Description:
-		//
-		//
+		/**
+		 * This method returns the number of records that match a passed set of SQL query clauses. 
+		 * This method is very similiar to Find(), except that it returns an integer value 
+		 * representing the number of matching records.
+		 * 
+		 * @argument array Additional databases clauses, including: join and where. Where is a string 
+		 * 		 that are directly appended to the query. Join is an array of referenced tables to 
+		 * 		 inner join.
+		 * @returns int Returns the number of database records that match the passed clauses
+		 */
+		public function FindCount( $aClauses = array() )
 		{
 			$aPrimaryKey = $this->oDatabase->GetTablePrimaryKey( $this->sTableName );
-			
-			if( !empty( $xId ) )
-			{
-				// If we have a primary key specified, make sure it the number of columsn matches:
-				if( count( $aPrimaryKey ) > 1 && ( !is_array( $xId ) || 
-					count( $xId ) != count( $aPrimaryKey ) ) )
-				{
-					trigger_error( "Invalid Key Provided", E_USER_ERROR );
-					exit;
-				}
-			}
-			
-			if( empty( $xId ) && !isset( $aClauses[ "where" ] ) )
-			{
-				//trigger_error( "Invalid Key Provided", E_USER_ERROR );
-				//exit;
-			}
-			
+						
 			
 			$sWhere = isset( $aClauses[ "where" ] ) ? $aClauses[ "where" ] : "";
-			
-					
-			// Handle our provided key:	
 			
 			if( !empty( $sWhere ) )
 			{
 				$sWhere = " WHERE {$sWhere} ";
-			}
-
-			if( is_array( $xId ) && count( $aPrimaryKey ) > 0 )
-			{
-				// our primary key value is an array -- put the data in the WHERE clause:
-				
-				foreach( $xId as $sField => $sValue )
-				{					
-					$sType = $this->oDatabase->GetColumnType( $this->sTableName, $sField );
-					
-					$sWhere .= !empty( $sWhere ) ? " AND " : " WHERE ";
-					$sWhere .= "{$sField} = " . $this->oDatabase->FormatData( $sType, $sValue ) . " ";
-				}
-			}
-			else if( !empty( $xId ) )
-			{
-				// we have a singular primary key -- put the data in the WHERE clause:
-				$sKey = reset( $aPrimaryKey );
-				$sType = $this->oDatabase->GetColumnType( $this->sTableName, $sKey );
-				
-				$sWhere .= !empty( $sWhere ) ? " AND " : " WHERE ";
-				$sWhere .= "{$sKey} = " . $this->oDatabase->FormatData( $sType, $xId ) . " ";
-			}
-			
+			}			
 			
 			// Setup supplied joins:
 			
@@ -389,11 +351,8 @@
 					$this->oDatabase->GetLastError() . "\n Query: {$sSQL}", E_USER_ERROR );
 				exit;
 			}
-			
-			
-			$oData = $this->oDataSet->Rewind();
 						
-			return( $oData->count );
+			return( $this->oDataSet->Rewind()->count );
 			
 		} // FindCount()
 		
