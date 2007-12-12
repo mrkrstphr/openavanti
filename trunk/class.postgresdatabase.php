@@ -25,7 +25,7 @@
 	 * @author		Kristopher Wilson
 	 * @link			http://www.openavanti.com/docs/postgresdatabase
 	 */
-	class PostgresDatabase
+	class PostgresDatabase extends Database
 	{
 		private $hDatabase = null;
         
@@ -36,15 +36,27 @@
 
 		
       //////////////////////////////////////////////////////////////////////////////////////////////
-		public function __construct()
+		protected function __construct( $aProfile )
       {
-			$sString = "host=" . DATABASE_HOST . " dbname=" . DATABASE_NAME . " " . 
-				"user=" . DATABASE_USER;
-			  
-			if( trim( DATABASE_PASSWORD ) != "" )
-			{
-				$sString .= " password=" . DATABASE_PASSWORD;
-			}
+      	
+      	$sString = "";
+      	
+      	if( isset( $aProfile[ "host" ] ) )
+      	{
+      		$sString .= " host=" . $aProfile[ "host" ] . " ";
+      	}
+      
+			$sString .= " dbname=" . $aProfile[ "name" ] . " ";
+      	
+      	if( isset( $aProfile[ "user" ] ) )
+      	{
+      		$sString .= " user=" . $aProfile[ "user" ] . " ";
+      	}
+      	
+      	if( isset( $aProfile[ "password" ] ) )
+      	{
+      		$sString .= " password=" . $aProfile[ "password" ] . " ";
+      	}
 			
 			$this->hDatabase = @pg_connect( $sString );
 			
@@ -239,7 +251,7 @@
 
 
 		///////////////////////////////////////////////////////////////////////////////////////////
-		public function GetConnection()
+		public function GetResource()
 		//
 		// Description:
 		//      Returns the database resource
