@@ -801,7 +801,7 @@
 		
 		
 		/////////////////////////////////////////////////////////////////////////////////////////////
-		private function RecordExists()
+		protected function RecordExists()
 		{
 			$aPrimaryKeys = $this->oDatabase->GetTablePrimaryKey( $this->sTableName );
 		
