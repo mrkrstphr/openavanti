@@ -81,7 +81,7 @@
 			
 			return( $sString );
 		
-		} // ToSingular())
+		} // ToSingular()
 	
 	
      /**
@@ -93,7 +93,7 @@
       * @argument string The string of PHP code to format
       * @returns string The formatted PHP code
       */
-		public function FormatPHPCode( $sCode ) 
+		public static function FormatPHPCode( $sCode ) 
 		{
 		   $sCode = highlight_string( trim( $sCode ), true );
 			$aCode = explode( "<br />", $sCode );
@@ -111,6 +111,21 @@
 			return( $sCode );
 		
 		} // FormatPHPCode()
+		
+		
+     /**
+      * Returns a substring of the supplied string, starting after the last occurrence	of the
+      * supplied delimiter.	      
+      *
+      * @argument string The string we're generating a substring from
+      * @argument string The delimiter that we're searching for
+      * @returns string The generated substring
+      */
+		public static function AfterLastOccurrenceOf( $sString, $sDelim )
+		{
+			return( substr( $sString, strrpos( $sString, $sDelim ) + 1 ) );
+		
+		} // AfterLastOccurrenceOf()
 	
 	}; // SringFunctions()
 
