@@ -21,7 +21,7 @@
 	 * @author		Kristopher Wilson
 	 * @link			http://www.openavanti.com/docs/database
 	 */
-	abstract class Database
+	abstract class Database implements Throwable
 	{
 		protected static $aProfiles = array();
 		protected static $aDefaultProfile = array();
@@ -62,7 +62,7 @@
 		{
 			if( !isset( self::$aProfiles[ $sProfile ] ) )
 			{
-				throw new Exception( "Unknown database profile: {$sProfile}" );
+				throw new DatabaseConnectionException( "Unknown database profile: {$sProfile}" );
 			}
 		
 			self::$aDefaultProfile = self::$aProfiles[ $sProfile ];

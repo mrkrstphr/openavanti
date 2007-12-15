@@ -20,7 +20,7 @@
 	 * @author		Kristopher Wilson
 	 * @link			http://www.openavanti.com/docs/crud
 	 */
-	class CRUD implements Iterator
+	class CRUD implements Iterator, Throwable
 	//
 	// Description:
 	//		
@@ -74,14 +74,10 @@
 
 			// If data is supplied, load it, depending on data type:
 			
-         if( is_object( $oData ) )
-         {
-         	$this->LoadObject( $oData );
-         }
-         else if( is_array( $oData ) )
-         {
-            $this->LoadArray( $oData );
-         }
+			if( !is_null( $oData ) )
+			{
+				$this->Load( $oData );
+			}
 
 		} // __construct()
 		
@@ -104,38 +100,6 @@
 		} // PrepareColumns()
 		
 		
-      ///////////////////////////////////////////////////////////////////////////////////////////
-      protected function LoadArray( $aArray )
-      {
-      	$aColumns = $this->oDatabase->GetTableColumns( $this->sTableName );
-
-			$aRelationships = $this->oDatabase->GetTableForeignKeys( $this->sTableName );
-
-         foreach( $aArray as $sKey => $xValue )
-         {
-         	if( is_object( $xValue ) )
-            {
-                
-            }
-            else if( is_array( $xValue ) )
-            {
-					if( isset( $aRelationships[ $sKey ] ) )
-					{
-						$this->aData[ $sKey ] = new CRUD( $aRelationships[ $sKey ][ "table" ], $xValue );
-					}					
-            }
-            else
-            {
-               // problem is that the key of aFields is numeric
-               if( isset( $aColumns[ $sKey ] ) )
-					{
-						$this->aData[ $sKey ] = $xValue;
-					}
-         	}
-			}
-
-		} // LoadArray()
-
 		
 		/**
 		 * This method attempts to load a record from the database based on the passed ID, or a 
@@ -158,7 +122,7 @@
 				if( count( $aPrimaryKey ) > 1 && ( !is_array( $xId ) || 
 					count( $xId ) != count( $aPrimaryKey ) ) )
 				{
-					throw new Exception( "Invalid Key Provided" );
+					throw new QueryFailedException( "Invalid record key provided" );
 				}
 			}
 			
@@ -382,7 +346,7 @@
 			
 			foreach( $aForeignKeys as $aForeignKey )
 			{
-				if( $aForeignKey[ "name" ] == $sName ) // || $aForeignKey[ "table" ] == $sTable )
+				if( $aForeignKey[ "name" ] == $sName )
 				{
 					return( $aForeignKey );
 				}
@@ -393,27 +357,55 @@
 		} // FindRelationship()
 		
 		
-		////////////////////////////////////////////////////////////////////////////////////////////
-		protected function Load( $oRecord = null )
-		//
-		// Description:
-		//	
+		/**
+		 * Loads the specified data (either an array or object) into the CRUD object. This 
+		 * array/object to load can contained referenced data (through foreign keys) as either
+		 * an array or object.
+		 * 		 		 
+		 * @argument mixed The data to load into the CRUD object
+		 * @returns void
+		 */
+		protected function Load( $oRecord )
 		{
-		
-			if( !is_null( $oRecord ) && is_object( $oRecord ) )
-			{
-				// Loop each field
-				foreach( $oRecord as $sKey => $sValue )
-				{
-					// otherwise this data is part of the primary table, 
-					// create a member variable:
-					$this->aData[ $sKey ] = $sValue;
-				}
-				
-				$this->bEmptySet = false;
+      	$aColumns = $this->oDatabase->GetTableColumns( $this->sTableName );
+			$aRelationships = $this->oDatabase->GetTableForeignKeys( $this->sTableName );
+
+         foreach( $oRecord as $sKey => $xValue )
+         {
+         	if( is_array( $xValue ) || is_object( $xValue ) )
+            {
+					if( isset( $aRelationships[ $sKey ] ) )
+					{
+						if( $aRelationships[ $sKey ][ "type" ] == "1-1" || 
+							$aRelationships[ $sKey ][ "type" ] == "m-1" )
+						{
+							$this->aData[ $sKey ] = new CRUD( $aRelationships[ $sKey ][ "table" ], $xValue );
+						}
+						else if( $aRelationships[ $sKey ][ "type" ] == "1-m" )
+						{
+							if( !isset( $this->aData[ $sKey ] ) )
+							{
+								$this->aData[ $sKey ] = array();
+							}
+							
+							foreach( $xValue as $oRelatedData )
+							{
+								$this->aData[ $sKey ][] = new CRUD( $aRelationships[ $sKey ][ "table" ], $oRelatedData );
+							}
+						}
+					}					
+            }
+            else if( isset( $aColumns[ $sKey ] ) )
+            {
+					$this->aData[ $sKey ] = $xValue;
+         	}
 			}
-	
+			
+			$this->bEmptySet = false; // is this still used?
+
 		} // Load()
+		
+		
 		
 		
 		/**
@@ -1092,7 +1084,7 @@
 	
 		/**
        * Add the database table columns for the specified table, from the specified object, to
-       * the specfied SimpleXMLElement.       
+       * the specfied SimpleXMLElement. Used internally by AsXML() 
        * 	        
        * @argument SimpleXMLElement 
        * @argument CRUD
@@ -1113,7 +1105,7 @@
 
 		/**
        * Add the database table references for the specified table, from the specified object, to
-       * the specfied SimpleXMLElement.       
+       * the specfied SimpleXMLElement. Used internally by AsXML()   
        * 	        
        * @argument SimpleXMLElement 
        * @argument CRUD

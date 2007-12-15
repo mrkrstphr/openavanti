@@ -21,7 +21,7 @@
 	 * @author		Kristopher Wilson
 	 * @link			http://www.openavanti.com/docs/imagefunctions
 	 */
-	class ImageFunctions
+	class ImageFunctions implements Throwable
 	{
 	
 		/**

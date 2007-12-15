@@ -25,7 +25,7 @@
 	 * @author		Kristopher Wilson
 	 * @link			http://www.openavanti.com/docs/postgresdatabase
 	 */
-	class PostgresDatabase extends Database
+	class PostgresDatabase extends Database implements Throwable
 	{
 		private $hDatabase = null;
         
@@ -62,7 +62,7 @@
 			
 			if( !$this->hDatabase )
 			{
-				throw new Exception( "Failed to connect to Postgres server" );
+				throw new DatabaseConnectionException( "Failed to connect to Postgres server" );
 			}
 		} // __construct()
 
@@ -482,7 +482,7 @@
 				
 			if( !( $oForeignKeys = $this->Query( $sSQL ) ) )
 			{
-				throw new Exception( "Failed on Query: " . $sSQL . "\n" . $this->GetLastError() );
+				throw new QueryFailedException( "Failed on Query: " . $sSQL . "\n" . $this->GetLastError() );
 			}
             
 			$iCount = 0;
