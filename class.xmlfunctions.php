@@ -45,7 +45,7 @@
 		{
 			if( !class_exists( "DOMDocument" ) )
 			{
-				throw new Exception( "Class DomDocument does not exist" );
+				throw new ExtensioNotException( "Class DomDocument does not exist" );
 			}
 		
 			$oDOM = new DOMDocument( "1.0" );
