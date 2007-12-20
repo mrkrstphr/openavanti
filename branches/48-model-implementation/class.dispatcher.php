@@ -24,12 +24,20 @@
 	class Dispatcher
 	{
 		private static $aRoutes = array();
+		private static $bRequireViewFiles = true;
 		
 		private function __construct()
 		{
 			// this class cannot be instantiated
 			
 		} // __construct()
+	
+		
+		public static function RequireViewFiles( $bRequireViewFiles )
+		{
+			self::$bRequireViewFiles = $bRequireViewFiles;
+			
+		} // RequireViewFiles()
 	
 
 		/**
@@ -181,28 +189,32 @@
 			if( isset( $_SESSION[ "view" ] ) )
 			{
 				$aData = &$oController->aData;
+				$_SESSION[ "data" ] = $aData;
 				
-				if( !self::IsAjaxRequest() )
+				if( self::$bRequireViewFiles )
 				{
-					require( "header.php" );
-				}
-			
-				if( isset( $_SESSION[ "view" ] ) && 
-					( $sView = FileFunctions::FileExistsInPath( $_SESSION[ "view" ] ) ) !== false )
-				{
-					require( $sView );
-				}
-				else
-				{
-					require( "404.php" );
-				}
+					if( !self::IsAjaxRequest() )
+					{
+						require( "header.php" );
+					}
 				
-				if( !self::IsAjaxRequest() )
-				{
-					require( "footer.php" );
+					if( isset( $_SESSION[ "view" ] ) && 
+						( $sView = FileFunctions::FileExistsInPath( $_SESSION[ "view" ] ) ) !== false )
+					{
+						require( $sView );
+					}
+					else
+					{
+						require( "404.php" );
+					}
+					
+					if( !self::IsAjaxRequest() )
+					{
+						require( "footer.php" );
+					}
+					
+					unset( $_SESSION[ "view" ], $_SESSION[ "data" ] );
 				}
-				
-				unset( $_SESSION[ "view" ] );
 			}
 		
 		} // LoadView()
