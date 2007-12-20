@@ -367,6 +367,11 @@
 		 */
 		protected function Load( $oRecord )
 		{
+			if( !is_object( $oRecord ) && !is_array( $oRecord ) )
+			{
+				return;
+			}
+			
       	$aColumns = $this->oDatabase->GetTableColumns( $this->sTableName );
 			$aRelationships = $this->oDatabase->GetTableForeignKeys( $this->sTableName );
 
