@@ -9,7 +9,7 @@
  * @copyright		Copyright (c) 2008, Kristopher Wilson
  * @license			http://www.openavanti.com/license
  * @link				http://www.openavanti.com
- * @version			0.05a
+ * @version			0.6.4-alpha
  *
  */
  
@@ -367,6 +367,11 @@
 		 */
 		protected function Load( $oRecord )
 		{
+			if( !is_object( $oRecord ) && !is_array( $oRecord ) )
+			{
+				return;
+			}
+			
       	$aColumns = $this->oDatabase->GetTableColumns( $this->sTableName );
 			$aRelationships = $this->oDatabase->GetTableForeignKeys( $this->sTableName );
 
@@ -694,7 +699,7 @@
 			
 			if( !$this->oDatabase->Query( $sSQL ) )
 			{
-				throw new Exception( "Failed on Query: {$sSQL} \n" . $this->oDatabase->GetLastError() );
+				throw new Exception( "Failed on Query: " . $this->oDatabase->GetLastError() );
 			}
 			
 			// Note: an assumption is made that if the primary key is not singular, then there all
@@ -801,7 +806,7 @@
 		
 		
 		/////////////////////////////////////////////////////////////////////////////////////////////
-		private function RecordExists()
+		protected function RecordExists()
 		{
 			$aPrimaryKeys = $this->oDatabase->GetTablePrimaryKey( $this->sTableName );
 		
@@ -841,7 +846,7 @@
 		 */
 		public function Destroy()
 		{
-			throw new Exception( "Destroy() is not yet implemented." );
+			return( true );
 		
 		} // Destroy()
 	
@@ -855,7 +860,7 @@
 		 */
 		public function DestroyAll()
 		{
-			throw new Exception( "DestroyAll() is not yet implemented." );
+			return( true );
 			
 			// destroy dependent data:
 			
@@ -863,9 +868,7 @@
 			// destroy this:
 			
 			$this->destory();
-		
-			
-		
+
 		} // DestroyAll()
 		
 		//////////////////////////////////////////////////////////////////////////////////////////////

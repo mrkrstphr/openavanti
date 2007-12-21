@@ -89,13 +89,13 @@
 		////////////////////////////////////////////////////////////////////////////////////////////
  		public function Next()
 		{
-         if( $this->rResult )
+			if( !is_null( $this->rResult ) )
          {
-             $this->oRecord = pg_fetch_object( $this->rResult );
-         }
+				$this->oRecord = pg_fetch_object( $this->rResult );
+			}
          else
          {
-             $this->oRecord = null;
+				$this->oRecord = null;
          }
 
          return( $this->oRecord );
