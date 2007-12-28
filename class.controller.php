@@ -60,6 +60,13 @@
 			return( Dispatcher::IsAjaxRequest() );
 		
 		} // IsAjaxRequest()
+		
+		
+		public function RedirectTo( $sURL, $bPermanentRedirect = true )
+		{
+			header( "Location: {$sURL}", true, $bPermanentRedirect ? 301 : null );
+		
+		} // RedirectTo()
 	
 	} // Controller()
 
