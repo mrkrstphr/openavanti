@@ -56,7 +56,7 @@
 		 * @returns bool True if the object can be saved, false if not
 		 */	
 		public function Save()
-		{			
+		{		
 			$bUpdate = parent::RecordExists();
 		
 			if( $bUpdate )
@@ -79,7 +79,7 @@
 					return( false );
 				}
 			}	
-				
+			
 			if( !parent::Save() )
 			{
 				return( false );
@@ -106,6 +106,62 @@
 			return( true );			
 		
 		} // Save()
+		
+		/**		 		 		 
+		 *
+		 * @returns bool True if the object can be saved, false if not
+		 */	
+		public function SaveAll()
+		{		
+			$bUpdate = parent::RecordExists();
+		
+			if( $bUpdate )
+			{
+				if( !$this->OnBeforeUpdate() || 
+					 !$this->OnBeforeSave() || 
+					 !$this->ValidateUpdate() ||
+					 !$this->Validate() )
+				{
+					return( false );
+				}
+			}
+			else
+			{
+				if( !$this->OnBeforeInsert() || 
+					 !$this->OnBeforeSave() || 
+					 !$this->ValidateInsert() ||
+					 !$this->Validate() )
+				{
+					return( false );
+				}
+			}	
+			
+			if( !parent::SaveAll() )
+			{
+				return( false );
+			}
+		
+			if( $bUpdate )
+			{
+				if( !$this->OnAfterUpdate() || 
+					 !$this->OnAfterSave() )
+				{
+					return( false );
+				}
+			}
+			else
+			{
+				if( !$this->OnAfterInsert() || 
+					 !$this->OnAfterSave() )
+				{
+					return( false );
+				}
+			}
+			
+			// Everything returned true, so should we:
+			return( true );			
+		
+		} // SaveAll()
 		
 		
 		/**
