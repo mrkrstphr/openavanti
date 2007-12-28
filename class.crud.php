@@ -323,20 +323,40 @@
 		
 		/////////////////////////////////////////////////////////
 		public function GetRecord()
-		{
-			// ********************************************************************
-			// ********************************************************************
-			// ********************************************************************
-			// *****************             FIX THIS              ****************
-			// ********************************************************************
-			// ********************************************************************
-			// ********************************************************************
+		{			
+			$oRecord = new StdClass();
 			
-			return( $this->oDataSet->GetRecord() ); // not good...
-			// need to present data in aData, as it may have changed, but we need to return
-			// aData (an array) as an object... hmm...
+			foreach( $this->aData as $sKey => $xValue )
+			{
+				if( is_object( $xValue ) )
+				{
+					$oRecord->$sKey = $xValue->GetRecord();
+				}
+				else
+				{
+					$oRecord->$sKey = $xValue;
+				}
+			}
+			
+			return( $oRecord );
 		
 		} // GetRecord()
+		
+		
+		public function GetAll()
+		{
+			$aRecords = array();
+			
+			$this->Rewind();
+			
+			foreach( $this->oDataSet as $oData )
+			{
+				$aRecords[] = $oData;
+			}
+		
+			return( $aRecords );
+		
+		} // GetAll()
 		
 		
 		////////////////////////////////////////////////////////////////////////////////////////////
@@ -564,7 +584,7 @@
 		//		Based on presence of primary key data, either creates a new record, or updates the
 		//		existing record
 		//
-		{
+		{			
 			// grab a copy of the primary key:
 			$aPrimaryKeys = $this->oDatabase->GetTablePrimaryKey( $this->sTableName );
 			
@@ -609,10 +629,13 @@
 		public function SaveAll()
 		{		
 			$aForeignKeys = $this->oDatabase->GetTableForeignKeys( $this->sTableName );
-		
+					
+					
+			$this->Save();
+			
+			
 			foreach( $aForeignKeys as $aRelationship )
 			{
-				//echo '<div class="printr"><pre>' . print_r( $aRelationship , true ) . '</pre></div>';
 				$sRelationshipName = $aRelationship[ "name" ];
 				
 				if( isset( $this->aData[ $sRelationshipName ] ) )
@@ -620,16 +643,25 @@
 					// If the relationship type is 1 to Many, than iterate each
 					// related data set and invoke SaveAll()
 					
-					if( $aRelationship[ "type" ] == "1-m" )
+					if( $aRelationship[ "type" ] == "1-m" || $aRelationship[ "type" ] == "1-1" )
 					{
 						foreach( $this->aData[ $sRelationshipName ] as $oRelatedData )
 						{
+							// do we need to handle anything but this case?
+							if( count( $aRelationship[ "foreign" ] ) == 1 && count( $aRelationship[ "local" ] ) == 1 )
+							{
+								$sForeignKey = current( $aRelationship[ "foreign" ] );
+								$sLocalKey = current( $aRelationship[ "local" ] );
+								
+								$oRelatedData->$sForeignKey = $this->$sLocalKey;
+							}
+							
 							$oRelatedData->SaveAll();
 						}
 					}
 					else
 					{
-						$this->aData[ $sRelationshipName ]->SaveAll();
+					/*	$this->aData[ $sRelationshipName ]->SaveAll();
 					
 						// If the relationship is many to one, then we have to set the foreign key
 						// value for this record
@@ -640,11 +672,10 @@
 							$this->aData[ $aRelationship[ "local" ][ 0 ] ] = 
 								$this->aData[ $sRelationshipName ]->{$aRelationship[ "foreign" ][ 0 ]};
 						}
+					*/
 					}
 				}
 			}
-			
-			$this->Save();
 		
 		} // SaveAll()
 		
@@ -699,7 +730,7 @@
 			
 			if( !$this->oDatabase->Query( $sSQL ) )
 			{
-				throw new Exception( "Failed on Query: " . $this->oDatabase->GetLastError() );
+				throw new Exception( "Failed on Query: {$sSQL} - " . $this->oDatabase->GetLastError() );
 			}
 			
 			// Note: an assumption is made that if the primary key is not singular, then there all
