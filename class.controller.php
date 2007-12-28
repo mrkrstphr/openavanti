@@ -24,6 +24,9 @@
 	class Controller
 	{		
 		public $aData = array();
+		public $sView = "";
+		
+		protected $b404Error = false;
 		
 		/**
 		 * Constructor. Currently does not do anything.		 		 		 		 		 		 		 
@@ -45,10 +48,17 @@
 		 */
 		public function index()
 		{
-			$_SESSION[ "view" ] = "404.php";
+			$this->b404Error = true;
 				
 		} // index()
 		
+		
+		public function Is404Error()
+		{
+			return( $this->b404Error );
+			
+		} // Is404Error()
+				
 		
 		/**
 		 * Determines whether or not the current HTTP request came via AJAX.	 		 		 		 		 		 
@@ -67,6 +77,13 @@
 			header( "Location: {$sURL}", true, $bPermanentRedirect ? 301 : null );
 		
 		} // RedirectTo()
+		
+		
+		public function SetView( $sView )
+		{
+			$this->sView = $sView;
+		
+		} // SetView()
 	
 	} // Controller()
 
