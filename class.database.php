@@ -178,6 +178,9 @@
 
 		abstract public static function FormatData( $sType, $sValue );
 
+		abstract public function GetTables();
+		abstract public function GetDatabases();
+		
 		abstract public function GetSchema( $sTableName );
 		abstract public function GetTableColumns( $sTableName );
 		abstract public function GetTablePrimaryKey( $sTableName );
