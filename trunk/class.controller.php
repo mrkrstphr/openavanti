@@ -9,7 +9,7 @@
  * @copyright		Copyright (c) 2008, Kristopher Wilson
  * @license			http://www.openavanti.com/license
  * @link				http://www.openavanti.com
- * @version			0.05a
+ * @version			0.6.4-alpha
  *
  */
  
@@ -26,7 +26,7 @@
 		public $aData = array();
 		public $sView = "";
 		
-		protected $b404Error = false;
+		public $b404Error = false;
 		
 		/**
 		 * Constructor. Currently does not do anything.		 		 		 		 		 		 		 
@@ -58,7 +58,7 @@
 			return( $this->b404Error );
 			
 		} // Is404Error()
-				
+						
 		
 		/**
 		 * Determines whether or not the current HTTP request came via AJAX.	 		 		 		 		 		 

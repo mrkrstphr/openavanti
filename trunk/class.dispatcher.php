@@ -9,7 +9,7 @@
  * @copyright		Copyright (c) 2008, Kristopher Wilson
  * @license			http://www.openavanti.com/license
  * @link				http://www.openavanti.com
- * @version			0.05a
+ * @version			0.6.4-alpha
  *
  */
  
@@ -26,19 +26,85 @@
 		private static $aRoutes = array();
 		private static $bRequireViewFiles = true;
 		
+		private static $s404ViewFile = "404.php";
+		
+		private static $x404Callback = null;
+		
+		private static $sHeaderFile = "header.php";
+		private static $sFooterFile = "footer.php";
+		
+		
+		
+		/**
+		 *   		 		 		 		 		 
+		 * 
+		 */
 		private function __construct()
 		{
 			// this class cannot be instantiated
 			
 		} // __construct()
-	
 		
+		
+		/**
+		 *   		 		 		 		 		 
+		 * 
+		 * @returns void
+		 */
 		public static function RequireViewFiles( $bRequireViewFiles )
 		{
 			self::$bRequireViewFiles = $bRequireViewFiles;
 			
 		} // RequireViewFiles()
-	
+		
+		
+		/**
+		 *   		 		 		 		 		 
+		 * 
+		 * @returns void
+		 */
+		public static function Set404View( $sView )
+		{
+			self::$s404ViewFile = $sView;
+			
+		} // Set404View()
+		
+		
+		/**
+		 *   		 		 		 		 		 
+		 * 
+		 * @returns void
+		 */
+		public static function SetHeaderView( $sView = "" )
+		{
+			self::$sHeaderFile = $sView;
+			
+		} // SetHeaderView()
+		
+		
+		/**
+		 *   		 		 		 		 		 
+		 * 
+		 * @returns void
+		 */
+		public static function SetFooterView( $sView = "" )
+		{
+			self::$sFooterFile = $sView;
+			
+		} // SetFooterView()
+		
+		
+		/**
+		 *   		 		 		 		 		 
+		 * 
+		 * @returns void
+		 */
+		public static function Set404Handler( $xCallback )
+		{
+			self::$x404Callback = $xCallback;
+			
+		} // Set404Handler()
+
 
 		/**
 		 * Adds a custom route based on matching the URI to a regular express. On a sucessful match,
@@ -64,7 +130,7 @@
 	
 		/**
 		 * Routes the specified request to an associated controller and action. Loads
-		 * any specified view file through _SESSION[ "view" ]		 
+		 * any specified view file stored in the controller		 
 		 * 
 		 * @argument string The current request URI
 		 * @returns void
@@ -75,58 +141,74 @@
 			
 			$sController = "";
 			$sAction = "";
-			$iID = "";
+			$aArguments = array();
 			
-			$oController = null;
+			// Load an empty controller. This may be replaced if we found a controller through a route.
+			
+			$oController = new Controller();
+			
+			// Loop each stored route and attempt to find a match to the URI:
 			
 			foreach( self::$aRoutes as $aRoute )
 			{
+				// If the request matches this route:
 				if( preg_match( $aRoute[ "match" ], $sRequest ) )
 				{
 					$sController = $aRoute[ "controller" ] . "Controller";
 					$sAction = $aRoute[ "action" ];
 					
+					// If the controller specified by the route exists:
 					if( !empty( $sController ) && class_exists( $sController, true ) )
 					{
 						$oController = new $sController();
-										
-						self::InvokeAction( $oController, $sAction, $iID );
+						
+						// Invoke the action of the controller:
+						self::InvokeAction( $oController, $sAction, $aArguments );
 					}
 					else
 					{
-						$_SESSION[ "view" ] = "404.php";
+						// The controller does not exist, we must invoke a 404:
+						$oController->b404Error = true;
 					}
 					
 					$bRouteFound = true;
 				}
 			}
 			
+			// If we did not found a match to the supplied routes, try to find a match for the standard
+			// route, ie: controller/action[/args]:
+			
 			if( !$bRouteFound )
 			{
+				// Explode the request on /
 				$aRequest = explode( "/", $sRequest );
+				
+				// Store this as the last request:
 				$_SESSION[ "last-request" ] = $aRequest;
-							
-				$sController = isset( $aRequest[ 0 ] ) ? 
-					$aRequest[ 0 ] . "Controller" : "";
-					
-				$sAction = isset( $aRequest[ 1 ] ) ? 
-					$aRequest[ 1 ] : "";
-					
-				$iID = isset( $aRequest[ 2 ] ) ? 
-					intval( $aRequest[ 2 ] ) : null;
+				
+				$sController = count( $aRequest ) > 0 ? array_shift( $aRequest ) . "Controller" : "";
+				
+				$sAction = count( $aRequest ) > 0 ? array_shift( $aRequest ) : "";
+				$aArguments = !empty( $aRequest ) ? $aRequest : array();
 			}
 			
-			
+			// If we've found a controller and the class exists:
 			if( !empty( $sController ) && class_exists( $sController, true ) )
 			{
+				// Replace our empty controller with the routed one:
 				$oController = new $sController();
-								
-				self::InvokeAction( $oController, $sAction, $iID );
+				
+				// Attempt to invoke an action on this controller: 				
+				self::InvokeAction( $oController, $sAction, $aArguments );
 			}
 			else
 			{
-				$_SESSION[ "view" ] = "404.php";
+				// If we can't find the controller, we must throw a 404 error:
+				$oController->b404Error = true;
 			}		
+			
+			// Continue on with the view loader method which will put the appropriate presentation
+			// on the screen:
 			
 			self::LoadView( $oController );
 		
@@ -151,73 +233,129 @@
 		 * 
 		 * @returns void
 		 */
-		private static function InvokeAction( &$oController, $sAction, $iID )
+		private static function InvokeAction( &$oController, $sAction, $aArguments )
 		{
 			// is_callable() is used over method_exists() in order to properly utilize __call()
 			
 			if( !empty( $sAction ) && is_callable( array( $oController, $sAction ) ) )
 			{
-				$aArguments = $_SESSION[ "last-request" ]; // prepare array of arguments
-				
-				array_shift( $aArguments ); // shift off the controller
-				array_shift( $aArguments ); // shift off the action
-				
-				// call $oController->$sAction() with arguments $aArguments:
-				
+				// Call $oController->$sAction() with arguments $aArguments:
 				call_user_func_array( array( $oController, $sAction ), $aArguments );
 			}
 			else if( empty( $sAction ) )
 			{
+				// Default to the index file:
 				$oController->index();
 			}
 			else
 			{
-				$_SESSION[ "view" ] = "404.php";
+				// Action is not callable, throw a 404 error:
+				$oController->b404Error = true;
 			}
 		
 		} // InvokeAction()
 		
 		
 		/**
-		 * Called from Connect(), responsible for loading any view file specified in
-		 * _SESSION[ "view" ]		 	  		 		 		 		 		 
+		 * Called from Connect(), responsible for loading any view file
 		 * 
 		 * @returns void
 		 */
 		private static function LoadView( &$oController )
-		{
-			if( isset( $_SESSION[ "view" ] ) )
+		{				
+			if( $oController->Is404Error() )
 			{
-				$aData = &$oController->aData;
-				$_SESSION[ "data" ] = $aData;
-				
+				self::Invoke404Error();
+			}
+			else if( !empty( $oController->sView ) )
+			{
 				if( self::$bRequireViewFiles )
 				{
-					if( !self::IsAjaxRequest() )
+					$aData = &$oController->aData;
+			
+					if( !self::IsAjaxRequest() && isset( self::$sHeaderFile ) )
 					{
-						require( "header.php" );
+						require( self::$sHeaderFile );
 					}
 				
-					if( isset( $_SESSION[ "view" ] ) && 
-						( $sView = FileFunctions::FileExistsInPath( $_SESSION[ "view" ] ) ) !== false )
+					if( ( $sView = FileFunctions::FileExistsInPath( $oController->sView ) ) !== false )
 					{
 						require( $sView );
 					}
 					else
 					{
-						require( "404.php" );
+						self::Invoke404Error();
 					}
 					
-					if( !self::IsAjaxRequest() )
+					
+					if( !self::IsAjaxRequest() && isset( self::$sFooterFile ) )
 					{
-						require( "footer.php" );
+						require( self::$sFooterFile );
 					}
-					
-					unset( $_SESSION[ "view" ], $_SESSION[ "data" ] );
+				}
+				else
+				{
+					$_SESSION[ "data" ] = &$oController->aData;
+					$_SESSION[ "view" ] = $oController->sView;
 				}
 			}
 		
 		} // LoadView()
+		
+		
+		/**
+		 *   		 		 		 		 		 
+		 * 
+		 * @returns void
+		 */
+		public static function CleanUp()
+		{
+			unset( $_SESSION[ "view" ], $_SESSION[ "data" ] );
+			
+		} // CleanUp()
+		
+		
+		/**
+		 *   		 		 		 		 		 
+		 * 
+		 * @returns void
+		 */
+		private static function Invoke404Error()
+		{
+			if( isset( self::$x404Callback ) ) 
+			{
+				if( is_callable( self::$x404Callback ) )
+				{					
+					call_user_func_array( 
+						self::$x404Callback, 
+						array( 
+							implode( "/", $_SESSION[ "last-request" ] ), 
+							isset( $_SERVER[ "HTTP_REFERER" ] ) ? $_SERVER[ "HTTP_REFERER" ] : "" 
+						) 
+					);
+				}
+			}
+			else if( isset( self::$s404ViewFile ) )
+			{
+				header( "HTTP/1.0 404 Not Found", true, 404 );
+					
+				if( ( $sView = FileFunctions::FileExistsInPath( self::$s404ViewFile ) ) !== false )
+				{					
+					if( !self::IsAjaxRequest() && isset( self::$sHeaderFile ) )
+					{
+						require( self::$sHeaderFile );
+					}
+					
+					require( $sView );
+					
+					if( !self::IsAjaxRequest() && isset( self::$sFooterFile ) )
+					{
+						require( self::$sFooterFile );
+					}
+				}
+			}
+		
+		} // Invoke404Error()
 		
 	
 	}; // Dispatcher()
