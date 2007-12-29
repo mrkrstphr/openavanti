@@ -9,7 +9,7 @@
  * @copyright		Copyright (c) 2008, Kristopher Wilson
  * @license			http://www.openavanti.com/license
  * @link				http://www.openavanti.com
- * @version			0.6.1-alpha
+ * @version			0.6.4-alpha
  *
  */
  
