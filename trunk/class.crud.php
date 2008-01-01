@@ -517,7 +517,7 @@
 			else
 			{
 				$sLocalColumn = current( $aRelationship[ "local" ] );
-								
+				
 				if( isset( $this->aData[ $sLocalColumn ] ) )
 				{
 					$this->aData[ $sName ] = new CRUD( $aRelationship[ "table" ] );		
@@ -525,7 +525,11 @@
 				}
 				else
 				{
-					$this->aData[ $sName ] = null;
+					// Modified 2007-12-29 to prevent error:
+					// Notice: Indirect modification of overloaded property has no effect
+					// If we are dynamically creating a record, we need to return an empty CRUD
+					// object for this relationship to load into
+					$this->aData[ $sName ] = new CRUD( $aRelationship[ "table" ] );
 				}
 			}
 			
@@ -536,8 +540,7 @@
 		
 		//////////////////////////////////////////////////////////////////////////////////////////////
 		public function __set( $sName, $sValue )
-		{
-		
+		{			
 			$aColumns = $this->oDatabase->GetTableColumns( $this->sTableName );
 		
 			if( isset( $aColumns[ $sName ] ) )
@@ -861,7 +864,7 @@
 			
 			if( !( $oResultSet = $this->oDatabase->Query( $sSQL ) ) )
 			{
-				throw new Exception( "Failed on Query: {$sSQL}\n" . $this->oDatabase->GetLastError() );
+				throw new QueryFailedException( "Failed on Query: " . $this->oDatabase->GetLastError() );
 			}
 			
 			return( $oResultSet->Count() != 0 );
@@ -877,30 +880,30 @@
 		 */
 		public function Destroy()
 		{
-			return( true );
+			$aPrimaryKeys = $this->oDatabase->GetTablePrimaryKey( $this->sTableName );
+			
+			$sSQL = "DELETE FROM
+				{$this->sTableName}
+			WHERE ";
+			
+			$sWhere = "";
+			
+			foreach( $aPrimaryKeys as $sKey )
+			{
+				$sWhere .= empty( $sWhere ) ? "" : " AND ";
+				$sWhere .= "{$sKey} = " . $this->oDatabase->FormatData( 
+					$this->oDatabase->GetColumnType( $this->sTableName, $sKey ), $this->aData[ $sKey ] );
+			}
+			
+			$sSQL .= $sWhere;
+			
+			if( !$this->oDatabase->Query( $sSQL ) )
+			{
+				throw new QueryFailedException( "Failed on Query: " . $this->oDatabase->GetLastError() );
+			}
 		
 		} // Destroy()
-	
-	
-		/**
-		 *	 Destroys (deletes) the current data, assuming the primary key for this record is set,
-		 *	 and all dependent data, including 1-1 and 1-M relationships. This can be accomplished
-		 *	 through the Destroy() method if cascading deletes are set on the table.		 		 
-		 * 	
-		 * @returns void
-		 */
-		public function DestroyAll()
-		{
-			return( true );
-			
-			// destroy dependent data:
-			
-			
-			// destroy this:
-			
-			$this->destory();
-
-		} // DestroyAll()
+		
 		
 		//////////////////////////////////////////////////////////////////////////////////////////////
 		protected function buildWhereClause( $keys, $dataSet )
