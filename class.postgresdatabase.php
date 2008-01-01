@@ -262,7 +262,7 @@
 		///////////////////////////////////////////////////////////////////////////////////////////
 		public static function FormatData( $sType, $sValue )
 		{
-			$aQuoted_Types = array( "/text/", "/varchar/", "/date/", "/timestamp/", "/bool/" );
+			$aQuoted_Types = array( "/text/", "/character varying/", "/date/", "/timestamp/", "/bool/" );
 				
 		   if( strlen( $sValue ) == 0 )
 		   {
