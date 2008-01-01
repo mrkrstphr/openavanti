@@ -580,7 +580,8 @@
          		"name" => $sName,
          		"local" => $aLocalFields,
          		"foreign" => $aForeignFields,
-         		"type" => "m-1"
+         		"type" => "m-1",
+         		"dependency" => true
          	);
       	
       		$iCount++;
@@ -672,7 +673,8 @@
 	         	"name" => $oForeignKey->typname,
 					"local" => $aLocalFields,
 	         	"foreign" => $aForeignFields,
-	         	"type" => $sType
+	         	"type" => $sType,
+         		"dependency" => false
 	         );
 	         	
          	$iCount++;
