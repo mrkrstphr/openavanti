@@ -84,6 +84,13 @@
 			$this->sView = $sView;
 		
 		} // SetView()
+		
+		
+		public function SetData( $sName, $sValue )
+		{
+			$this->aData[ $sName ] = $sValue;
+			
+		} // SetData()
 	
 	} // Controller()
 
