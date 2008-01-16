@@ -58,7 +58,13 @@
 			return( $this->b404Error );
 			
 		} // Is404Error()
-						
+		
+		
+		public function Set404Error( $bIs404Error = true )
+		{
+			$this->b404Error = $bIs404Error;
+			
+		} // Set404Error()
 		
 		/**
 		 * Determines whether or not the current HTTP request came via AJAX.	 		 		 		 		 		 
