@@ -151,6 +151,7 @@
 			
 			foreach( self::$aRoutes as $aRoute )
 			{
+				/*
 				// If the request matches this route:
 				if( preg_match( $aRoute[ "match" ], $sRequest ) )
 				{
@@ -168,11 +169,12 @@
 					else
 					{
 						// The controller does not exist, we must invoke a 404:
-						$oController->b404Error = true;
+						$oController->Set404Error();
 					}
 					
 					$bRouteFound = true;
 				}
+				*/
 			}
 			
 			// If we did not found a match to the supplied routes, try to find a match for the standard
@@ -204,7 +206,7 @@
 			else
 			{
 				// If we can't find the controller, we must throw a 404 error:
-				$oController->b404Error = true;
+				$oController->Set404Error();
 			}		
 			
 			// Continue on with the view loader method which will put the appropriate presentation
@@ -250,7 +252,7 @@
 			else
 			{
 				// Action is not callable, throw a 404 error:
-				$oController->b404Error = true;
+				$oController->Set404Error();
 			}
 		
 		} // InvokeAction()
