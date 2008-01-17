@@ -116,7 +116,7 @@
 		 * @argument string The action to invoke against the controller on a succesful match
 		 * @returns void
 		 */
-		public function AddRoute( $sPreg, $sController, $sAction )
+/*		public function AddRoute( $sPreg, $sController, $sAction )
 		{
 			self::$aRoutes[] = array(
 				"match" => $sPreg,
@@ -125,7 +125,15 @@
 			);
 			
 		} // AddRoute()
-	
+*/
+
+        public function AddRout( $sPregMatch, $sPregReplacement )
+        {
+            self::$aRoutes[] = array(
+                "match" => $sPregMatch,
+                "replace" => $sPregReplace
+            );
+        }
 	
 	
 		/**
