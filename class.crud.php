@@ -32,7 +32,7 @@
 		
 		protected $bEmptySet = true; // This could possibily be removed now that we are an iterator
 		
-		protected $aData = array(); // because object member variables cannot be unset
+		protected $aData = array();
 		
 		protected $bDirty = true; // I don't know if this is used
 		
@@ -391,10 +391,12 @@
             {
 					if( isset( $aRelationships[ $sKey ] ) )
 					{
-						if( $aRelationships[ $sKey ][ "type" ] == "1-1" || 
-							$aRelationships[ $sKey ][ "type" ] == "m-1" )
-						{
-							$this->aData[ $sKey ] = new CRUD( $aRelationships[ $sKey ][ "table" ], $xValue );
+						$aRelationship = $aRelationships[ $sKey ];
+						$sTable = $aRelationships[ $sKey ][ "table" ];
+						
+						if( $aRelationship[ "type" ] == "1-1" || $aRelationship[ "type" ] == "m-1" )
+						{							
+							$this->aData[ $sKey ] = $this->InstantiateClass( $sTable, $xValue );
 						}
 						else if( $aRelationships[ $sKey ][ "type" ] == "1-m" )
 						{
@@ -404,8 +406,8 @@
 							}
 							
 							foreach( $xValue as $oRelatedData )
-							{
-								$this->aData[ $sKey ][] = new CRUD( $aRelationships[ $sKey ][ "table" ], $oRelatedData );
+							{								
+								$this->aData[ $sKey ] = $this->InstantiateClass( $sTable, $oRelatedData );
 							}
 						}
 					}					
@@ -498,13 +500,9 @@
 					$sWhere .= empty( $sWhere ) ? "" : " AND ";
 					$sWhere .= " {$sKey} = " . intval( $this->aData[ $sRelated ] );
 				}
-				
-				$this->aData[ $sName ] = new CRUD( $aRelationship[ "table" ] );
-				$this->aData[ $sName ]->Find( null, array(
-					"where" => $sWhere 
-				) );
-				
-				
+							
+				$this->aData[ $sName ] = $this->InstantiateClass( $aRelationship[ "table" ] );
+				$this->aData[ $sName ]->Find( null, array( "where" => $sWhere ) );
 			}
 			else
 			{
@@ -512,16 +510,17 @@
 				
 				if( isset( $this->aData[ $sLocalColumn ] ) )
 				{
-					$this->aData[ $sName ] = new CRUD( $aRelationship[ "table" ] );		
-					$this->aData[ $sName ]->Find( $this->aData[ $sLocalColumn ] );
+					$this->aData[ $sName ] = $this->InstantiateClass( $aRelationship[ "table" ] );
+					$this->aData[ $sName ]->Find( $this->aData[ $sLocalColumn ] );	
 				}
 				else
 				{
 					// Modified 2007-12-29 to prevent error:
 					// Notice: Indirect modification of overloaded property has no effect
-					// If we are dynamically creating a record, we need to return an empty CRUD
-					// object for this relationship to load into
-					$this->aData[ $sName ] = new CRUD( $aRelationship[ "table" ] );
+					// If we are dynamically creating a record, we need to return an empty object for 
+					// this relationship to load into
+					
+					$this->aData[ $sName ] = $this->InstantiateClass( $aRelationship[ "table" ] );
 				}
 			}
 			
@@ -1272,7 +1271,39 @@
 			
 		} // __toString()
 		
-
+		
+		/**
+       * The purpose of this method is to instantiate a class based on a table name. This is used 
+       * several times throughout the CRUD class. If we determine that a Model class exists for the 
+       * specified table name, then we instiantiate an object of that class. Otherwise, we 
+       * instantiate an object of CRUD for that table name.
+       *
+       * To determine if a Model exists, we look for a class name that matches the English singular
+       * version of the table name. If we find such a class, and if this class is a subclass of
+       * the Model class (which itself is a subclass of CRUD), we assume this is the Model class
+       * we should use and instantiate it.
+       *
+       * @returns object The generated object, either CRUD or a subclass of CRUD
+       */
+		private function InstantiateClass( $sTableName, $xData )
+		{			
+			$sModelName = StringFunctions::ToSingular( $sTableName );
+			
+			$oObject = null;
+			
+			if( class_exists( $sModelName, true ) && is_subclass_of( $sModelName, "Model" ) )
+			{
+				$oObject = new $sModelName( $xData );
+			}
+			else
+			{
+				$oObject = new CRUD( $sTableName, $xData );
+			}			 
+			
+			return( $oObject );
+			
+		} // InstantiateClass()
+		
 	}; // CRUD()
 
 ?>
