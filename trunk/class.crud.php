@@ -311,9 +311,7 @@
 			// Execute and pray:
 			if( !( $this->oDataSet = $this->oDatabase->Query( $sSQL ) ) )
 			{
-				trigger_error( "Failed on Query. Error: " . 
-					$this->oDatabase->GetLastError() . "\n Query: {$sSQL}", E_USER_ERROR );
-				exit;
+				throw new QueryFailedException( $this->oDatbase->GetLastError() );
 			}
 						
 			return( $this->oDataSet->Rewind()->count );
@@ -513,6 +511,8 @@
 				$this->aData[ $sName ]->Find( null, array(
 					"where" => $sWhere 
 				) );
+				
+				
 			}
 			else
 			{
@@ -604,7 +604,12 @@
 			{
 				$sPrimaryKey = reset( $aPrimaryKeys );
 				
-				if( empty( $this->aData[ $sPrimaryKey ] ) )
+				if( $this->oDatabase->IsPrimaryKeyReference( $this->sTableName, $sPrimaryKey ) )
+				{
+					// See Task #56
+					$bInsert = !$this->RecordExists();
+				}
+				else if( empty( $this->aData[ $sPrimaryKey ] ) )
 				{
 					$bInsert = true;
 				}
@@ -630,52 +635,55 @@
 		
 		////////////////////////////////////////////////////////////////////////////////////////////
 		public function SaveAll()
-		{		
+		{			
 			$aForeignKeys = $this->oDatabase->GetTableForeignKeys( $this->sTableName );
 					
-					
-			$this->Save();
-			
-			
+			// Save all dependencies first
+
 			foreach( $aForeignKeys as $aRelationship )
 			{
 				$sRelationshipName = $aRelationship[ "name" ];
 				
-				if( isset( $this->aData[ $sRelationshipName ] ) )
+				if( isset( $this->aData[ $sRelationshipName ] ) && $aRelationship[ "dependency" ] )
 				{
-					// If the relationship type is 1 to Many, than iterate each
-					// related data set and invoke SaveAll()
+					$this->aData[ $sRelationshipName ]->SaveAll();
 					
-					if( $aRelationship[ "type" ] == "1-m" || $aRelationship[ "type" ] == "1-1" )
+					// We only work with single keys here !!
+					$sLocal = reset( $aRelationship[ "local" ] );
+					$sForeign = reset( $aRelationship[ "foreign" ] );
+					
+					$this->aData[ $sLocal ] = $this->aData[ $sRelationshipName ]->$sForeign;
+				}
+			}
+
+			// Save the primary record
+			
+			$this->Save();
+			
+			// Save all related data last
+
+			foreach( $aForeignKeys as $aRelationship )
+			{
+				$sRelationshipName = $aRelationship[ "name" ];
+				
+				if( isset( $this->aData[ $sRelationshipName ] ) && !$aRelationship[ "dependency" ] )
+				{
+					// We only work with single keys here !!
+					$sLocal = reset( $aRelationship[ "local" ] );
+					$sForeign = reset( $aRelationship[ "foreign" ] );
+						
+					if( $aRelationship[ "type" ] == "1-m" )
 					{
-						foreach( $this->aData[ $sRelationshipName ] as $oRelatedData )
+						foreach( $this->aData[ $sRelationshipName ] as $oRelationship )
 						{
-							// do we need to handle anything but this case?
-							if( count( $aRelationship[ "foreign" ] ) == 1 && count( $aRelationship[ "local" ] ) == 1 )
-							{
-								$sForeignKey = current( $aRelationship[ "foreign" ] );
-								$sLocalKey = current( $aRelationship[ "local" ] );
-								
-								$oRelatedData->$sForeignKey = $this->$sLocalKey;
-							}
-							
-							$oRelatedData->SaveAll();
+							$oRelationship->$sForeign = $this->aData[ $sLocal ];
+							$oRelationship->SaveAll();
 						}
 					}
-					else
-					{
-					/*	$this->aData[ $sRelationshipName ]->SaveAll();
-					
-						// If the relationship is many to one, then we have to set the foreign key
-						// value for this record
-						if( $aRelationship[ "type" ] == "m-1" )
-						{
-							// do we need to handle multiple columns?
-							
-							$this->aData[ $aRelationship[ "local" ][ 0 ] ] = 
-								$this->aData[ $sRelationshipName ]->{$aRelationship[ "foreign" ][ 0 ]};
-						}
-					*/
+					else if( $aRelationship[ "type" ] == "1-1" )
+					{						
+						$this->aData[ $sRelationshipName ]->$sForeign = $this->aData[ $sLocal ];
+						$this->aData[ $sRelationshipName ]->SaveAll();
 					}
 				}
 			}
@@ -707,7 +715,8 @@
 				}
 				
 				// If the primary key is singular, do not provide a value for it:				
-				if( in_array( $aColumn[ "field" ], $aPrimaryKeys ) && count( $aPrimaryKeys ) == 1 )
+				if( in_array( $aColumn[ "field" ], $aPrimaryKeys ) && count( $aPrimaryKeys ) == 1 && 
+					!$this->oDatabase->IsPrimaryKeyReference( $this->sTableName, reset( $aPrimaryKeys ) ) )
 				{
 					continue;
 				}				
@@ -836,7 +845,7 @@
 
 			return( $sSQL );
 			
-		} // updateQuery()
+		} // UpdateQuery()
 		
 		
 		/////////////////////////////////////////////////////////////////////////////////////////////
