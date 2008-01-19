@@ -5,11 +5,11 @@
  * OpenAvanti is an open source, object oriented framework for PHP 5+
  *
  * @author			Kristopher Wilson
- * @dependencies 	FileFunctions
+ * @dependencies 	Caching
  * @copyright		Copyright (c) 2008, Kristopher Wilson
  * @license			http://www.openavanti.com/license
  * @link				http://www.openavanti.com
- * @version			0.6.1-alpha
+ * @version			0.6.4-alpha
  *
  */
  
@@ -23,83 +23,50 @@
 	 */
 	class Cache implements Throwable
 	{
-		private static $bCacheDatabaseSchemas = false;
-		private static $sDatabaseSchemaCacheDir = "";
+		private $sFileName = null;
+		private $iLastModified = null;
+		private $iCreated = null;
 		
-		private static $sCacheDirectory = "";
-		
-		public static function SetCacheDirectory( $sCacheDirectory )
+		public function __construct()
 		{
-			self::$sCacheDirectory = $sCacheDirectory;
-			
-		} // SetCacheDirectory()
+		
+		} // __construct()
 		
 		
-		public static function CacheExists( $sCacheFile )
+		public function __get( $sVar )
 		{
-			$sCacheFile = self::$sCacheDirectory . "/" . $sCacheFile;
-			
-			return( !empty( self::$sCacheDirectory ) && file_exists( $sCacheFile ) );
-			
-		} // CacheExists()
-		
-		
-		public static function CacheFile( $sCacheFile, $sContents )
-		{
-			$sCacheFile = self::$sCacheDirectory . "/" . $sCacheFile;
-			
-			file_put_contents( $sCacheFile, $sContents );
-		
-		} // CacheFile()
-		
-		public static function LoadCacheFile( $sFile )
-		{
-			$sCacheFile = self::$sCacheDirectory . "/" . $sFile;
-			
-			if( self::CacheExists( $sFile ) )
+			if( isset( $this->$sVar ) )
 			{
-				return( file_get_contents( $sCacheFile ) );
-			}
-			else
-			{
-				throw new FileNotFoundException( "File not found: {$sFile}" );
-			}
-		
-		} // LoadCacheFile()
-		
-		
-		public static function CacheDatabaseSchemas( $bCache )
-		{
-			self::$bCacheDatabaseSchemas = $bCache;
-			
-		} // CacheDatabaseSchemas()
-		
-		
-		
-		public static function DatabaseSchemaCacheDir( $sCacheDir )
-		{
-			self::$bCacheDatabaseSchemas = $sCacheDir;
-		
-		} // DatabaseSchemaCacheDir()
-		
-		
-		
-		public static function CacheSchema( $sFileName, $sSchema )
-		{
-			if( !self::$bCacheDatabaseSchemas )
-			{
-				return;
+				return( $this->$sVar );
 			}
 			
-			if( !is_dir( self::$sDatabaseSchemaCacheDir ) )
-			{
-				throw new FileNotFoundException( "Path not found: " . self::$sDatabaseSchemaCacheDir );
-			}
-			
-			file_put_contents( self::$sDatabaseSchemaCacheDir . "/" . $sFileName, $sSchema );
-			
-		} // CacheSchema()
+			throw new Exception( "Cache::{$sVar} does not exist" );
+		
+		} // __get()		
+		
+		
+		public function Exists( $sCacheFileName )
+		{
+		
+		} // Exists()
+		
+		
+		public function Open( $sCacheFileName )
+		{
+		
+		} // Open()
+		
+		
+		public function Create( $sCacheFileName, $sCacheContents )
+		{
+		
+		} // Create()		
 	
+	
+		public function Close()
+		{
+		
+		} // Close()
 	
 	}; // Cache()
 
