@@ -349,9 +349,10 @@
 		{		
 			$sCacheFile = self::$sCacheDirectory . "/" . md5( $sTableName );
 		
-		   if( self::$bCacheSchemas && file_exists( $sCacheFile ) && !isset( self::$aSchemas[ $sTableName ] ) )
+		   if( self::$bCacheSchemas && !isset( self::$aSchemas[ $sTableName ] ) && Cache::Exists( $sCacheFile ) )
 			{
-				self::$aSchemas[ $sTableName ] = unserialize( file_get_contents( $sCacheFile ) );	
+				$oCache = new Cache( $sCacheFile );
+				self::$aSchemas[ $sTableName ] = unserialize( $oCache );	
 			}
 			else
 			{
@@ -361,7 +362,8 @@
 		   	
 		   	if( self::$bCacheSchemas )
 		   	{
-		   		file_put_contents( $sCacheFile, serialize( self::$aSchemas[ $sTableName ] ) );
+		   		$oCache = new Cache();
+		   		$oCache->Save( $sCacheFile, serialize( self::$aSchemas[ $sTableName ] ), true );
 		   	}
 		   }
 		   
