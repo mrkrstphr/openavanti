@@ -55,14 +55,6 @@
 		{
 			// relies on there only being one database profile or a default profile set:
 			$this->oDatabase = Database::GetConnection();
-			
-			
-			// Enable/disable schema caching:
-			$bCache = defined( "ENABLE_SCHEMA_CACHING" ) ? 
-				ENABLE_SCHEMA_CACHING : false;
-			
-			$this->oDatabase->CacheSchemas( $bCache );
-			$this->oDatabase->SetCacheDirectory( BASE_PATH . "/cache/schemas" );
 
 			$this->sTableName = $sTableName;
 		
