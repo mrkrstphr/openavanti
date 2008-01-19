@@ -1285,7 +1285,7 @@
        *
        * @returns object The generated object, either CRUD or a subclass of CRUD
        */
-		private function InstantiateClass( $sTableName, $xData )
+		private function InstantiateClass( $sTableName, $xData = null )
 		{			
 			$sModelName = StringFunctions::ToSingular( $sTableName );
 			
