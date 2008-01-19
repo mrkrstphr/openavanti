@@ -130,14 +130,17 @@
 		 * @returns void
 		 */
 		public static function Connect( $sRequest )
-		{			
+		{
+			$oRequest = new Request();
+			$oRequest->sURI = $sRequest;
+			
 			$sController = "";
 			$sAction = "";
 			$aArguments = array();
 			
 			// Load an empty controller. This may be replaced if we found a controller through a route.
 			
-			$oController = new Controller();
+			$oRequest->oController = new Controller();
 			
 			// Loop each stored route and attempt to find a match to the URI:
 			
@@ -154,6 +157,8 @@
 				$sRequest = substr( $sRequest, 1 );
 			}
 			
+			$oRequest->sRewrittenURI = $sRequest;
+			
 			
 			// Explode the request on /
 			$aRequest = explode( "/", $sRequest );
@@ -161,31 +166,35 @@
 			// Store this as the last request:
 			$_SESSION[ "last-request" ] = $aRequest;
 			
-			$sController = count( $aRequest ) > 0 ? array_shift( $aRequest ) . "Controller" : "";
+			$oRequest->sControllerName = count( $aRequest ) > 0 ? 
+				array_shift( $aRequest ) . "Controller" : "";
 			
-			$sAction = count( $aRequest ) > 0 ? array_shift( $aRequest ) : "";
-			$aArguments = !empty( $aRequest ) ? $aRequest : array();
+			$oRequest->sAction = count( $aRequest ) > 0 ? array_shift( $aRequest ) : "";
+			$oRequest->aArguments = !empty( $aRequest ) ? $aRequest : array();
 				
 			
 			// If we've found a controller and the class exists:
-			if( !empty( $sController ) && class_exists( $sController, true ) )
+			if( !empty( $oRequest->sControllerName ) && 
+				class_exists( $oRequest->sControllerName, true ) )
 			{
-				// Replace our empty controller with the routed one:
-				$oController = new $sController();
+				// Replace our empty controller with the routed one:				
+				$oRequest->oController = new $oRequest->sControllerName();
 				
 				// Attempt to invoke an action on this controller: 				
-				self::InvokeAction( $oController, $sAction, $aArguments );
+				self::InvokeAction( $oRequest ); //->oController, $sAction, $aArguments );
 			}
 			else
 			{
 				// If we can't find the controller, we must throw a 404 error:
-				$oController->Set404Error();
+				$oRequest->oController->Set404Error();
 			}		
 			
 			// Continue on with the view loader method which will put the appropriate presentation
 			// on the screen:
 			
-			self::LoadView( $oController );
+			self::LoadView( $oRequest );
+		
+			return( $oRequest );
 		
 		} // Connect()
 		
@@ -208,24 +217,26 @@
 		 * 
 		 * @returns void
 		 */
-		private static function InvokeAction( &$oController, $sAction, $aArguments )
+		private static function InvokeAction( Request &$oRequest ) //&$oController, $sAction, $aArguments )
 		{
 			// is_callable() is used over method_exists() in order to properly utilize __call()
 			
-			if( !empty( $sAction ) && is_callable( array( $oController, $sAction ) ) )
+			if( !empty( $oRequest->sAction ) && 
+				is_callable( array( $oRequest->oController, $oRequest->sAction ) ) )
 			{
 				// Call $oController->$sAction() with arguments $aArguments:
-				call_user_func_array( array( $oController, $sAction ), $aArguments );
+				call_user_func_array( array( $oRequest->oController, $oRequest->sAction ), 
+					$oRequest->aArguments );
 			}
-			else if( empty( $sAction ) )
+			else if( empty( $oRequest->sAction ) )
 			{
 				// Default to the index file:
-				$oController->index();
+				$oRequest->oController->index();
 			}
 			else
 			{
 				// Action is not callable, throw a 404 error:
-				$oController->Set404Error();
+				$oRequest->oController->Set404Error();
 			}
 		
 		} // InvokeAction()
@@ -236,24 +247,24 @@
 		 * 
 		 * @returns void
 		 */
-		private static function LoadView( &$oController )
+		private static function LoadView( Request &$oRequest ) //&$oController )
 		{				
-			if( $oController->Is404Error() )
+			if( $oRequest->oController->Is404Error() )
 			{
 				self::Invoke404Error();
 			}
-			else if( !empty( $oController->sView ) )
+			else if( !empty( $oRequest->oController->sView ) )
 			{
 				if( self::$bRequireViewFiles )
 				{
-					$aData = &$oController->aData;
+					$aData = &$oRequest->oController->aData;
 			
 					if( !self::IsAjaxRequest() && isset( self::$sHeaderFile ) )
 					{
 						require( self::$sHeaderFile );
 					}
 				
-					if( ( $sView = FileFunctions::FileExistsInPath( $oController->sView ) ) !== false )
+					if( ( $sView = FileFunctions::FileExistsInPath( $oRequest->oController->sView ) ) !== false )
 					{
 						require( $sView );
 					}
@@ -268,26 +279,9 @@
 						require( self::$sFooterFile );
 					}
 				}
-				else
-				{
-					$_SESSION[ "data" ] = &$oController->aData;
-					$_SESSION[ "view" ] = $oController->sView;
-				}
 			}
 		
 		} // LoadView()
-		
-		
-		/**
-		 *   		 		 		 		 		 
-		 * 
-		 * @returns void
-		 */
-		public static function CleanUp()
-		{
-			unset( $_SESSION[ "view" ], $_SESSION[ "data" ] );
-			
-		} // CleanUp()
 		
 		
 		/**
