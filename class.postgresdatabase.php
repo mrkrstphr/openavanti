@@ -685,6 +685,22 @@
 		} // GetTableForeignKeys();
 
 
+		public function IsPrimaryKeyReference( $sTableName, $sColumnName )
+		{
+			$aForeignKeys = $this->GetTableForeignKeys( $sTableName );
+						
+			foreach( $aForeignKeys as $aForeignKey )
+			{
+				if( $aForeignKey[ "dependency" ] && reset( $aForeignKey[ "local" ] ) == $sColumnName )
+				{
+					return( true );
+				}
+			}
+			
+			return( false );
+		}
+
+
 		////////////////////////////////////////////////////////////////////////////////////////////
 		public function GetColumnType( $sTableName, $sFieldName )
 		{
