@@ -107,31 +107,17 @@
 
 
 		/**
-		 * Adds a custom route based on matching the URI to a regular express. On a sucessful match,
-		 * the supplied controller is instantiated and it's method action is invoked, passing
-		 * along the individual parts of the URI as parameters		 		  
+		 * 		  
 		 * 
-		 * @argument string The regular expression to match against the URI
-		 * @argument string The controller to instantiate on a successful match
-		 * @argument string The action to invoke against the controller on a succesful match
+		 * @argument string 
+		 * @argument string 
 		 * @returns void
 		 */
-/*		public function AddRoute( $sPreg, $sController, $sAction )
-		{
-			self::$aRoutes[] = array(
-				"match" => $sPreg,
-				"controller" => $sController,
-				"action" => $sAction
-			);
-			
-		} // AddRoute()
-*/
-
-        public function AddRout( $sPregMatch, $sPregReplacement )
+        public function AddRoute( $sPattern, $sReplacement )
         {
             self::$aRoutes[] = array(
-                "match" => $sPregMatch,
-                "replace" => $sPregReplace
+                "pattern" => $sPattern,
+                "replace" => $sReplacement
             );
         }
 	
@@ -144,9 +130,7 @@
 		 * @returns void
 		 */
 		public static function Connect( $sRequest )
-		{
-			$bRouteFound = false;
-			
+		{			
 			$sController = "";
 			$sAction = "";
 			$aArguments = array();
@@ -158,49 +142,30 @@
 			// Loop each stored route and attempt to find a match to the URI:
 			
 			foreach( self::$aRoutes as $aRoute )
-			{
-				/*
-				// If the request matches this route:
-				if( preg_match( $aRoute[ "match" ], $sRequest ) )
+			{				
+				if( preg_match( $aRoute[ "pattern" ], $sRequest ) != 0 )
 				{
-					$sController = $aRoute[ "controller" ] . "Controller";
-					$sAction = $aRoute[ "action" ];
-					
-					// If the controller specified by the route exists:
-					if( !empty( $sController ) && class_exists( $sController, true ) )
-					{
-						$oController = new $sController();
-						
-						// Invoke the action of the controller:
-						self::InvokeAction( $oController, $sAction, $aArguments );
-					}
-					else
-					{
-						// The controller does not exist, we must invoke a 404:
-						$oController->Set404Error();
-					}
-					
-					$bRouteFound = true;
+					$sRequest = preg_replace( $aRoute[ "pattern" ], $aRoute[ "replace" ], $sRequest );
 				}
-				*/
 			}
 			
-			// If we did not found a match to the supplied routes, try to find a match for the standard
-			// route, ie: controller/action[/args]:
-			
-			if( !$bRouteFound )
+			if( substr( $sRequest, 0, 1 ) == "/" )
 			{
-				// Explode the request on /
-				$aRequest = explode( "/", $sRequest );
-				
-				// Store this as the last request:
-				$_SESSION[ "last-request" ] = $aRequest;
-				
-				$sController = count( $aRequest ) > 0 ? array_shift( $aRequest ) . "Controller" : "";
-				
-				$sAction = count( $aRequest ) > 0 ? array_shift( $aRequest ) : "";
-				$aArguments = !empty( $aRequest ) ? $aRequest : array();
+				$sRequest = substr( $sRequest, 1 );
 			}
+			
+			
+			// Explode the request on /
+			$aRequest = explode( "/", $sRequest );
+			
+			// Store this as the last request:
+			$_SESSION[ "last-request" ] = $aRequest;
+			
+			$sController = count( $aRequest ) > 0 ? array_shift( $aRequest ) . "Controller" : "";
+			
+			$sAction = count( $aRequest ) > 0 ? array_shift( $aRequest ) : "";
+			$aArguments = !empty( $aRequest ) ? $aRequest : array();
+				
 			
 			// If we've found a controller and the class exists:
 			if( !empty( $sController ) && class_exists( $sController, true ) )
