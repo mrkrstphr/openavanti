@@ -83,11 +83,13 @@
 				return( null );
 			}
 			
-			$rFinfo = finfo_open( FILEINFO_MIME );
+			$rFinfo = new finfo( FILEINFO_MIME );
 
-			$sMimeType = finfo_file( $rFinfo, $sFileName );
-
-			finfo_close( $rFinfo );
+			$sMimeType = $rFinfo->file( $sFileName );
+			
+			// Strip off the charset, if one is appended. Return everything before a semicolon
+			$aMimeType = explode( ";", $sMimeType );
+			$sMimeType = $aMimeType[ 0 ];
 			
 			return( $sMimeType );
 		
