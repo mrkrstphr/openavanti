@@ -145,7 +145,36 @@
 		 	return( false );
 		
 		} // FileExistsInPath()
-
+		
+		
+		/*
+		 * Returns a human readable file size format in the form of #.## (bytes|KB|MB|GB)
+		 *
+		 * @argument integer The file size in bytes
+		 * @returns integer A formated string of the file size
+		 */
+		public static function HumanReadableSize( $iSizeInBytes )
+		{
+			if( $iSizeInBytes >= 1073741824 )
+			{
+				$iSizeInBytes = round( $iSizeInBytes / 1073741824 * 100 ) / 100 . " GB";
+			}
+			elseif( $iSizeInBytes >= 1048576 )
+			{
+				$iSizeInBytes = round( $iSizeInBytes / 1048576 * 100 ) / 100 . " MB";
+			}
+			elseif( $iSizeInBytes >= 1024 )
+			{
+				$iSizeInBytes = round( $iSizeInBytes / 1024 * 100 ) / 100 . " KB";
+			}
+			else
+			{
+				$iSizeInBytes = $iSizeInBytes . " bytes";
+			}
+			
+			return( $iSizeInBytes );
+		
+		} // HumanReadableSize()
 
     }; // FileFunctions()
 
