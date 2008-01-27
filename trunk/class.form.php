@@ -36,7 +36,25 @@
 			self::$aFields += $aArray;
 		
 		} // LoadArray()
+
+		/**
+		 * Loads the specified array into the classes aFields array. These values are later
+		 * used by the field generation helpers for setting the value of the form field.		 
+		 * 
+		 * @argument array An array of keys and values to load into the forms data array
+		 * @returns void
+		 */
+		public static function LoadObject( $oObject )
+		{
+			foreach( $oObject as $sKey => $sValue )
+			{
+				if( !is_object( $sValue ) || !is_array( $sValue ) )
+				{
+					self::$aFields[ $sKey ] = $sValue;
+				}
+			}
 		
+		} // LoadArray()		
 		
 		/**
 		 * Generate a label for the form. Note that the supplied attributes are not validated to be
