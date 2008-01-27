@@ -15,7 +15,7 @@
 
 
 	/**
-	 * Database Interaction Interface
+	 * Database interaction abstract class definition
 	 *
 	 * @category	Database
 	 * @author		Kristopher Wilson
