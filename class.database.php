@@ -163,31 +163,186 @@
 		} // ValidateProfile()
 		
 
+		/*
+		 * Queries the database using the supplied SQL query.
+		 * 
+		 * @argument string The SQL query to execute
+		 * @returns	ResultSet A ResultSet object containing the results of the database query
+		 */
 		abstract public function Query( $sSQL );
+		
 
+		/*
+		 * The Begin() method begins a database transaction which persists until either Commit() or 
+		 * Rollback() is called, or the request ends. If Commit() is not called before the end of the 
+		 * request, the database transaction will automatically roll back.
+		 *		 
+		 * @returns void
+		 */
 		abstract public function Begin();
+		
+
+		/*
+		 * The Commit() method commits a database transaction (assuming one was started with 
+		 * Begin()). If Commit() is not called before the end of the request, the database 
+		 * transaction will automatically roll back.
+		 * 
+		 * @returns void		 		 
+		 */
 		abstract public function Commit();
+		
+
+		/*
+		 * The Rollback() method rolls back a database transaction (assuming one was started with 
+		 * Begin()). The database transaction is automatically rolled back if Commit() is not called.
+		 * 
+		 * @returns void		 		 
+		 */
 		abstract public function Rollback();
+		
 
+		/*
+		 * Returns the last database error, if any.
+		 * 
+		 * @returns string A string representation of the last error		 		 
+		 */
 		abstract public function GetLastError();
-        
+		
+
+		/*
+		 * The SetCacheDirectory() method stores which directory should be used to load and store 
+		 * database schema cache files. If the directory does not exist, an exception will be thrown.
+		 * Setting the cache directory is useless unless schema caching is turned on using 
+		 * CacheSchemas().
+		 * 
+		 * @argument string The absolute path to the directory in the system to store and read cached 
+		 * 		 database schema files.
+		 * @returns void		 		 
+		 */        
 		abstract public function SetCacheDirectory( $sDirectoryName );
+		
+
+		/*
+		 * The CacheSchemas() method toggles whether or not database schemas discovered through the 
+		 * GetSchema(), GetTableColumns(), GetTableForeignKeys() and GetTablePrimaryKey() methods 
+		 * should be cached, and also whether or not those methods will pull their information from a 
+		 * cache, if available.
+		 * 
+		 * @argument boolean Toggles whether or not to cache discovered database schemas
+		 * @returns void		 
+		 */
 		abstract public function CacheSchemas( $bEnable );
+		
 
+		/*
+		 * Returns the PHP native database connection resource.
+		 * 
+		 * @returns resource A database connection resource.
+		 */
 		abstract public function GetResource();
+		
 
+		/*
+		 * Returns a database-safe formatted representation of the supplied data, based on the 
+		 * supplied data type. This method may be called statically using Database::FormatData(). 
+		 * 
+		 * @argument string The data type of the supplied value.
+		 * @argument string The value to be formatted into a database-safe representation.
+		 * @returns string A string of the formatted value supplied.	 		 		 		 
+		 */
 		abstract public static function FormatData( $sType, $sValue );
-
+		
+		
+		/*
+		 * This method returns all tables for the database the class is currently connected to.
+		 *		 
+		 * @returns array Returns an array of all tables in the form of table_name => table_name.
+		 */	
 		abstract public function GetTables();
+		
+		
+		/*
+		 * This method returns all databases on the database server. 
+		 *		 
+		 * @returns array An array of all databases on the database server in the formation of 
+		 * 		 database_name => database_name
+		 */	
 		abstract public function GetDatabases();
 		
-		abstract public function GetSchema( $sTableName );
-		abstract public function GetTableColumns( $sTableName );
-		abstract public function GetTablePrimaryKey( $sTableName );
-		abstract public function GetTableForeignKeys( $sTableName );
 
+		/*
+		 * Collects information about the schema for the specified table, including information on 
+		 * columns (name, datatype), primary keys and foreign keys (relationships to other tables).
+		 * 
+		 * This method stores its information the static variable $aSchemas so that if the data is 
+		 * required again, the database does not have to be consoluted.
+		 * 
+		 * If schema caching is on, this method can pull data from a schema cache. 
+		 * 
+		 * @argument string The name of the table for the requested schema
+		 * @returns array An array of schema information for the specified table	 
+		 */		
+		abstract public function GetSchema( $sTableName );
+		
+
+		/*
+		 * Returns an array of columns that belong to the specified table.
+		 * 
+		 * This method stores its information the static variable $aSchemas so that if the data is 
+		 * required again, the database does not have to be consoluted.
+		 * 
+		 * If schema caching is on, this method can pull data from a schema cache. 
+		 * 
+		 * @argument string The name of the table for the requested columns
+		 * @returns array An array of columns that belong to the specified table
+		 */
+		abstract public function GetTableColumns( $sTableName );
+		
+
+		/*
+		 * Returns an array of columns that belong to the primary key for the specified table.
+		 * 
+		 * This method stores its information the static variable $aSchemas so that if the data is 
+		 * required again, the database does not have to be consoluted.
+		 * 
+		 * If schema caching is on, this method can pull data from a schema cache. 
+		 * 
+		 * @argument string The name of the table for the requested primary key
+		 * @returns array An array of columns that belong to the primary key for the specified table
+		 */
+		abstract public function GetTablePrimaryKey( $sTableName );
+		
+
+		/*
+		 * Returns an array of relationships (foreign keys) for the specified table.
+		 * 
+		 * This method stores its information the static variable $aSchemas so that if the data is 
+		 * required again, the database does not have to be consoluted.
+		 * 
+		 * If schema caching is on, this method can pull data from a schema cache.
+		 * 
+		 * @argument string The name of the table for the requested relationships
+		 * @returns array An array of relationships for the specified table
+		 */
+		abstract public function GetTableForeignKeys( $sTableName );
+		
+
+		/*
+		 * Returns the data type of the specified column in the specified table.
+		 * 
+		 * @argument string The name of the table that the desired column belongs to
+		 * @argument string The name of the column that is desired to know the type of
+		 * @returns string The data type of the column, if one is found, or null.
+		 */
 		abstract public function GetColumnType( $sTableName, $sFieldName );
 		
+
+		/*
+		 * Determines whether the specified table exists in the current database.
+		 * 
+		 * @argument string The name of the table to determine existence
+		 * @returns bool True or false, depending on whether the table exists.	 		 		 
+		 */		
 		abstract public function TableExists( $sTableName );
 
     }; // Database()
