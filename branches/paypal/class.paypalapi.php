@@ -23,7 +23,10 @@
 	 */	 
 	class PayPalAPI
 	{		
-		private $oLastError = null;
+        const RefundTypeFull = "Full";
+        const RefundTypePartial = "Partial";		
+
+        private $oLastError = null;
 		private $sLastError = "";
 		
 		private $oProfile = null;
