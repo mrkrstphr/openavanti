@@ -97,6 +97,24 @@
 			$this->aData[ $sName ] = $sValue;
 			
 		} // SetData()
+		
+		
+		public function SetFlash( $sMessage )
+		{
+			$_SESSION[ "flash" ] = $sMessage;
+			
+		} // SetFlash()
+		
+		
+		public function GetFlash()
+		{
+			$sFlash = isset( $_SESSION[ "flash" ] ) ? $_SESSION[ "flash" ] : "";
+			
+			unset( $_SESSION[ "flash" ] );
+			
+			return( $sFlash );
+			
+		} // GetFlash()
 	
 	} // Controller()
 
