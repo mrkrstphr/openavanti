@@ -73,7 +73,7 @@
        * @argument string The error message
        * @returns void		 		 		        
        */
-		protected static function SetError( $sKey, $sError )
+		public static function SetError( $sKey, $sError )
 		{
 			self::$aErrorList[ $sKey ][] = $sError;
 			
