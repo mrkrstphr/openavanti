@@ -37,6 +37,59 @@
 		
 		public $sView = null;
 		
+		public $sRequestType = "";
+		
+		public $bSecureConnection = false;
+		
+		/**
+		 *
+		 *
+		 *
+		 */
+		public function __construct()
+		{
+			$this->sRequestType = $_SERVER[ "REQUEST_METHOD" ];
+			$this->bSecureConnection = isset( $_SERVER[ "HTTPS" ] ) && !empty( $_SERVER[ "HTTPS" ] );
+		
+		} // __construct()
+		
+		
+		/**
+		 *
+		 *
+		 *
+		 */		 		 		 		
+		public function IsSecureConnection()
+		{
+			return( $this->bSecureConnection );
+			
+		} // IsSecureConnection()
+		
+		
+		/**
+		 *
+		 *
+		 *
+		 */		 		 		 		
+		public function IsPostRequest()
+		{
+			return( strtolower( $sRequestType ) == "post" );
+			
+		} // IsSecureConnection()
+		
+		
+		/**
+		 *
+		 *
+		 *
+		 */		 		 		 		
+		public function IsGetRequest()
+		{
+			return( strtolower( $sRequestType ) == "get" );
+			
+		} // IsSecureConnection()
+		
+		
 	}; // Request()
 
 ?>
