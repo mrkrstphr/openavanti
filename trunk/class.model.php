@@ -61,20 +61,20 @@
 		
 			if( $bUpdate )
 			{
-				if( !$this->OnBeforeUpdate() || 
-					 !$this->OnBeforeSave() || 
-					 !$this->ValidateUpdate() ||
-					 !$this->Validate() )
+				if( !$this->ValidateUpdate() ||
+					 !$this->Validate() ||
+					 !$this->OnBeforeUpdate() || 
+					 !$this->OnBeforeSave() )
 				{
 					return( false );
 				}
 			}
 			else
 			{
-				if( !$this->OnBeforeInsert() || 
-					 !$this->OnBeforeSave() || 
-					 !$this->ValidateInsert() ||
-					 !$this->Validate() )
+				if( !$this->ValidateInsert() ||
+					 !$this->Validate() ||
+					 !$this->OnBeforeInsert() || 
+					 !$this->OnBeforeSave() )
 				{
 					return( false );
 				}
@@ -117,20 +117,20 @@
 		
 			if( $bUpdate )
 			{
-				if( !$this->OnBeforeUpdate() || 
-					 !$this->OnBeforeSave() || 
-					 !$this->ValidateUpdate() ||
-					 !$this->Validate() )
+				if( !$this->ValidateUpdate() ||
+					 !$this->Validate() || 
+					 !$this->OnBeforeUpdate() || 
+					 !$this->OnBeforeSave() )
 				{
 					return( false );
 				}
 			}
 			else
 			{
-				if( !$this->OnBeforeInsert() || 
-					 !$this->OnBeforeSave() || 
-					 !$this->ValidateInsert() ||
-					 !$this->Validate() )
+				if( !$this->ValidateInsert() ||
+					 !$this->Validate() ||
+					 !$this->OnBeforeInsert() || 
+					 !$this->OnBeforeSave() )
 				{
 					return( false );
 				}
