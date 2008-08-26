@@ -8,8 +8,8 @@
  * @dependencies 	
  * @copyright		Copyright (c) 2008, Kristopher Wilson
  * @license			http://www.openavanti.com/license
- * @link				http://www.openavanti.com
- * @version			0.6.4-alpha
+ * @link			http://www.openavanti.com
+ * @version			0.6.7-beta
  *
  */
  
@@ -19,7 +19,7 @@
 	 *
 	 * @category	Pagination
 	 * @author		Kristopher Wilson
-	 * @link			http://www.openavanti.com/docs/pagination
+	 * @link		http://www.openavanti.com/docs/pagination
 	 */
 	class Pagination
 	{
@@ -48,26 +48,26 @@
 			}
 
 			// Calculations:
-         $iStartPage = 1; $iEnd = $iTotalPages;
-            
-         if( $iTotalPages > $iLinksShown ) 
-         {
+			$iStartPage = 1; $iEnd = $iTotalPages;
+			
+			if( $iTotalPages > $iLinksShown ) 
+			{
 				if( $iStart <= ceil( $iLinksShown / 2 ) ) 
-            {
-            	$iStartPage = 1;
-            	$iEnd = $iLinksShown;
-            } 
-            else if( $iStart >= $iTotalPages - floor( $iLinksShown / 2 ) ) 
-            {
-            	$iStartPage = $iTotalPages - ( $iLinksShown - 1 );
-            	$iEnd = $iTotalPages;
+				{
+					$iStartPage = 1;
+					$iEnd = $iLinksShown;
 				} 
-         	else 
-         	{
-         		$iStartPage = $iStart - floor( $iLinksShown / 2 );
-            	$iEnd = $iStart + floor( $iLinksShown / 2 );
-         	}
-         }
+				else if( $iStart >= $iTotalPages - floor( $iLinksShown / 2 ) ) 
+				{
+					$iStartPage = $iTotalPages - ( $iLinksShown - 1 );
+					$iEnd = $iTotalPages;
+				} 
+				else 
+				{
+					$iStartPage = $iStart - floor( $iLinksShown / 2 );
+					$iEnd = $iStart + floor( $iLinksShown / 2 );
+				}
+			}
 													
 			$iRecordsStart = ( ( $iStart - 1 ) * $iPerPage ) + 1;
 			$iRecordsEnd = $iRecordsStart + $iPerPage - 1 > $iTotalResults ? 
