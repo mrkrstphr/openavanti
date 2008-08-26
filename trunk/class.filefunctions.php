@@ -8,8 +8,8 @@
  * @dependencies 	FileInfo
  * @copyright		Copyright (c) 2008, Kristopher Wilson
  * @license			http://www.openavanti.com/license
- * @link				http://www.openavanti.com
- * @version			0.6.4-alpha
+ * @link			http://www.openavanti.com
+ * @version			0.6.7-beta
  *
  */
  
@@ -18,7 +18,7 @@
 	 *
 	 * @category	Files
 	 * @author		Kristopher Wilson
-	 * @link			http://www.openavanti.com/docs/filefunctions
+	 * @link		http://www.openavanti.com/docs/filefunctions
 	 */
 	class FileFunctions
  	{
@@ -94,6 +94,22 @@
 			return( $sMimeType );
 		
 		} // GetMimeType()
+		
+		
+		/**
+		 *
+		 * @argument string The base file name to use as an example
+		 * @returns string The file name created from microtime
+		 */
+		public static function CreateFileNameFromTime( $sBase )
+		{
+			$sExt = self::GetFileExtension( $sBase );
+			
+			$sFileName = microtime( true ) . "." . $sExt;
+		
+			return( $sFileName );
+		
+		} // CreateFileNameFromTime()
 		
 		
 		/**
@@ -175,6 +191,93 @@
 			return( $iSizeInBytes );
 		
 		} // HumanReadableSize()
+		
+		
+		/**
+		 *
+		 *
+		 */		 		 		
+		public static function CreateTemporaryDirectory()
+		{
+			$sTempDirectory = sys_get_temp_dir();
+
+			$sNewDirectory = "";
+
+			do
+			{
+				$sNewDirectory = $sTempDirectory . "/" . substr( md5( microtime() ), 0, 8 );
+				
+			} while( !mkdir( $sNewDirectory ) );
+
+			return( $sNewDirectory );
+
+		} // CreateTemporaryDirectory()
+		
+		
+		/**
+		 *
+		 *
+		 */
+		public static function RemoveRecursively( $sFile ) 
+		{
+			if( is_dir( $sFile ) && !is_link( $sFile ) && !in_array( $sFile, array( ".", ".." ) ) )
+			{
+				foreach( glob( "{$sFile}/{,.}*", GLOB_BRACE ) as $sCurrentFile ) 
+				{
+					if( in_array( basename( $sCurrentFile ), array( ".", ".." ) ) )
+					{
+						continue;
+					}
+					
+		      	if( !FileFunctions::RemoveRecursively( $sCurrentFile ) )
+					{
+		         	return( false );
+		         }
+		      }
+		      
+				return( rmdir( $sFile ) );
+			} 
+			else 
+			{
+				return( unlink( $sFile ) );
+			}
+			
+			return( true );
+			
+		} // RemoveRecursively()
+		
+		
+		/**
+		 *
+		 *
+		 */
+		public static function MoveRecursively( $sPath, $sDestination )
+		{
+			foreach( glob( "{$sPath}/{,.}*", GLOB_BRACE ) as $sCurrentFile ) 
+			{
+				if( is_dir( $sCurrentFile ) && in_array( basename( $sCurrentFile ), array( ".", ".." ) ) )
+				{
+					continue;
+				}
+				
+				if( is_dir( $sCurrentFile ) )
+				{
+					if( !file_exists( $sDestination . "/" . basename( $sCurrentFile ) ) )
+					{
+						mkdir( $sDestination . "/" . basename( $sCurrentFile ) );
+					}
+					
+					FileFunctions::MoveRecursively( $sCurrentFile, $sDestination . "/" . basename( $sCurrentFile ) );
+				}
+				else
+				{
+					rename( $sCurrentFile, $sDestination . "/" . basename( $sCurrentFile ) );
+				}
+			}
+			
+			return( true ); 
+			
+		} // MoveRecursively()
 
     }; // FileFunctions()
 
