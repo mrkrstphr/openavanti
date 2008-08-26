@@ -8,8 +8,8 @@
  * @dependencies 	
  * @copyright		Copyright (c) 2008, Kristopher Wilson
  * @license			http://www.openavanti.com/license
- * @link				http://www.openavanti.com
- * @version			0.6.4-alpha
+ * @link			http://www.openavanti.com
+ * @version			0.6.7-beta
  *
  */
  
@@ -20,13 +20,23 @@
 	 *
 	 * @category	Database
 	 * @author		Kristopher Wilson
-	 * @link			http://www.openavanti.com/docs/resultset
+	 * @link		http://www.openavanti.com/docs/resultset
 	 */
-	class ResultSet implements Iterator
+	class ResultSet implements Iterator, Countable
 	{
 		private $oDatabase = null;
 		private $rResult = null;
-      private $oRecord = null;
+		private $oRecord = null;
+      
+      	private $bValid = false;
+		
+		private $iNumRows = 0;
+		
+		private $iCurrentRow = -1;
+		private $aData = array();
+		
+		
+		private $bDebug = false;
 		
 		
 		/**
@@ -39,6 +49,13 @@
 		{
 			$this->oDatabase = &$oDatabase;
 			$this->rResult = &$rResult;
+			
+			if( !is_null( $this->rResult ) )
+			{
+				$this->iNumRows = pg_num_rows( $this->rResult );
+			}
+			
+			$this->bValid = $this->Count() != 0;
 		
 		} // __construct()
 	
@@ -50,79 +67,150 @@
 		 */
 		public function GetRecord()
 		{
-			return( $this->oRecord );
+			return( $this->Current() );
 		
 		} // GetRecord()
 		
-		
-		////////////////////////////////////////////////////////////////////////////////////////////
+
+		/**
+		 *
+		 */
 		public function Count()
 		{
-         if( $this->rResult )
-         {
-             return( pg_num_rows( $this->rResult ) );
-         }
-         else
-         {
-             return( 0 );
-         }
+			$this->Debug( "Count: {$this->iNumRows}" );
+			
+			return( $this->oDatabase->CountFromResult( $this->rResult ) );
             
 		} // Count()
-	
-	
-		////////////////////////////////////////////////////////////////////////////////////////////
+		
+
+		/**
+		 *
+		 */
  		public function Current()
 		{
-			return( $this->oRecord );
+			$this->Debug( "Current: {$this->iCurrentRow}" );
+			
+			if( isset( $this->aData[ $this->iCurrentRow ] ) )
+			{
+				return( $this->aData[ $this->iCurrentRow ] );
+			}
+			else
+			{
+				return( false );
+			}
 		
 		} // Current()
-	
-	
-		////////////////////////////////////////////////////////////////////////////////////////////
+		
+
+		/**
+		 *
+		 */
  		public function Key()
 		{
-			return( null );
+			return( $this->iCurrentRow );
 		
 		} // Key()
-	
-	
-		////////////////////////////////////////////////////////////////////////////////////////////
+		
+
+		/**
+		 *
+		 */
  		public function Next()
 		{
-			if( !is_null( $this->rResult ) )
-         {
-				$this->oRecord = pg_fetch_object( $this->rResult );
-			}
-         else
-         {
-				$this->oRecord = null;
-         }
+			$this->iCurrentRow++;
+			
+			$this->Debug( "Next: {$this->iCurrentRow}" );
 
-         return( $this->oRecord );
+			//if( !isset( $this->aData[ $this->iCurrentRow ] ) )
+			//{
+				if( !is_null( $this->rResult ) )
+	         	{
+	         		$this->Debug( "Fetching row [{$this->iCurrentRow}]" );
+					$this->aData[ $this->iCurrentRow ] = 
+						$this->oDatabase->PullNextResult( $this->rResult );
+					
+					if( !$this->aData[ $this->iCurrentRow ] )
+					{
+	         			$this->Debug( "There is no row [{$this->iCurrentRow}]" );
+					}
+				}
+	         	else
+	         	{
+					$this->aData[ $this->iCurrentRow ] = null;
+	        	}
+         	//}
+         
+			$this->Debug( "<pre>" . print_r( $this->aData, true ) . "</pre>" );
+         
+			$this->bValid = !is_null( $this->aData[ $this->iCurrentRow ] ) &&
+				$this->aData[ $this->iCurrentRow ] !== false;
+				
+			if( $this->bValid )
+			{
+				$this->Debug( "Next [{$this->iCurrentRow}] is Valid!" );
+			}
 		
 		} // Next()
-	
-	
-		////////////////////////////////////////////////////////////////////////////////////////////
+		
+
+		/**
+		 *
+		 */
  		public function Rewind()
 		{
-			pg_result_seek( $this->rResult, 0 );
+			$this->Debug( "Rewind: {$this->iCurrentRow} | 0" );
 			
-			$oRecord = $this->Next();
+			$this->oDatabase->ResetResult( $this->rResult );
 			
-			return( $oRecord );
+			//if( !isset( $this->aData[ 0 ] ) )
+			//{
+				$this->iCurrentRow = -1;
+			/*	$this->Next();			
+			}
+			else
+			{
+				$this->iCurrentRow = 0;
+			}*/
+			
+			
+			$this->Next();	
+			
+			$this->bValid = $this->Count() != 0;
+			
+			//$this->Next();
 		
 		} // Rewind()
-	
-	
-		////////////////////////////////////////////////////////////////////////////////////////////
+		
+
+		/**
+		 *
+		 */
  		public function Valid()
 		{
-			return( $this->oRecord );
+			$this->Debug( "Valid: {$this->iCurrentRow}" );
+			
+			if( $this->bValid )
+			{
+				$this->Debug( "<pre>" . print_r( $this->aData, true ) . "</pre>" );
+			}
+			
+			return( $this->bValid );
 		
 		} // Valid()
 		
-	
+		
+		/**
+		 *
+		 */		 		
+		public function Debug( $sMessage )
+		{
+			if( $this->bDebug )
+			{
+				echo $sMessage . "<br />";
+			}
+		}
+		
 	} // ResultSet()
 
 ?>
