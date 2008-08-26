@@ -8,8 +8,8 @@
  * @dependencies 	Database, CRUD
  * @copyright		Copyright (c) 2008, Kristopher Wilson
  * @license			http://www.openavanti.com/license
- * @link				http://www.openavanti.com
- * @version			0.6.4-alpha
+ * @link			http://www.openavanti.com
+ * @version			0.6.7-beta
  *
  */
 
@@ -18,7 +18,7 @@
 	 *
 	 * @category	Debugging
 	 * @author		Kristopher Wilson
-	 * @link			http://www.openavanti.com/docs/debug
+	 * @link		http://www.openavanti.com/docs/debug
 	 */
 	class Debug
 	{

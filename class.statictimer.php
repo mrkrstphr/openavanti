@@ -8,8 +8,8 @@
  * @dependencies 	
  * @copyright		Copyright (c) 2008, Kristopher Wilson
  * @license			http://www.openavanti.com/license
- * @link				http://www.openavanti.com
- * @version			0.6.4-alpha
+ * @link			http://www.openavanti.com
+ * @version			0.6.7-beta
  *
  */
  
@@ -19,7 +19,7 @@
 	 *
 	 * @category	Controller
 	 * @author		Kristopher Wilson
-	 * @link			http://www.openavanti.com/docs/statictimer
+	 * @link		http://www.openavanti.com/docs/statictimer
 	 */
 	class StaticTimer
 	{
