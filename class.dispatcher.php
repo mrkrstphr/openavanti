@@ -8,8 +8,8 @@
  * @dependencies 	
  * @copyright		Copyright (c) 2008, Kristopher Wilson
  * @license			http://www.openavanti.com/license
- * @link				http://www.openavanti.com
- * @version			0.6.4-alpha
+ * @link			http://www.openavanti.com
+ * @version			0.6.7-beta
  *
  */
  
@@ -19,7 +19,7 @@
 	 *
 	 * @category	Database
 	 * @author		Kristopher Wilson
-	 * @link			http://www.openavanti.com/docs/dispatcher
+	 * @link		http://www.openavanti.com/docs/dispatcher
 	 */
 	class Dispatcher
 	{
@@ -167,7 +167,7 @@
 			$_SESSION[ "last-request" ] = $aRequest;
 			
 			$oRequest->sControllerName = count( $aRequest ) > 0 ? 
-				array_shift( $aRequest ) . "Controller" : "";
+				str_replace( "-", "_", array_shift( $aRequest ) ) . "Controller" : "";
 			
 			$oRequest->sAction = count( $aRequest ) > 0 ? array_shift( $aRequest ) : "";
 			$oRequest->aArguments = !empty( $aRequest ) ? $aRequest : array();
@@ -257,9 +257,14 @@
 			{
 				if( self::$bRequireViewFiles )
 				{
-					$aData = &$oRequest->oController->aData;
+					extract( $oRequest->oController->aData );
 			
-					if( !self::IsAjaxRequest() && isset( self::$sHeaderFile ) )
+					if( ( $sView = FileFunctions::FileExistsInPath( $oRequest->oController->sView ) ) === false )
+					{
+						return( self::Invoke404Error() );
+					}
+			
+					if( !self::IsAjaxRequest() && !empty( self::$sHeaderFile ) )
 					{
 						require( self::$sHeaderFile );
 					}
@@ -273,8 +278,7 @@
 						self::Invoke404Error();
 					}
 					
-					
-					if( !self::IsAjaxRequest() && isset( self::$sFooterFile ) )
+					if( !self::IsAjaxRequest() && !empty( self::$sFooterFile ) )
 					{
 						require( self::$sFooterFile );
 					}
@@ -326,7 +330,6 @@
 		
 		} // Invoke404Error()
 		
-	
 	}; // Dispatcher()
 
 ?>
