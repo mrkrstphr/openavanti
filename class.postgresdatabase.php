@@ -8,8 +8,8 @@
  * @dependencies 	
  * @copyright		Copyright (c) 2008, Kristopher Wilson
  * @license			http://www.openavanti.com/license
- * @link				http://www.openavanti.com
- * @version			0.6.4-alpha
+ * @link			http://www.openavanti.com
+ * @version			0.6.7-beta
  *
  */
 
@@ -19,40 +19,45 @@
 	 *
 	 * @category	Database
 	 * @author		Kristopher Wilson
-	 * @link			http://www.openavanti.com/docs/postgresdatabase
+	 * @link		http://www.openavanti.com/docs/postgresdatabase
 	 */
 	class PostgresDatabase extends Database implements Throwable
 	{
 		private $hDatabase = null;
         
-      protected static $aSchemas = array();
+      	protected static $aSchemas = array();
         
-      private static $sCacheDirectory = "";
-      private static $bCacheSchemas = false;
-
+      	private static $sCacheDirectory = "";
+      	private static $bCacheSchemas = false;
 		
-      //////////////////////////////////////////////////////////////////////////////////////////////
+
+		/**
+		 * The constructor sets up a new connection to the PostgreSQL database. This method is
+		 * protected, and can only be called from within the class, normally through the 
+		 * GetConnection() method. This helps support the singleton methodology.
+		 * 
+		 * @argument array The database profile array containing connection information		 		 		 		 
+		 */
 		protected function __construct( $aProfile )
-      {
-      	
-      	$sString = "";
-      	
-      	if( isset( $aProfile[ "host" ] ) )
       	{
-      		$sString .= " host=" . $aProfile[ "host" ] . " ";
-      	}
+	      	$sString = "";
+	      	
+	      	if( isset( $aProfile[ "host" ] ) )
+	      	{
+	      		$sString .= " host=" . $aProfile[ "host" ] . " ";
+	      	}
       
 			$sString .= " dbname=" . $aProfile[ "name" ] . " ";
       	
-      	if( isset( $aProfile[ "user" ] ) )
-      	{
-      		$sString .= " user=" . $aProfile[ "user" ] . " ";
-      	}
-      	
-      	if( isset( $aProfile[ "password" ] ) )
-      	{
-      		$sString .= " password=" . $aProfile[ "password" ] . " ";
-      	}
+	      	if( isset( $aProfile[ "user" ] ) )
+	      	{
+	      		$sString .= " user=" . $aProfile[ "user" ] . " ";
+	      	}
+	      	
+	      	if( isset( $aProfile[ "password" ] ) )
+	      	{
+	      		$sString .= " password=" . $aProfile[ "password" ] . " ";
+	      	}
 			
 			$this->hDatabase = @pg_connect( $sString );
 			
@@ -61,25 +66,81 @@
 				throw new DatabaseConnectionException( "Failed to connect to Postgres server: " . 
 					$aProfile[ "host" ] . "." . $aProfile[ "name" ] );
 			}
+			
 		} // __construct()
+		
 
-
-		///////////////////////////////////////////////////////////////////////////////////////////
+		/**
+		 * Queries the PostgreSQL database using the supplied SQL query.
+		 * 
+		 * @argument string The PostgreSQL query to execute
+		 * @returns string A ResultSet object containing the results of the database query	 		 		 
+		 */
 		public function Query( $sSQL )
 		{
-		   $rResult = @pg_query( $this->hDatabase, $sSQL );
-		
+			$rResult = @pg_query( $this->hDatabase, $sSQL );
+			
 			if( !$rResult )
 			{
 				return( null );
 			}
-		
+			
 			return( new ResultSet( $this, $rResult ) );
 		
 		} // Query()
+		
+		
+		/**
+		 *
+		 */		 
+		public function PullNextResult( &$rResult )
+		{
+			if( !is_null( $rResult ) )
+			{
+				return( pg_fetch_object( $rResult ) );
+			}
+			else
+			{
+				return( null );
+			}
+			
+		} // PullNextResult()
+		
+		
+		/**
+		 *
+		 */
+		public function CountFromResult( &$rResult )
+		{
+			if( $rResult )
+			{
+				return( pg_num_rows( $rResult ) );
+			}
+			else
+			{
+			 	return( 0 );
+			}
+			
+		} // CountFromResult()
+		
+		
+		/**
+		 *
+		 */
+		public function ResetResult( &$rResult )
+		{
+			return( @pg_result_seek( $rResult, 0 ) );
+		
+		} // ResetResult()
+		
 
-
-		///////////////////////////////////////////////////////////////////////////////////////////
+		/**
+		 * The Begin() method begins a database transaction which persists until either Commit() or 
+		 * Rollback() is called, or the request ends. If Commit() is not called before the end of the 
+		 * request, the database transaction will automatically roll back.
+		 * 
+		 * @returns void		 		 
+		 */
 		public function Begin()
 		{
 			$rResult = @pg_query( $this->hDatabase, "BEGIN" ) or
@@ -88,9 +149,15 @@
 			return( $rResult ? true : false );
 
 		} // Begin()
+		
 
-
-		///////////////////////////////////////////////////////////////////////////////////////////
+		/**
+		 * The Commit() method commits a database transaction (assuming one was started with 
+		 * Begin()). If Commit() is not called before the end of the request, the database 
+		 * transaction will automatically roll back.
+		 * 
+		 * @returns void		 
+		 */
 		public function Commit()
 		{
 			$rResult = @pg_query( $this->hDatabase, "COMMIT" ) or
@@ -100,8 +167,13 @@
 		
 		} // Commit()
 		
-		
-		///////////////////////////////////////////////////////////////////////////////////////////
+
+		/**
+		 * The Rollback() method rolls back a database transaction (assuming one was started with 
+		 * Begin()). The database transaction is automatically rolled back if Commit() is not called.
+		 * 		 
+		 * @returns void		 
+		 */
 		public function Rollback()
 		{
 			$rResult = @pg_query( $this->hDatabase, "ROLLBACK" ) or
@@ -110,9 +182,14 @@
 			return( $rResult ? true : false );
 		
 		} // Rollback()
-        
-        
-		///////////////////////////////////////////////////////////////////////////////////////////
+		
+
+		/**
+		 * Advances the value of the supplied sequence and returns the new value.
+		 * 
+		 * @argument string The name of the database sequence to advance and get the current value of
+		 * @returns integer An integer representation of the next value of the sequence
+		 */
 		public function NextVal( $sSequenceName )
 		{
 			$sSQL = "SELECT
@@ -134,9 +211,20 @@
      		return( null );
 		
 		} // NextVal()
-			
-			
-		///////////////////////////////////////////////////////////////////////////////////////////
+		
+
+		/**
+		 * Gets the current value of the specified sequence.
+		 * 
+		 * This method does not alter the current value of the sequence.
+		 * 
+		 * This method will only work if the value of the sequence has already been altered during 
+		 * the current database transaction; meaning that you must call NextVal() or SerialNextVal() 
+		 * prior to using this method.
+		 *  
+		 * @argument string The name of the database sequence to get the current value of
+		 * @returns integer An integer representation of the current value of the sequence.
+		 */
 		public function CurrVal( $sSequenceName )
 		{
 			$sSQL = "SELECT
@@ -158,9 +246,24 @@
 	     	return( null );
 		
 		} // CurrVal()
-			
-			
-		///////////////////////////////////////////////////////////////////////////////////////////
+		
+
+		/**
+		 * Gets the current value of the specified sequence by the name of the table and the name of 
+		 * the database column. This will only work if a sequence is defined as the default value of 
+		 * a table column.
+		 * 
+		 * This method does not alter the current value of the sequence.
+		 * 
+		 * This method will only work if the value of the sequence has already been altered during 
+		 * the current database transaction; meaning that you must call NextVal() or SerialNextVal() 
+		 * prior to using this method.
+		 * 
+		 * @argument string The name of the database table that holds the column with the sequence as 
+		 * 		 a default value
+		 * @argument string The name of the database table column with the sequence as a default value
+		 * @returns integer An integer representation of the current value of the sequence
+		 */
 		public function SerialCurrVal( $sTableName, $sColumnName )
 		{
 			$sSQL = "SELECT
@@ -187,9 +290,18 @@
 	     	return( null );
 		
 		} // SerialCurrVal()
+		
 
-     
-		///////////////////////////////////////////////////////////////////////////////////////////
+		/**
+		 * Advances the value of the supplied sequence and returns the new value by the name of the 
+		 * table and the name of the column. This will only work if a sequence is defined as the 
+		 * default value of a table column.
+		 * 
+		 * @argument string The name of the database table that holds the column with the sequence as 
+		 * 		 a default value
+		 * @argument string The name of the database table column with the sequence as a default value
+		 * @returns integer An integer representation of the next value of the sequence	 		 		 
+		 */
 		public function SerialNextVal( $sTableName, $sColumnName )
 		{
 			$sSQL = "SELECT
@@ -216,53 +328,94 @@
 	     	return( null );
 		
 		} // SerialNextVal()
+		
 
-
-		///////////////////////////////////////////////////////////////////////////////////////////
+		/**
+		 * Returns the last PostgreSQL database error, if any.
+		 * 
+		 * @returns string A string representation of the last PostgreSQL error		 		 
+		 */
 		public function GetLastError()
-		//
-		// Description:
-		//      Returns the last database error, if any
-		//
 		{
 			return( pg_last_error() );
 		
 		} // GetLastError()
-        
+		
 
-
-		////////////////////////////////////////////////////////////////////////////////////////////
+		/**
+		 * The SetCacheDirectory() method stores which directory should be used to load and store 
+		 * database schema cache files. If the directory does not exist, an exception will be thrown.
+		 * 
+		 * Setting the cache directory is useless unless schema caching is turned on using 
+		 * CacheSchemas().
+		 * 
+		 * Schema caching is primarily used by the CRUD object, which analyzes database schemas to 
+		 * automate database operations. 
+		 * 
+		 * @argument The absolute path to the directory in the system to store and read cached 
+		 * 		 database schema files
+		 * @returns void 		 		 		 
+		 */
 		public function SetCacheDirectory( $sDirectoryName )
 		{
 			self::$sCacheDirectory = $sDirectoryName;
 		
 		} // SetCacheDirectory()
-
 		
-		////////////////////////////////////////////////////////////////////////////////////////////
+
+		/**
+		 * The CacheSchemas() method toggles whether or not database schemas discovered through the 
+		 * GetSchema(), GetTableColumns(), GetTableForeignKeys() and GetTablePrimaryKey() methods 
+		 * should be cached, and also whether or not those methods will pull their information from a 
+		 * cache, if available.
+		 * 
+		 * Attempting to cache schemas without properly setting the cache directory using 
+		 * SetCacheDirectory(). If caching is attempted without setting the directory, an exception 
+		 * will be thrown.
+		 * 
+		 * Schema caching is primarily used by the CRUD object, which analyzes database schemas to 
+		 * automate database operations. 
+		 * 
+		 * @argument boolean Toggles whether or not to cache discovered database schemas
+		 * @returns void		 
+		 */
 		public function CacheSchemas( $bEnable )
 		{
 			self::$bCacheSchemas = $bEnable;
 
 		} // CacheSchemas()
+		
 
-
-		///////////////////////////////////////////////////////////////////////////////////////////
+		/**
+		 * Returns the native PHP database resource
+		 * 
+		 * @returns resource The native PHP database resource		 		 
+		 */
 		public function GetResource()
-		//
-		// Description:
-		//      Returns the database resource
-		//
 		{
 			return( $this->hDatabase );
 		
 		} // GetResource()
+		
 
-
-		///////////////////////////////////////////////////////////////////////////////////////////
-		public static function FormatData( $sType, $sValue )
+		/**
+		 * Returns a database-safe formatted representation of the supplied data, based on the 
+		 * supplied data type.
+		 * 
+		 * 1. If the supplied data is empty and does not equal zero, this method returns NULL.
+		 * 2. If the data type is of text, varchar, timestamp, or bool, this method returns that 
+		 * 		 value surrounded in single quotes.
+		 * 
+		 * This method may be called statically using PostgresDatabase::FormatData(). 
+		 * 
+		 * @argument string The data type of the supplied value
+		 * @argument string The value to be formatted into a database-safe representation
+		 * @returns string A string of the formatted value supplied	 		 		 		 
+		 */
+		public function FormatData( $sType, $sValue )
 		{
-			$aQuoted_Types = array( "/text/", "/character varying/", "/date/", "/timestamp/", "/bool/" );
+			$aQuoted_Types = array( "/text/", "/character varying/", "/date/", 
+				"/timestamp/", "/bool/", "/time without time zone/" );
 				
 		   if( strlen( $sValue ) == 0 )
 		   {
@@ -279,7 +432,12 @@
 		} // FormatData()
 
 
-		/////////////////////////////////////////////////////////////////////////////////////////////
+		/**
+		 * This method returns all databases on the database server. 
+		 *		 
+		 * @returns array An array of all databases on the database server in the formation of 
+		 * 		 database_name => database_name
+		 */		 
 		public function GetDatabases()
 		{
 			$sSQL = "SELECT
@@ -303,14 +461,19 @@
 			
 			return( $aDatabases );
 		
-		} // GetTables()
+		} // GetDatabases()
 		
 		
+		/**
+		 * This method returns all tables for the database the class is currently connected to.
+		 *		 
+		 * @returns array Returns an array of all tables in the form of table_name => table_name.
+		 */	
 		public function GetTables()
 		{        		
-      	$aTables = array();
+			$aTables = array();
 
-         $sSQL = "SELECT 
+			$sSQL = "SELECT 
 				pt.tablename, 
 				pp.typrelid 
 			FROM 
@@ -321,7 +484,7 @@
 				pt.tablename NOT LIKE 'pg_%' 
 			AND
 				pt.tablename NOT LIKE 'sql_%'";
-
+			
 			if( !( $oTables = $this->Query( $sSQL ) ) )
 			{
 				throw new QueryFailedException( $this->GetLastError() );
@@ -329,58 +492,59 @@
 
 			$aTables = array();
 
-         foreach( $oTables as $oTable ) 
-         {
-             $aTables[ $oTable->typrelid ] = $oTable->tablename;
-         }
+			foreach( $oTables as $oTable ) 
+			{
+				$aTables[ $oTable->typrelid ] = $oTable->tablename;
+			}
 
-         return( $aTables );
+			return( $aTables );
 		
 		} // GetTables()
+		
 
-
-		///////////////////////////////////////////////////////////////////////////////////////////
+		/**
+		 * Collects all fields/columns in the specified database table, as well as data type
+		 * and key information.
+		 * 		 
+		 */
 		public function GetSchema( $sTableName )
-		//
-		// Description:
-		//      Collects all fields/columns in the specified database table, as well as data type
-		//      and key information.
-		//
 		{		
 			$sCacheFile = self::$sCacheDirectory . "/" . md5( $sTableName );
-		
-		   if( self::$bCacheSchemas && !isset( self::$aSchemas[ $sTableName ] ) && Cache::Exists( $sCacheFile ) )
+			
+			if( self::$bCacheSchemas && !isset( self::$aSchemas[ $sTableName ] ) && Cache::Exists( $sCacheFile ) )
 			{
 				$oCache = new Cache( $sCacheFile );
 				self::$aSchemas[ $sTableName ] = unserialize( $oCache );	
 			}
 			else
 			{
-		   	$this->GetTableColumns( $sTableName );
-		   	$this->GetTablePrimaryKey( $sTableName );
-		   	$this->GetTableForeignKeys( $sTableName );
-		   	
-		   	if( self::$bCacheSchemas )
-		   	{
-		   		$oCache = new Cache();
-		   		$oCache->Save( $sCacheFile, serialize( self::$aSchemas[ $sTableName ] ), true );
-		   	}
-		   }
-		   
-		   return( self::$aSchemas[ $sTableName ] );
+				$this->GetTableColumns( $sTableName );
+				$this->GetTablePrimaryKey( $sTableName );
+				$this->GetTableForeignKeys( $sTableName );
+			
+				if( self::$bCacheSchemas )
+				{
+					$oCache = new Cache();
+					$oCache->Save( $sCacheFile, serialize( self::$aSchemas[ $sTableName ] ), true );
+				}
+			}
+			
+			return( self::$aSchemas[ $sTableName ] );
 		
 		} // GetSchema()
+		
 
-
-		////////////////////////////////////////////////////////////////////////////////////////////
+		/**
+		 *
+		 */
 		public function GetTableColumns( $sTableName )
 		{
 			if( isset( self::$aSchemas[ $sTableName ][ "fields" ] ) )
 			{
 				return( self::$aSchemas[ $sTableName ][ "fields" ] );
 			}
-
-         $aFields = array();
+			
+			$aFields = array();
 
 			$sSQL = "SELECT 
 				pa.attname, 
@@ -418,9 +582,8 @@
 				throw new QueryFailedException( $this->GetLastError() );
 			}
             
-            
-			foreach( $oFields as $oField )
-			{
+			foreach( $oFields as $iCount => $oField )
+			{			
 				// When dropping a column with PostgreSQL, you get a lovely .pg.dropped. column
 				// in the PostgreSQL catalog
 				
@@ -449,8 +612,10 @@
             
 		} // GetTableColumns()
 		
-		
-		////////////////////////////////////////////////////////////////////////////////////////////
+
+		/**
+		 *
+		 */
 		public function GetTablePrimaryKey( $sTableName )
 		{
 			if( isset( self::$aSchemas[ $sTableName ][ "primary_key" ] ) )
@@ -482,7 +647,8 @@
 
 			if( $oPrimaryKeys->Count() != 0 )
 			{
-				$oPrimaryKey = $oPrimaryKeys->Rewind();
+				$oPrimaryKeys->Next();				
+				$oPrimaryKey = $oPrimaryKeys->Current();
 				
 				$aIndexFields = explode( " ", $oPrimaryKey->indkey );
 				
@@ -498,9 +664,11 @@
 			return( self::$aSchemas[ $sTableName ][ "primary_key" ] );
 		
 		} // GetTablePrimaryKey()
-			
 		
-		////////////////////////////////////////////////////////////////////////////////////////////
+
+		/**
+		 *
+		 */
 		public function GetTableForeignKeys( $sTableName )
 		{
 			if( isset( self::$aSchemas[ $sTableName ][ "foreign_key" ] ) )
@@ -554,41 +722,40 @@
 					str_replace( array( "{", "}" ), "", $oForeignKey->confkey ) );
 			
 		         	
-         	$aFields = $this->GetTableColumns( $oForeignKey->typname );
-         	
-         	foreach( $aForeignFields as $iIndex => $iField )
-         	{
-         		$aField = $this->GetColumnByNumber( $oForeignKey->typname, $iField );
-         		$aForeignFields[ $iIndex ] = $aField[ "field" ];
-         	}
-         	
-         	foreach( $aLocalFields as $iIndex => $iField )
-         	{
-         		$aField = $this->GetColumnByNumber( $sTableName, $iField );
-         		$aLocalFields[ $iIndex ] = $aField[ "field" ];
-         	}
+				$aFields = $this->GetTableColumns( $oForeignKey->typname );
+				
+				foreach( $aForeignFields as $iIndex => $iField )
+				{
+					$aField = $this->GetColumnByNumber( $oForeignKey->typname, $iField );
+					$aForeignFields[ $iIndex ] = $aField[ "field" ];
+				}
+				
+				foreach( $aLocalFields as $iIndex => $iField )
+				{
+					$aField = $this->GetColumnByNumber( $sTableName, $iField );
+					$aLocalFields[ $iIndex ] = $aField[ "field" ];
+				}
          	
 				// we currently do not handle references to multiple fields:
 
 				$localField = current( $aLocalFields );
 
-         	$sName = substr( $localField, strlen( $localField ) - 3 ) == "_id" ? 
-         		substr( $localField, 0, strlen( $localField ) - 3 ) : $localField;
-         	
-         	$sName = StringFunctions::ToSingular( $sName );
-         	
-         	self::$aSchemas[ $sTableName ][ "foreign_key" ][ $sName ] = array(
-         		"table" => $oForeignKey->typname,
-         		"name" => $sName,
-         		"local" => $aLocalFields,
-         		"foreign" => $aForeignFields,
-         		"type" => "m-1",
-         		"dependency" => true
-         	);
-      	
-      		$iCount++;
+	         	$sName = substr( $localField, strlen( $localField ) - 3 ) == "_id" ? 
+	         		substr( $localField, 0, strlen( $localField ) - 3 ) : $localField;
+	         	
+	         	$sName = StringFunctions::ToSingular( $sName );
+	         	
+	         	self::$aSchemas[ $sTableName ][ "foreign_key" ][ $sName ] = array(
+	         		"table" => $oForeignKey->typname,
+	         		"name" => $sName,
+	         		"local" => $aLocalFields,
+	         		"foreign" => $aForeignFields,
+	         		"type" => "m-1",
+	         		"dependency" => true
+	         	);
+	      	
+	      		$iCount++;
 			}
-			
 			
 			// find tables that reference us:
 					
@@ -620,30 +787,30 @@
 				throw new QueryFailedException( $this->GetLastError() );
 			}
 
-	      foreach( $oForeignKeys as $oForeignKey )
-	      {
-	      	$aLocalFields = $aArray = explode( ",", 
+			foreach( $oForeignKeys as $oForeignKey )
+			{
+				$aLocalFields = $aArray = explode( ",", 
 					str_replace( array( "{", "}" ), "", $oForeignKey->confkey ) );
-	
-	         $aForeignFields = $aArray = explode( ",", 
+			
+			 	$aForeignFields = $aArray = explode( ",", 
 					str_replace( array( "{", "}" ), "", $oForeignKey->conkey ) );
-	         	
-         	
-	         $this->GetSchema( $oForeignKey->typname );
-	         	
-	         $aFields = $this->GetTableColumns( $oForeignKey->typname );
-	         	
-	         foreach( $aForeignFields as $iIndex => $iField )
-	         {
-	         	$aField = $this->GetColumnByNumber( $oForeignKey->typname, $iField );
-	         	$aForeignFields[ $iIndex ] = $aField[ "field" ];
-	         }
-	         	
-	         foreach( $aLocalFields as $iIndex => $iField )
-	         {
-	         	$aField = $this->GetColumnByNumber( $sTableName, $iField );
-	         	$aLocalFields[ $iIndex ] = $aField[ "field" ];
-	         }
+			 	
+			
+				$this->GetSchema( $oForeignKey->typname );
+				
+				$aFields = $this->GetTableColumns( $oForeignKey->typname );
+				
+				foreach( $aForeignFields as $iIndex => $iField )
+				{
+					$aField = $this->GetColumnByNumber( $oForeignKey->typname, $iField );
+					$aForeignFields[ $iIndex ] = $aField[ "field" ];
+				}
+				
+				foreach( $aLocalFields as $iIndex => $iField )
+				{
+					$aField = $this->GetColumnByNumber( $sTableName, $iField );
+					$aLocalFields[ $iIndex ] = $aField[ "field" ];
+				}
 
 				$localField = reset( $aLocalFields );
 				$foreignField = reset( $aForeignFields );
@@ -669,24 +836,26 @@
 					$sType = "1-1";
 				}
 
-
-	         self::$aSchemas[ $sTableName ][ "foreign_key" ][ $oForeignKey->typname ] = array(
-	         	"table" => $oForeignKey->typname,
-	         	"name" => $oForeignKey->typname,
-					"local" => $aLocalFields,
-	         	"foreign" => $aForeignFields,
-	         	"type" => $sType,
-         		"dependency" => false
-	         );
-	         	
-         	$iCount++;
+				self::$aSchemas[ $sTableName ][ "foreign_key" ][ $oForeignKey->typname ] = array(
+					"table" => $oForeignKey->typname,
+					"name" => $oForeignKey->typname,
+						"local" => $aLocalFields,
+					"foreign" => $aForeignFields,
+					"type" => $sType,
+					"dependency" => false
+				);
+				
+				$iCount++;
 			}
 			
 			return( self::$aSchemas[ $sTableName ][ "foreign_key" ] );
 		
-		} // GetTableForeignKeys();
+		} // GetTableForeignKeys()
+		
 
-
+		/**
+		 *
+		 */
 		public function IsPrimaryKeyReference( $sTableName, $sColumnName )
 		{
 			$aForeignKeys = $this->GetTableForeignKeys( $sTableName );
@@ -700,10 +869,13 @@
 			}
 			
 			return( false );
-		}
+		
+		} // IsPrimaryKeyReference()
+		
 
-
-		////////////////////////////////////////////////////////////////////////////////////////////
+		/**
+		 *
+		 */
 		public function GetColumnType( $sTableName, $sFieldName )
 		{
 			$aFields = $this->GetTableColumns( $sTableName );
@@ -720,8 +892,16 @@
 		
 		} // GetColumnType()
 		
-		
-		////////////////////////////////////////////////////////////////////////////////////////////
+
+		/**
+		 * Determines whether the specified table exists in the current database.
+		 * 
+		 * This method first determines whether or not the table exists in the schemas array. If not, 
+		 * it attempts to find the table in the PostgreSQL catalog. 
+		 * 
+		 * @argument string The name of the table to determine existence
+		 * @returns boolean True or false, depending on whether the table exists		 	 
+		 */
 		public function TableExists( $sTableName )
 		{
 			if( isset( self::$aSchemas[ $sTableName ] ) )
@@ -744,9 +924,11 @@
 			return( $oResultSet->Count() );
 		
 		} // TableExists()
+		
 
-
-		////////////////////////////////////////////////////////////////////////////////////////////
+		/**
+		 *
+		 */
 		protected function GetColumnByNumber( $sTableName, $iColumnNumber )
 		{
 			foreach( self::$aSchemas[ $sTableName ][ "fields" ] as $aField )
@@ -761,7 +943,6 @@
 		
 		} // GetColumnByNumber()
 
-
-    }; // Database()
+    }; // PostgresDatabase()
 
 ?>

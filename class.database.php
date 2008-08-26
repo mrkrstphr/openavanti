@@ -8,8 +8,8 @@
  * @dependencies 	
  * @copyright		Copyright (c) 2008, Kristopher Wilson
  * @license			http://www.openavanti.com/license
- * @link				http://www.openavanti.com
- * @version			0.6.4-alpha
+ * @link			http://www.openavanti.com
+ * @version			0.6.7-beta
  *
  */
 
@@ -19,7 +19,7 @@
 	 *
 	 * @category	Database
 	 * @author		Kristopher Wilson
-	 * @link			http://www.openavanti.com/docs/database
+	 * @link		http://www.openavanti.com/docs/database
 	 */
 	abstract class Database implements Throwable
 	{
@@ -170,6 +170,27 @@
 		 * @returns	ResultSet A ResultSet object containing the results of the database query
 		 */
 		abstract public function Query( $sSQL );
+		
+		
+		/*
+		 *
+		 *
+		 */		 		 
+		abstract public function PullNextResult( &$rResult );
+		
+		
+		/*
+		 *
+		 *
+		 */	
+		abstract public function CountFromResult( &$rResult );
+		
+		
+		/*
+		 *
+		 *
+		 */	
+		abstract public function ResetResult( &$rResult );
 		
 
 		/*
