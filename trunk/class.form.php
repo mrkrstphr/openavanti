@@ -8,8 +8,8 @@
  * @dependencies 	FileInfo
  * @copyright		Copyright (c) 2008, Kristopher Wilson
  * @license			http://www.openavanti.com/license
- * @link				http://www.openavanti.com
- * @version			0.6.4-alpha
+ * @link			http://www.openavanti.com
+ * @version			0.6.7-beta
  *
  */
  
@@ -18,7 +18,7 @@
 	 *
 	 * @category	Forms
 	 * @author		Kristopher Wilson
-	 * @link			http://www.openavanti.com/docs/form
+	 * @link		http://www.openavanti.com/docs/form
 	 */
 	class Form 
 	{
@@ -31,12 +31,15 @@
 		 * @argument array An array of keys and values to load into the forms data array
 		 * @returns void
 		 */
+		/*
 		public static function LoadArray( $aArray )
 		{
 			self::$aFields += $aArray;
 		
 		} // LoadArray()
+		*/
 
+		
 		/**
 		 * Loads the specified array into the classes aFields array. These values are later
 		 * used by the field generation helpers for setting the value of the form field.		 
@@ -44,17 +47,29 @@
 		 * @argument array An array of keys and values to load into the forms data array
 		 * @returns void
 		 */
-		public static function LoadObject( $oObject )
+		public static function Load( $oObject, &$aTarget = null )
 		{
+			is_null( $aTarget ) ? $aTarget = &self::$aFields : $aTarget = $aTarget;
+		
 			foreach( $oObject as $sKey => $sValue )
 			{
-				if( !is_object( $sValue ) || !is_array( $sValue ) )
+				if( !is_object( $sValue ) && !is_array( $sValue ) )
 				{
-					self::$aFields[ $sKey ] = $sValue;
+					$aTarget[ $sKey ] = $sValue;
+				}
+				else
+				{
+					if( !isset( $aTarget[ $sKey ] ) )
+					{
+						$aTarget[ $sKey ] = array();
+					}
+					
+					self::Load( $sValue, $aTarget[ $sKey ] );
 				}
 			}
+						
+		} // Load()		
 		
-		} // LoadArray()		
 		
 		/**
 		 * Generate a label for the form. Note that the supplied attributes are not validated to be
@@ -74,7 +89,14 @@
 				$sLabel = $aAttributes[ "label" ];
 			
 				unset( $aAttributes[ "label" ] );
-			}	
+			}
+			
+			if( class_exists( "Validation" ) && isset( $aAttributes[ "for" ] ) && 
+				Validation::FieldHasErrors( $aAttributes[ "for" ] ) )
+			{
+				$aAttributes[ "class" ] = isset( $aAttributes[ "class" ] ) ? 
+					$aAttributes[ "class" ] . " error" : "error";	
+			}
 			
 			$sInput = "<label ";
 			
@@ -83,7 +105,7 @@
 				$sInput .= "{$sKey}=\"{$sValue}\" ";
 			}
 			
-			$sInput .= ">{$sLabel}:</label>";
+			$sInput .= ">{$sLabel}</label>";
 			
 			
 			if( $bReturn )
@@ -109,15 +131,27 @@
 		 */
 		public static function Input( $aAttributes, $bReturn = false )
 		{
-			if( isset( self::$aFields[ $aAttributes[ "name" ] ] ) )
+			if( strtolower( $aAttributes[ "type" ] ) == "checkbox" )
 			{
-				$aAttributes[ "value" ] = self::$aFields[ $aAttributes[ "name" ] ];
+				$sValue = self::TranslatePathForValue( $aAttributes[ "name" ] );
+				
+				if( isset( $aAttributes[ "value" ] ) && $aAttributes[ "value" ] == $sValue )
+				{
+					$aAttributes[ "checked" ] = "checked";
+				}
+			}
+			else if( strtolower( $aAttributes[ "type" ] ) != "password" )
+			{
+				$sValue = self::TranslatePathForValue( $aAttributes[ "name" ] );
+				
+				$aAttributes[ "value" ] = $sValue !== false ? $sValue : "";
 			}
 		
 			$sInput = "<input ";
 			
 			foreach( $aAttributes as $sKey => $sValue )
 			{
+				$sValue = htmlentities( $sValue );
 				$sInput .= "{$sKey}=\"{$sValue}\" ";
 			}
 			
@@ -155,16 +189,31 @@
 		{
 			$sDefault = "";
 			
-			if( isset( self::$aFields[ $aAttributes[ "name" ] ] ) )
+			$sValue = self::TranslatePathForValue( $aAttributes[ "name" ] );
+			
+			if( $sValue !== false )
 			{
-				$sDefault = self::$aFields[ $aAttributes[ "name" ] ];
+				$sDefault = $sValue;
 			}
 			else if( isset( $aAttributes[ "default" ] ) )
 			{
 				$sDefault = $aAttributes[ "default" ];
+				unset( $aAttributes[ "default" ] );
 			}
 		
-			$sSelect = "<select name=\"" . $aAttributes[ "name" ] . "\">\n";
+			$sSelect = "<select ";
+			
+			foreach( $aAttributes as $sKey => $sValue )
+			{
+				if( $sKey == "options" )
+				{
+					continue;
+				}
+				
+				$sSelect .= "{$sKey}=\"{$sValue}\" ";
+			}
+			
+			$sSelect .= ">\n";
 			
 			foreach( $aAttributes[ "options" ] as $sKey => $sValue )
 			{
@@ -175,7 +224,6 @@
 			}
 			
 			$sSelect .= "\n</select>\n";
-			
 			
 			if( $bReturn )
 			{
@@ -208,11 +256,9 @@
 			}
 			
 			$sInput .= ">";
-			
-			if( isset( self::$aFields[ $aAttributes[ "name" ] ] ) )
-			{
-				$sInput .= self::$aFields[ $aAttributes[ "name" ] ];
-			}
+
+			$sValue = self::TranslatePathForValue( $aAttributes[ "name" ] );
+			$sInput .= $sValue !== false ? $sValue : "";
 			
 			$sInput .= "</textarea>";
 			
@@ -227,6 +273,42 @@
 			}
 			
 		} // TextArea()
+		
+		
+		/**
+		 *
+		 */		 		
+		private static function TranslatePathForValue( $sName )
+		{
+			$sValue = false;
+			
+			$sPath = str_replace( "[", "/", $sName );
+			$sPath = str_replace( "]", "", $sPath );
+			
+			$aKeys = explode( "/", $sPath );
+			
+			$aData = self::$aFields;
+			
+			foreach( $aKeys as $sKey )
+			{
+				if( isset( $aData[ $sKey ] ) )
+				{
+					$aData = $aData[ $sKey ];
+				}
+				else
+				{
+					return( false );
+				}
+			}
+			
+			if( !is_array( $aData ) )
+			{
+				$sValue = $aData;
+			}
+			
+			return( $sValue );
+		
+		} // TranslatePathForValue()
 
 	}; // Form()
 
