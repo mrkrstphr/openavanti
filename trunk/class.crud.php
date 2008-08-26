@@ -8,8 +8,8 @@
  * @dependencies 	Database, StringFunctions
  * @copyright		Copyright (c) 2008, Kristopher Wilson
  * @license			http://www.openavanti.com/license
- * @link				http://www.openavanti.com
- * @version			0.6.4-alpha
+ * @link			http://www.openavanti.com
+ * @version			0.6.7-beta
  *
  */
  
@@ -18,19 +18,13 @@
 	 *
 	 * @category	Database
 	 * @author		Kristopher Wilson
-	 * @link			http://www.openavanti.com/docs/crud
+	 * @link		http://www.openavanti.com/docs/crud
 	 */
 	class CRUD implements Iterator, Throwable
-	//
-	// Description:
-	//		
-	//
 	{
 		protected $oDatabase = null;
 		protected $sTableName = null;		
 		protected $oDataSet = null;
-		
-		protected $bEmptySet = true; // This could possibily be removed now that we are an iterator
 		
 		protected $aData = array();
 		
@@ -74,12 +68,12 @@
 		} // __construct()
 		
 		
-		////////////////////////////////////////////////////////////////////////////////////////////
+		/**
+		 * Setup variables for each database column for this table
+		 * 
+		 *
+		 */		 		 		 
 		protected function PrepareColumns()
-		//
-		// Description:
-		//		Setup variables for each database column for this table
-		//
 		{
 			$aColumns = $this->oDatabase->GetTableColumns( $this->sTableName );
 			
@@ -90,7 +84,6 @@
 			}
 		
 		} // PrepareColumns()
-		
 		
 		
 		/**
@@ -226,7 +219,9 @@
 			// Loop the data and create member variables
 			if( $this->oDataSet->Count() != 0 )
 			{
-				$this->Load( $this->oDataSet->Rewind() );
+				$this->oDataSet->Next();
+				
+				$this->Load( $this->oDataSet->Current() );
 			}	
 			
 			$this->bDirty = false;
@@ -303,15 +298,122 @@
 			// Execute and pray:
 			if( !( $this->oDataSet = $this->oDatabase->Query( $sSQL ) ) )
 			{
-				throw new QueryFailedException( $this->oDatbase->GetLastError() );
+				throw new QueryFailedException( $this->oDatabase->GetLastError() );
 			}
-						
-			return( $this->oDataSet->Rewind()->count );
+			
+			$this->oDataSet->Next();
+			
+			return( $this->oDataSet->Current()->count );
 			
 		} // FindCount()
 		
 		
-		/////////////////////////////////////////////////////////
+		/**
+		 * This method will retrieve records from the table based on column value using the supplied
+		 * column name (which may have had underscores removed and be cased differently) and
+		 * column value.
+		 * 
+		 * This method is invoked through __call() when the user uses the CRUD::getBy[column]()
+		 * "virtual" method.			 		 		 		 
+		 *
+		 * @argument string The name of the column we are pulling records by. This name may 
+		 * 	underscores removed and be cased differently		 
+		 * @argument string The value of the column in the first argument that determines which
+		 * 	records will be selected
+		 * @returns CRUD A reference to the current object to support chaining or secondary assignment
+		 * @throws Exception, QueryFailedException		 		 		 		 		 
+		 */
+		protected function GetDataByColumnValue( $sColumn, $sValue )
+		{
+			$aColumns = $this->oDatabase->GetTableColumns( $this->sTableName );
+			
+			$aColumn = null;
+			
+			foreach( $aColumns as $sName => $aTmpColumn )
+			{
+				if( strtolower( str_replace( "_", "", $sName ) ) == strtolower( $sColumn ) )
+				{
+					$aColumn = $aTmpColumn;
+					break;
+				}
+			}
+			
+			if( is_null( $aColumn ) )
+			{
+				throw new Exception( "Database column {$this->sTableName}.{$sColumn} does not exist." );
+			}
+			
+			$sDataType = $aColumn[ "type" ];
+			
+			$this->Find( null, array(
+				"where" => $aColumn[ "field" ] . " = " . 
+					$this->oDatabase->FormatData( $sDataType, $sValue )
+			) );
+			
+			return( $this );
+			
+		} // GetDataByColumnValue()		
+		
+		
+		/**
+		 * This method will delete records from the table based on column value using the supplied
+		 * column name (which may have had underscores removed and be cased differently) and
+		 * column value.
+		 * 
+		 * This method is invoked through __call() when the user uses the CRUD::destroyBy[column]()
+		 * "virtual" method.		 		 		 		 		 
+		 *
+		 * @argument string The name of the column we are basing our delete from. This name may
+		 * 	underscores removed and be cased differently		 
+		 * @argument string The value of the column in the first argument that determines which
+		 * 	records will be deleted.
+		 * @returns boolean True if successful/no error; throws an Exception otherwise
+		 * @throws Exception, QueryFailedException		 		 		 		 		 
+		 */
+		protected function DestroyDataByColumnValue( $sColumn, $sValue )
+		{
+			$aColumns = $this->oDatabase->GetTableColumns( $this->sTableName );
+			
+			$aColumn = null;
+			
+			foreach( $aColumns as $sName => $aTmpColumn )
+			{
+				if( strtolower( str_replace( "_", "", $sName ) ) == strtolower( $sColumn ) )
+				{
+					$aColumn = $aTmpColumn;
+					break;
+				}
+			}
+			
+			if( is_null( $aColumn ) )
+			{
+				throw new Exception( "Database column {$this->sTableName}.{$sColumn} does not exist." );
+			}
+			
+			$sDataType = $aColumn[ "type" ];
+			
+			$sSQL = "DELETE FROM 
+				{$this->sTableName}
+			WHERE
+				" . $aColumn[ "field" ] . " = " . $this->oDatabase->FormatData( $sDataType, $sValue );
+			
+			if( !$this->oDatabase->Query( $sSQL ) )
+			{
+				throw new QueryFailedException( "Failed to delete data" );
+			}
+			
+			return( true );
+			
+		} // GetDataByColumnValue()	 		 		 		
+		
+		
+		/**
+		 *
+		 * 		 
+		 * @note GetRecord() will move the internal pointers of all 1-M iterators loaded
+		 * 
+		 *		 		 
+		 */
 		public function GetRecord()
 		{			
 			$oRecord = new StdClass();
@@ -320,7 +422,19 @@
 			{
 				if( is_object( $xValue ) )
 				{
-					$oRecord->$sKey = $xValue->GetRecord();
+					if( $xValue->Count() > 1 )
+					{
+						$oRecord->$sKey = array();
+						
+						foreach( $xValue as $oValue )
+						{
+							$oRecord->{$sKey}[] = $oValue->GetRecord();
+						}
+					}
+					else
+					{
+						$oRecord->$sKey = $xValue->GetRecord();
+					}
 				}
 				else
 				{
@@ -333,6 +447,11 @@
 		} // GetRecord()
 		
 		
+		/**
+		 *
+		 *
+		 * 		 
+		 */		 		 		
 		public function GetAll()
 		{
 			$aRecords = array();
@@ -349,7 +468,11 @@
 		} // GetAll()
 		
 		
-		////////////////////////////////////////////////////////////////////////////////////////////
+		/**
+		 *
+		 *
+		 *		 
+		 */		 		 		
 		protected function FindRelationship( $sName )
 		{
 			$aForeignKeys = $this->oDatabase->GetTableForeignKeys( $this->sTableName );
@@ -382,47 +505,44 @@
 				return;
 			}
 			
-      	$aColumns = $this->oDatabase->GetTableColumns( $this->sTableName );
-			$aRelationships = $this->oDatabase->GetTableForeignKeys( $this->sTableName );
+      		$aColumns = $this->oDatabase->GetTableColumns( $this->sTableName );
+				$aRelationships = $this->oDatabase->GetTableForeignKeys( $this->sTableName );
 
-         foreach( $oRecord as $sKey => $xValue )
-         {
-         	if( is_array( $xValue ) || is_object( $xValue ) )
-            {
-					if( isset( $aRelationships[ $sKey ] ) )
-					{
-						$aRelationship = $aRelationships[ $sKey ];
-						$sTable = $aRelationships[ $sKey ][ "table" ];
-						
-						if( $aRelationship[ "type" ] == "1-1" || $aRelationship[ "type" ] == "m-1" )
-						{							
-							$this->aData[ $sKey ] = $this->InstantiateClass( $sTable, $xValue );
-						}
-						else if( $aRelationships[ $sKey ][ "type" ] == "1-m" )
+	         foreach( $oRecord as $sKey => $xValue )
+	         {
+	         	if( is_array( $xValue ) || is_object( $xValue ) )
+	            {
+						if( isset( $aRelationships[ $sKey ] ) )
 						{
-							if( !isset( $this->aData[ $sKey ] ) )
-							{
-								$this->aData[ $sKey ] = array();
-							}
+							$aRelationship = $aRelationships[ $sKey ];
+							$sTable = $aRelationships[ $sKey ][ "table" ];
 							
-							foreach( $xValue as $oRelatedData )
-							{								
-								$this->aData[ $sKey ] = $this->InstantiateClass( $sTable, $oRelatedData );
+							if( $aRelationship[ "type" ] == "1-1" || $aRelationship[ "type" ] == "m-1" )
+							{							
+								$this->aData[ $sKey ] = $this->InstantiateClass( $sTable, $xValue );
 							}
-						}
-					}					
-            }
-            else if( isset( $aColumns[ $sKey ] ) )
-            {
-					$this->aData[ $sKey ] = $xValue;
-         	}
+							else if( $aRelationships[ $sKey ][ "type" ] == "1-m" )
+							{
+								if( !isset( $this->aData[ $sKey ] ) )
+								{
+									$this->aData[ $sKey ] = array();
+								}
+								
+								foreach( $xValue as $oRelatedData )
+								{
+									$this->aData[ $sKey ][] = $this->InstantiateClass( 
+										$sTable, $oRelatedData );
+								}
+							}
+						}					
+	            }
+	            else if( isset( $aColumns[ $sKey ] ) )
+	            {
+						$this->aData[ $sKey ] = $xValue;
+	         	}
 			}
-			
-			$this->bEmptySet = false; // is this still used?
 
 		} // Load()
-		
-		
 		
 		
 		/**
@@ -435,7 +555,7 @@
 		 */
 		protected function IsEmpty()
 		{
-			return( $this->bEmptySet );
+			return( $this->Count() == 0 );
 			
 		} // IsEmpty()
 		
@@ -447,9 +567,8 @@
 		 * 	
 		 * @returns integer The number of results in the data set
 		 */
-		protected function GetCount() 
+		public function Count() 
 		{
-		
 			if( !is_null( $this->oDataSet ) )
 			{
 				return( $this->oDataSet->Count() );
@@ -460,6 +579,11 @@
 		} // GetCount()
 			
 		
+		/**
+		 *
+		 *
+		 *
+		 */		 		 		 		
 		public function __isset( $sName )
 		{
 			return( array_key_exists( $sName, $this->aData ) );
@@ -467,7 +591,10 @@
 		} // __isset()
 		
 		
-		////////////////////////////////////////////////////////////////////////////////////////////
+		/**
+		 *
+		 *
+		 */		 		 		
 		public function __get( $sName )
 		{			
 			if( array_key_exists( $sName, $this->aData ) )
@@ -483,7 +610,6 @@
 			{
 				throw new Exception( "Relationship [{$sName}] does not exist" );
 			}
-
 
 			$aRelationship = $aSchema[ "foreign_key" ][ $sName ];
 			
@@ -529,7 +655,15 @@
 		} // __get()
 		
 		
-		//////////////////////////////////////////////////////////////////////////////////////////////
+		/** 
+		 * Attempts to set the value of a database column, or sets a relationship through the
+		 * CRUD->[column_name] syntax.
+		 * 
+		 * @argument string The name of the column to set
+		 * @argument string The value to set the column specified in the first argument
+		 * @returns void
+		 * @throws Exception
+		 */	
 		public function __set( $sName, $sValue )
 		{			
 			$aColumns = $this->oDatabase->GetTableColumns( $this->sTableName );
@@ -550,7 +684,35 @@
 		} // __set()
 		
 		
-		//////////////////////////////////////////////////////////////////////////////////////////////
+		/**
+		 * Unsets the value of a database column. This will effectively remove the column from
+		 * the known list of columns for this instance, causing a CRUD::Save() operation to not
+		 * update the value.
+		 * 
+		 * @argument string The name of the database column to unset
+		 * @returns void
+		 */	
+		public function __unset( $sName )
+		{
+			if( isset( $this->aData[ $sName ] ) )
+			{
+				unset( $this->aData[ $sName ] );
+			}
+		
+		} // __set()
+		
+		
+		/**
+		 * Supports several "virtual" or magic methods, such as data manipulation/retrieval through 
+		 * 	getBy[column_name] and destroyBy[column_name], reserved word methods, such as empty(),
+		 * 	and also provides access to public methods of the database, which fakes database
+		 * 	class inheritance (which is needed to support multiple database drivers).
+		 *
+		 * @argument string The name of the argument to be called magically	
+		 * @argument array An array of arguments to pass to the magically called method
+		 * @returns mixed Depends sName, the first argument
+		 * @throws Exception
+		 */
 		public function __call( $sName, $aArguments )
 		{
 			switch( strtolower( $sName ) )
@@ -558,26 +720,54 @@
 				case "empty":
 					return( $this->IsEmpty() );
 				break;
-				
-				case "count":
-					return( $this->GetCount() );
-				break;
-				
-				default:
-					throw new Exception( "Call to undefined method: {$sName}" );
-				break;
 			}
+			
+			if( is_callable( array( $this->oDatabase, $sName ) ) )
+			{
+				return( call_user_func_array( array( $this->oDatabase, $sName ), $aArguments ) );
+			}
+			
+			if( substr( $sName, 0, 5 ) == "getBy" )
+			{			
+				return( $this->GetDataByColumnValue( substr( $sName, 5 ), $aArguments[ 0 ] ) );
+			}
+			else if( substr( $sName, 0, 9 ) == "destroyBy" )
+			{				
+				return( $this->DestroyDataByColumnValue( substr( $sName, 9 ), $aArguments[ 0 ] ) );
+			}
+			
+			throw new Exception( "Call to undefined method: {$sName}" );
 				
 		} // __call()
 		
 		
-		////////////////////////////////////////////////////////////////////////////////////////////
+		/**
+		 * Assists slightly in object cloning. If this table has a single primary key, the value
+		 * of this key will be whiped out when cloning. 		 
+		 *		 		 
+		 * @returns void		 
+		 */		 		
+		public function __clone()
+		{
+			$aPrimaryKey = $this->oDatabase->GetTablePrimaryKey( $this->sTableName );
+			
+			if( count( $aPrimaryKey ) == 1 )
+			{
+				$sPrimaryKey = reset( $aPrimaryKey );
+				
+				$this->{$sPrimaryKey} = null;
+			}
+		
+		} // __clone()
+		
+		
+		/**
+		 * Based on presence of primary key data, either creates a new record, or 
+		 * updates theexisting record
+		 *
+		 * @returns boolean True if the save was successful, false otherwise		 
+		 */
 		public function Save()
-		//
-		// Description:
-		//		Based on presence of primary key data, either creates a new record, or updates the
-		//		existing record
-		//
 		{			
 			// grab a copy of the primary key:
 			$aPrimaryKeys = $this->oDatabase->GetTablePrimaryKey( $this->sTableName );
@@ -589,7 +779,6 @@
 			
 			// If we have a singular primary key, we can rely on whether the primary key
 			// value of this object is null
-			
 			
 			if( count( $aPrimaryKeys ) == 1 )
 			{
@@ -609,8 +798,6 @@
 			{
 				$bInsert = !$this->RecordExists();
 			}
-
-
 			
 			if( $bInsert )
 			{
@@ -622,9 +809,11 @@
 			}
 		
 		} // Save()
-				
 		
-		////////////////////////////////////////////////////////////////////////////////////////////
+		
+		/**
+		 *
+		 */
 		public function SaveAll()
 		{			
 			$aForeignKeys = $this->oDatabase->GetTableForeignKeys( $this->sTableName );
@@ -637,7 +826,10 @@
 				
 				if( isset( $this->aData[ $sRelationshipName ] ) && $aRelationship[ "dependency" ] )
 				{
-					$this->aData[ $sRelationshipName ]->SaveAll();
+					if( !$this->aData[ $sRelationshipName ]->SaveAll() )
+					{
+						return( false );
+					}
 					
 					// We only work with single keys here !!
 					$sLocal = reset( $aRelationship[ "local" ] );
@@ -649,7 +841,10 @@
 
 			// Save the primary record
 			
-			$this->Save();
+			if( !$this->Save() )
+			{
+				return( false );
+			}
 			
 			// Save all related data last
 
@@ -668,7 +863,11 @@
 						foreach( $this->aData[ $sRelationshipName ] as $oRelationship )
 						{
 							$oRelationship->$sForeign = $this->aData[ $sLocal ];
-							$oRelationship->SaveAll();
+							
+							if( !$oRelationship->SaveAll() )
+							{
+								return( false );
+							}
 						}
 					}
 					else if( $aRelationship[ "type" ] == "1-1" )
@@ -678,16 +877,16 @@
 					}
 				}
 			}
+			
+			return( true );
 		
 		} // SaveAll()
 		
 		
-		////////////////////////////////////////////////////////////////////////////////////////////
+		/**
+		 *
+		 */
 		protected function Insert()
-		//
-		// Description:
-		//
-		//
 		{
 			$sColumns = "";
 			$sValues = "";
@@ -710,7 +909,12 @@
 					!$this->oDatabase->IsPrimaryKeyReference( $this->sTableName, reset( $aPrimaryKeys ) ) )
 				{
 					continue;
-				}				
+				}
+				
+				if( empty( $this->aData[ $aColumn[ "field" ] ] ) )
+				{
+					continue;
+				}
 				
 				// Create a list of columns to insert into:
 				$sColumns .= ( !empty( $sColumns ) ? ", " : "" ) . 
@@ -750,7 +954,7 @@
 				$this->aData[ $aPrimaryKeys[0] ] = $iKey;
 				
 				// return the primary key:
-				return( $iKey );
+				return( true );
 			}
 			
 			
@@ -760,34 +964,33 @@
 		} // Insert()
 		
 		
-		
-		////////////////////////////////////////////////////////////////////////////////////////////
+		/**
+		 * Responsible for updating the currently stored data for primary table and
+		 * all foreign tables referenced
+		 * 
+		 * @returns boolean True if the update was successful, false otherwise		 		 		 
+		 */
 		protected function Update()
-		//
-		// Description:
-		//		Responsible for updating the currently stored data for primary table and all foreign
-		//		tables referenced.
-		//
 		{			
 			// update the primary record:
 			$sSQL = $this->UpdateQuery();
 			
 			if( !$this->oDatabase->Query( $sSQL ) )
 			{
-				throw new Exception( "Failed on Query: {$sSQL} <br />" . $this->oDatabase->GetLastError() );
-				exit;
+				throw new Exception( "Failed on Query: " . $this->oDatabase->GetLastError() );
 			}
+			
+			return( true );
 			
 		} // Update()
 		
 		
-		
-		/////////////////////////////////////////////////////////////////////////////////////////////
+		/**
+		 * Called by the Update() method to generate an update query for this table
+		 * 
+		 * @returns string The generated SQL query		 		 
+		 */
 		protected function UpdateQuery()
-		//
-		// Description:
-		//		Called by update() method
-		//
 		{
 			$aSchema = $this->oDatabase->GetSchema( $this->sTableName );
 			
@@ -808,6 +1011,11 @@
 				if( in_array( $field[ "field" ], array( "updated_date", "updated_stamp", "updated_on" ) ) )
 				{
 					$this->aData[ $field[ "field" ] ] = gmdate( "Y-m-d H:i:s" );
+				}
+				
+				if( !isset( $this->aData[ $field[ "field" ] ] ) )
+				{
+					continue;
 				}
 				
 				// complete the query for this field:
@@ -839,7 +1047,11 @@
 		} // UpdateQuery()
 		
 		
-		/////////////////////////////////////////////////////////////////////////////////////////////
+		/**
+		 *
+		 *
+		 * 		 
+		 */		 		 		
 		protected function RecordExists()
 		{
 			$aPrimaryKeys = $this->oDatabase->GetTablePrimaryKey( $this->sTableName );
@@ -873,8 +1085,8 @@
 		
 		
 		/**
-		 *	 Destroys (deletes) the current data. This method will delete the primary record 
-		 *	 (assuming that the primary key for the data is set).
+		 * Destroys (deletes) the current data. This method will delete the primary record 
+		 * (assuming that the primary key for the data is set).
 		 * 	
 		 * @returns void
 		 */
@@ -905,13 +1117,12 @@
 		} // Destroy()
 		
 		
-		//////////////////////////////////////////////////////////////////////////////////////////////
+		/**
+		 * Helper method for generating a where clause for a query string. Where clause is
+		 * built by supplied keys and associated data
+		 * 
+		 */		 		 		
 		protected function buildWhereClause( $keys, $dataSet )
-		//
-		// Description:
-		//		Helper method for generating a where clause for a query string. Where clause is
-		//		built by supplied keys and associated data
-		//
 		{
 			$where = "";
 			
@@ -933,24 +1144,28 @@
 		//
 		// ITERATOR DEFINITION
 		//
+		
 
-		////////////////////////////////////////////////////////////////////////////////////////////
-	   public function Rewind()  
-	   //
-	   // Description:
-	   //		See http://www.php.net/~helly/php/ext/spl/interfaceIterator.html
-	   //
-		{		
-			if( !is_null( $this->oDataSet ) )
+		/**
+		 *
+		 * See http://www.php.net/~helly/php/ext/spl/interfaceIterator.html
+		 * 
+		 */		 		 
+		public function Rewind() 
+		{							
+			if( !is_null( $this->oDataSet ) && $this->oDataSet->Count() != 0 )
 			{
-				$this->oDataSet->Rewind();
+				$this->Cleanup();
 				
-				return( $this->oDataSet->Rewind() );
-			}
+				$this->oDataSet->Rewind();
 			
-			return( null );
-	
-	   } // Rewind()
+				if( $this->oDataSet->Valid() )
+				{
+					$this->Load( $this->oDataSet->Current() );
+				}
+			}
+		
+		} // Rewind()
     	
 
 		/**
@@ -962,7 +1177,9 @@
 		 */
 		public function Current() 
 		{
-			if( !$this->bEmptySet )
+			//echo "CRUD::Current <br />";
+			
+			if( $this->Valid() )
 			{
 				return( $this );
 			}
@@ -972,78 +1189,91 @@
 		} // Current()
 		
 		
-		////////////////////////////////////////////////////////////////////////////////////////////
+		/**
+		 *
+		 * See http://www.php.net/~helly/php/ext/spl/interfaceIterator.html
+		 * 
+		 */		
 		public function Key() 
-		//
-		// Description:
-		//		See http://www.php.net/~helly/php/ext/spl/interfaceIterator.html
-		//
 		{			
-			// It might be a good idea to return the primary key of the current record here,
-			// but what if that primary key is compound? Return an array? Hmm...
-			
-			return( null );
+			return( $this->oDataSet->Key() );
 			
 		} // Key()
-	
-	
-		////////////////////////////////////////////////////////////////////////////////////////////
+
+
+		/**
+		 *
+		 * See http://www.php.net/~helly/php/ext/spl/interfaceIterator.html
+		 * 
+		 */		
 		public function Next() 
-		//
-		// Description:
-		//		See http://www.php.net/~helly/php/ext/spl/interfaceIterator.html
-		// 
-		{
-			$this->bEmptySet = true;
-				
-			if( !is_null( $this->oDataSet ) && $this->oDataSet->Count() != 0 )
+		{			
+			if( !is_null( $this->oDataSet ) )
 			{
-				$aRelationships = $this->oDatabase->GetTableForeignKeys( $this->sTableName );
+				$this->Cleanup();
+			
+				$this->oDataSet->Next();
 				
-				foreach( $aRelationships as $aRelationship )
+				if( $this->Valid() )
 				{
-					$sRelationshipName = $aRelationship[ "name" ];
-					
-					if( array_key_exists( $sRelationshipName, $this->aData ) )
-					{
-						unset( $this->aData[ $sRelationshipName ] );
-					}
+					$oData = $this->oDataSet->Current();
+									
+					$this->Load( $oData );
 				}
-			
-				$this->Load( $this->oDataSet->Next() );
 			}
-			else
-			{
-				return( null );
-			}
-			
-			return( $this );
 		
 		} // Next()
 
-	
-		//////////////////////////////////////////////////////////////////////////////////////////////
+
+		/**
+		 *
+		 * See http://www.php.net/~helly/php/ext/spl/interfaceIterator.html
+		 * 
+		 */		
 		public function Valid()  
-		//
-		// Description:
-		//		See http://www.php.net/~helly/php/ext/spl/interfaceIterator.html
-		//
-		{ 			
-			if( !$this->bEmptySet )
-			{
-				return( $this );
-			}
+		{
+			//echo "CRUD::Valid <br />";
 			
-			return( null );
+			return( $this->oDataSet->Valid() );
 		
 		} // Valid()
 		
 		
 		/**
-       * Returns the table name associated with this CRUD object
-       *
-       * @returns string The name of the table associated with this CRUD object
-       */
+		 *
+		 *
+		 */		 		 		
+		protected function Cleanup()
+		{
+			$aRelationships = $this->oDatabase->GetTableForeignKeys( $this->sTableName );
+			
+			foreach( $aRelationships as $aRelationship )
+			{
+				$sRelationshipName = $aRelationship[ "name" ];
+				
+				if( array_key_exists( $sRelationshipName, $this->aData ) )
+				{
+					unset( $this->aData[ $sRelationshipName ] );
+				}
+			}
+			
+			$aColumns = $this->oDatabase->GetTableColumns( $this->sTableName );
+			
+			// Loop each column in the table and create a member variable for it:			
+			foreach( $aColumns as $aColumn )
+			{
+				$this->aData[ $aColumn[ "field" ] ] = null;
+			}
+				
+		} // Cleanup()
+		
+		
+		
+		/**
+		 * Returns the table name associated with this CRUD object
+		 *
+		 * @returns string The name of the table associated with this CRUD object
+		 */
 		public function GetTableName()
 		{
 			return( $this->sTableName );
@@ -1052,15 +1282,15 @@
 		
 		
 		/**
-       * Returns the data currently stored in the CRUD object a well formed XML document as a
-       *	string representation. This requires the DOM and SimpleXML extensions of PHP to be 
-		 *	installed. If either extension is not installed, this method will throw an exception.
-       * 	        
-       * @argument bool Should this returned XML include references? Default false.
-       * @argument bool Should this returned XML include all records returned by the last Find()
-       * 	call? If not, only the current record stored is returned. Default false.      
-       * @returns string A well formed XML document as a string representation
-       */
+		 * Returns the data currently stored in the CRUD object a well formed XML document as a
+		 * string representation. This requires the DOM and SimpleXML extensions of PHP to be 
+		 * installed. If either extension is not installed, this method will throw an exception.
+		 * 	        
+		 * @argument bool Should this returned XML include references? Default false.
+		 * @argument bool Should this returned XML include all records returned by the last Find()
+		 *		call? If not, only the current record stored is returned. Default false.      
+		 * @returns string A well formed XML document as a string representation
+		 */
 		public function AsXMLString( $bIncludeReferences = false, $bProvideAll = false )
 		{
 			$oXML = $this->asXML( $bIncludeReferences, $bProvideAll );			
@@ -1072,16 +1302,16 @@
 		
 		
 		/**
-       * Returns the data currently stored in the CRUD object a well formed XML document as a 
-       * SimpleXMLElement object. This method requires the SimpleXML extension of PHP to be
-       * installed. If the SimpleXML extension is not installed, this method will throw an 
-       * exception.
-       * 	        
-       * @argument bool Should this returned XML include references? Default false.
-       * @argument bool Should this returned XML include all records returned by the last Find()
-       * 	call? If not, only the current record stored is returned. Default false.      
-       * @returns SimpleXMLElement The data requested as a SimpleXMLElement object
-       */
+		 * Returns the data currently stored in the CRUD object a well formed XML document as a 
+		 * SimpleXMLElement object. This method requires the SimpleXML extension of PHP to be
+		 * installed. If the SimpleXML extension is not installed, this method will throw an 
+		 * exception.
+		 * 	        
+		 * @argument bool Should this returned XML include references? Default false.
+		 * @argument bool Should this returned XML include all records returned by the last Find()
+		 *		call? If not, only the current record stored is returned. Default false.      
+		 * @returns SimpleXMLElement The data requested as a SimpleXMLElement object
+		 */
 		public function AsXML( $bIncludeReferences = false, $bProvideAll = false )
 		{
 			$oXML = null;
@@ -1120,14 +1350,14 @@
 		
 	
 		/**
-       * Add the database table columns for the specified table, from the specified object, to
-       * the specfied SimpleXMLElement. Used internally by AsXML() 
-       * 	        
-       * @argument SimpleXMLElement 
-       * @argument CRUD
-       * @argument string		      
-       * @returns SimpleXMLElement The data requested as a SimpleXMLElement object
-       */
+         * Add the database table columns for the specified table, from the specified object, to
+         * the specfied SimpleXMLElement. Used internally by AsXML() 
+		 * 	        
+		 * @argument SimpleXMLElement 
+		 * @argument CRUD
+		 * @argument string		      
+		 * @returns SimpleXMLElement The data requested as a SimpleXMLElement object
+		  */
 		private function AddColumns( &$oElement, &$oObject, $sTableName )
 		{
 			$aColumns = $this->oDatabase->GetTableColumns( $sTableName );
@@ -1141,14 +1371,14 @@
 		
 
 		/**
-       * Add the database table references for the specified table, from the specified object, to
-       * the specfied SimpleXMLElement. Used internally by AsXML()   
-       * 	        
-       * @argument SimpleXMLElement 
-       * @argument CRUD
-       * @argument string		      
-       * @returns SimpleXMLElement The data requested as a SimpleXMLElement object
-       */
+		 * Add the database table references for the specified table, from the specified object, to
+		 * the specfied SimpleXMLElement. Used internally by AsXML()   
+		 * 	        
+		 * @argument SimpleXMLElement 
+		 * @argument CRUD
+		 * @argument string		      
+		 * @returns SimpleXMLElement The data requested as a SimpleXMLElement object
+		 */
 		private function AddReferences( &$oElement, &$oObject, $sTableName )
 		{
 			$aTableReferences = $this->oDatabase->GetTableForeignKeys( $sTableName );
@@ -1185,13 +1415,13 @@
 
 		
 		/**
-       * Returns the data currently stored in the CRUD object as a JSON (JavaScript object notation)
-       * string. If bIncludeReferences is true, then each reference to the table is considered and 
-       * added to the XML document.
-       *
-       * @argument bool Toggles whether references/relationships should be stored in the JSON string       
-       * @returns string A JSON string representing the CRUD object
-       */
+         * Returns the data currently stored in the CRUD object as a JSON (JavaScript object notation)
+         * string. If bIncludeReferences is true, then each reference to the table is considered and 
+         * added to the XML document.
+         *
+         * @argument bool Toggles whether references/relationships should be stored in the JSON string       
+         * @returns string A JSON string representing the CRUD object
+         */
 		public function AsJSON( $bIncludeReferences = false)
 		{
 			$oJSON = new JSONObject();
@@ -1260,11 +1490,11 @@
 		
 		
 		/**
-       * Creates a readable, string representation of the object using print_r and returns that
-       * string.       
-       *
-       * @returns string A readable, string representation of the object
-       */
+		 * Creates a readable, string representation of the object using print_r and returns that
+		 * string.       
+		 *
+		 * @returns string A readable, string representation of the object
+		 */
 		public function __toString()
 		{
 			return( print_r( $this->aData, true ) );
@@ -1273,18 +1503,18 @@
 		
 		
 		/**
-       * The purpose of this method is to instantiate a class based on a table name. This is used 
-       * several times throughout the CRUD class. If we determine that a Model class exists for the 
-       * specified table name, then we instiantiate an object of that class. Otherwise, we 
-       * instantiate an object of CRUD for that table name.
-       *
-       * To determine if a Model exists, we look for a class name that matches the English singular
-       * version of the table name. If we find such a class, and if this class is a subclass of
-       * the Model class (which itself is a subclass of CRUD), we assume this is the Model class
-       * we should use and instantiate it.
-       *
-       * @returns object The generated object, either CRUD or a subclass of CRUD
-       */
+		 * The purpose of this method is to instantiate a class based on a table name. This is used 
+		 * several times throughout the CRUD class. If we determine that a Model class exists for the 
+		 * specified table name, then we instiantiate an object of that class. Otherwise, we 
+		 * instantiate an object of CRUD for that table name.
+		 *
+		 * To determine if a Model exists, we look for a class name that matches the English singular
+		 * version of the table name. If we find such a class, and if this class is a subclass of
+		 * the Model class (which itself is a subclass of CRUD), we assume this is the Model class
+		 * we should use and instantiate it.
+		 *
+		 * @returns object The generated object, either CRUD or a subclass of CRUD
+		 */
 		private function InstantiateClass( $sTableName, $xData = null )
 		{			
 			$sModelName = StringFunctions::ToSingular( $sTableName );
@@ -1304,6 +1534,6 @@
 			
 		} // InstantiateClass()
 		
-	}; // CRUD()
+	} // CRUD()
 
 ?>
