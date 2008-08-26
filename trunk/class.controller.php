@@ -8,8 +8,8 @@
  * @dependencies 	FileFunctions
  * @copyright		Copyright (c) 2008, Kristopher Wilson
  * @license			http://www.openavanti.com/license
- * @link				http://www.openavanti.com
- * @version			0.6.4-alpha
+ * @link			http://www.openavanti.com
+ * @version			0.6.7-beta
  *
  */
  
@@ -19,7 +19,7 @@
 	 *
 	 * @category	Controller
 	 * @author		Kristopher Wilson
-	 * @link			http://www.openavanti.com/docs/controller
+	 * @link		http://www.openavanti.com/docs/controller
 	 */
 	class Controller
 	{		
@@ -53,6 +53,11 @@
 		} // index()
 		
 		
+		/**
+		 *
+		 *
+		 *
+		 */		 		 		 		
 		public function Is404Error()
 		{
 			return( $this->b404Error );
@@ -60,11 +65,17 @@
 		} // Is404Error()
 		
 		
+		/**
+		 *
+		 *
+		 *
+		 */	
 		public function Set404Error( $bIs404Error = true )
 		{
 			$this->b404Error = $bIs404Error;
 			
 		} // Set404Error()
+		
 		
 		/**
 		 * Determines whether or not the current HTTP request came via AJAX.	 		 		 		 		 		 
@@ -78,6 +89,38 @@
 		} // IsAjaxRequest()
 		
 		
+		/**
+		 *
+		 *
+		 */
+		public function SetHTTPStatus( $iCode )
+		{
+			if( !headers_sent() )
+			{
+				header( " ", true, $iCode );
+			}
+			
+		} // SetHTTPStatus()
+		
+		
+		/**
+		 *
+		 *
+		 */		 		 		
+		public function AjaxError( $sError, $iResponseCode = 400 )
+		{
+			$this->SetHTTPStatus( $iResponseCode );
+			
+			echo $sError;
+			
+		} // AjaxError()
+		
+		
+		/**
+		 *
+		 *
+		 *
+		 */	
 		public function RedirectTo( $sURL, $bPermanentRedirect = true )
 		{
 			header( "Location: {$sURL}", true, $bPermanentRedirect ? 301 : null );
@@ -85,6 +128,11 @@
 		} // RedirectTo()
 		
 		
+		/**
+		 *
+		 *
+		 *
+		 */	
 		public function SetView( $sView )
 		{
 			$this->sView = $sView;
@@ -92,6 +140,11 @@
 		} // SetView()
 		
 		
+		/**
+		 *
+		 *
+		 *
+		 */	
 		public function SetData( $sName, $sValue )
 		{
 			$this->aData[ $sName ] = $sValue;
@@ -99,6 +152,11 @@
 		} // SetData()
 		
 		
+		/**
+		 *
+		 *
+		 *
+		 */	
 		public function SetFlash( $sMessage )
 		{
 			$_SESSION[ "flash" ] = $sMessage;
@@ -106,6 +164,11 @@
 		} // SetFlash()
 		
 		
+		/**
+		 *
+		 *
+		 *
+		 */	
 		public function GetFlash()
 		{
 			$sFlash = isset( $_SESSION[ "flash" ] ) ? $_SESSION[ "flash" ] : "";
