@@ -5,11 +5,11 @@
  * OpenAvanti is an open source, object oriented framework for PHP 5+
  *
  * @author			Kristopher Wilson
- * @dependencies 	Caching
+ * @dependencies 	Throwable
  * @copyright		Copyright (c) 2008, Kristopher Wilson
  * @license			http://www.openavanti.com/license
- * @link				http://www.openavanti.com
- * @version			0.6.4-alpha
+ * @link			http://www.openavanti.com
+ * @version			0.6.7-beta
  *
  */
  
@@ -19,7 +19,7 @@
 	 *
 	 * @category	Controller
 	 * @author		Kristopher Wilson
-	 * @link			http://www.openavanti.com/docs/cache
+	 * @link		http://www.openavanti.com/docs/cache
 	 */
 	class Cache implements Throwable
 	{
@@ -31,7 +31,9 @@
 		
 		
 		/**
-		 * The constructor for the cache class. Loads the supplied cache file
+		 * The constructor for the cache class. Loads the supplied cache file, if one was specified.
+		 * 
+		 * @argument string The absolute path to the cache file to load		 		 
 		 */
 		public function __construct( $sCacheFileName = null )
 		{
@@ -46,7 +48,8 @@
 		/**
 		 * Simply returns whether or not the supplied file path exists. There is no difference 
 		 * between calling this method and calling file_exists().
-		 * 	 
+		 * 
+		 * @argument string The absolute path to the cache file we're checking the existence of
 		 * @returns boolean True if the file exists, false if not
 		 */
 		public static function Exists( $sCacheFileName )
