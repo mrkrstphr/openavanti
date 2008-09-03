@@ -25,6 +25,12 @@
     {
         const JoinTypeInner = "inner";
         const JoinTypeLeft = "left";
+        
+        public static $aJoinTypes = array( 
+            self::JoinTypeInner => "INNER JOIN",
+            self::JoinTypeLeft => "LEFT JOIN"
+        );
+        
 	
 		protected static $aProfiles = array();
 		protected static $aDefaultProfile = array();

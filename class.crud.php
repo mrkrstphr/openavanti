@@ -162,7 +162,7 @@
             if( isset( $aClauses[ "join" ] ) )
 			{
                 foreach( $aClauses[ "join" ] as &$xJoin )
-				{
+				{				    
 				    //
 				    // xJoin may be either a relationship name, or it might be an array of
 				    // join information:
@@ -179,7 +179,7 @@
 				    // If the join is an array:
                     
                     if( is_array( $xJoin ) )
-					{
+					{				        
                         // Make sure the table value is provided:
                         if( !isset( $xJoin[ "table" ] ) )
                         {
@@ -191,6 +191,16 @@
                         {
                             throw new Exception( "Join column not specified" );
                         }
+                        
+    				    $sJoinType = isset( $xJoin[ "type" ] ) ? 
+    				        $xJoin[ "type" ] : Database::JoinTypeInner;		
+                            	        
+    				    if( !isset( Database::$aJoinTypes[ $sJoinType ] ) )
+    				    {
+    				        throw new Exception( "Unknown join type specified: " . $xJoin[ "type" ] );
+    				    }
+    				        
+    				    $sJoinType = Database::$aJoinTypes[ $sJoinType ];
                         					
                         if( isset( $xJoin[ "through" ] ) )
                         {
@@ -233,7 +243,7 @@
                             
                             
                             // Start the join:
-                            $sJoins .= "INNER JOIN " . $xJoin[ "table" ] . " ";
+                            $sJoins .= "{$sJoinType} " . $xJoin[ "table" ] . " ";
                             
                             // Determine the alias (AS):
                             $sAs = "_" . $aRelationship[ "name" ];
@@ -269,7 +279,7 @@
                             
                             
                             // Start the join:
-                            $sJoins .= "INNER JOIN " . $xJoin[ "table" ] . " ";
+                            $sJoins .= "{$sJoinType} " . $xJoin[ "table" ] . " ";
                             
                             // Determine the alias (AS):
                             $sAs = "_" . $aRelationship[ "name" ];
