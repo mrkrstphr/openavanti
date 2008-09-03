@@ -159,31 +159,161 @@
 			
 			$sJoins = "";
 			
-			if( isset( $aClauses[ "join" ] ) )
+            if( isset( $aClauses[ "join" ] ) )
 			{
-				foreach( $aClauses[ "join" ] as $sJoin )
+                foreach( $aClauses[ "join" ] as &$xJoin )
 				{
-					$aRelationship = $this->FindRelationship( $sJoin );
-					
-					if( !count( $aRelationship ) )
+				    //
+				    // xJoin may be either a relationship name, or it might be an array of
+				    // join information:
+				    //
+				    // array(
+				    //      table => table_name (required)
+				    //      on => column_name (required)
+				    //      as => table_alias (optional)
+				    //      through => join_through (optional, through must be another join's "as")
+				    // )
+				    //
+				    
+				    
+				    // If the join is an array:
+                    
+                    if( is_array( $xJoin ) )
 					{
-						throw new Exception( "Unknown join relationship specified: {$sJoin}" );
+                        // Make sure the table value is provided:
+                        if( !isset( $xJoin[ "table" ] ) )
+                        {
+                            throw new Exception( "Join table not specified" );
+                        }
+                        
+                        // Make sure the column is provided:
+                        if( !isset( $xJoin[ "on" ] ) )
+                        {
+                            throw new Exception( "Join column not specified" );
+                        }
+                        					
+                        if( isset( $xJoin[ "through" ] ) )
+                        {
+                            //throw new Exception( "through not yet implemented!" );
+                            
+                            // If we are joining through another table, we should have already 
+                            // setup that join. Let's find it:
+                            
+                            $aJoin = array();
+                            
+                            foreach( $aClauses[ "join" ] as $xJoinSub )
+                            {
+                                if( isset( $xJoinSub[ "as" ] ) )
+                                {
+                                    if( $xJoin[ "through" ] == $xJoinSub[ "as" ] )
+                                    {
+                                        $aJoin = $xJoinSub;
+                                        break;
+                                    }
+                                }
+                            }
+                            
+                            if( empty( $aJoin ) )
+                            {
+                                throw new Exception( "Invalid through join specified: " . 
+                                    $xJoin[ "through" ] );
+                            }
+                            
+                            // Find the relationship:
+                            $aRelationship = $this->FindRelationship2( $aJoin[ "table" ],
+                                $xJoin[ "table" ], $xJoin[ "on" ] );
+                            
+                            // If the relationship doesn't exist:
+                            if( empty( $aRelationship ) )
+                            {
+                                throw new Exception( "Relationship not found: " . 
+                                    $this->sTableName . " -> " . $xJoin[ "table" ] . "." .
+                                    $xJoin[ "on" ] );
+                            }
+                            
+                            
+                            // Start the join:
+                            $sJoins .= "INNER JOIN " . $xJoin[ "table" ] . " ";
+                            
+                            // Determine the alias (AS):
+                            $sAs = "_" . $aRelationship[ "name" ];
+                            
+                            if( !empty( $xJoin[ "as" ] ) )
+                            {
+                                $sAs = $xJoin[ "as" ];
+                            }
+                            
+                            $xJoin[ "as" ] = $sAs; // Store this for later use!
+                            
+                            // Add the alias:
+                            $sJoins .= " AS " . $sAs . " ";
+					        
+					        // Add the ON clause:
+                            $sJoins .= " ON " . $aJoin[ "as" ] . "." . 
+                                current( $aRelationship[ "local" ] ) . " = " . 
+                                $sAs . "." . current( $aRelationship[ "foreign" ] ) . " "; 
+                        }
+                        else
+                        {
+                            // Find the relationship:
+                            $aRelationship = $this->FindRelationship2( $this->sTableName,
+                                $xJoin[ "table" ], $xJoin[ "on" ] );
+                            
+                            // If the relationship doesn't exist:
+                            if( empty( $aRelationship ) )
+                            {
+                                throw new Exception( "Relationship not found: " . 
+                                    $this->sTableName . " -> " . $xJoin[ "table" ] . "." .
+                                    $xJoin[ "on" ] );
+                            }
+                            
+                            
+                            // Start the join:
+                            $sJoins .= "INNER JOIN " . $xJoin[ "table" ] . " ";
+                            
+                            // Determine the alias (AS):
+                            $sAs = "_" . $aRelationship[ "name" ];
+                            
+                            if( !empty( $xJoin[ "as" ] ) )
+                            {
+                                $sAs = $xJoin[ "as" ];
+                            }
+                            
+                            $xJoin[ "as" ] = $sAs; // Store this for later use!
+                            
+                            // Add the alias:
+                            $sJoins .= " AS " . $sAs . " ";
+					        
+					        // Add the ON clause:
+                            $sJoins .= " ON _" . $sTableAlias . "." . 
+                                current( $aRelationship[ "local" ] ) . " = " . 
+                                $sAs . "." . current( $aRelationship[ "foreign" ] ) . " "; 
+                        }
 					}
-					
-					$sJoins .= " INNER JOIN " . $aRelationship[ "table" ] . " AS " . 
-						"_" . $aRelationship[ "name" ] . " ON ";
-					
-					$sOn = "";
-					
-					foreach( $aRelationship[ "local" ] as $iIndex => $sField )
+					else
 					{
-						$sOn .= ( !empty( $sOn ) ? " AND " : "" ) . 
-							"_" . StringFunctions::ToSingular( $this->sTableName ) . 
-							"." . $sField . " = " . "_" . $aRelationship[ "name" ] . 
-							"." . $aRelationship[ "foreign" ][ $iIndex ];
+						$aRelationship = $this->FindRelationship( $xJoin );
+						
+						if( !count( $aRelationship ) )
+						{
+							throw new Exception( "Unknown join relationship specified: {$xJoin}" );
+						}
+						
+						$sJoins .= " INNER JOIN " . $aRelationship[ "table" ] . " AS " . 
+							"_" . $aRelationship[ "name" ] . " ON ";
+						
+						$sOn = "";
+						
+						foreach( $aRelationship[ "local" ] as $iIndex => $sField )
+						{
+							$sOn .= ( !empty( $sOn ) ? " AND " : "" ) . 
+								"_" . StringFunctions::ToSingular( $this->sTableName ) . 
+								"." . $sField . " = " . "_" . $aRelationship[ "name" ] . 
+								"." . $aRelationship[ "foreign" ][ $iIndex ];
+						}
+						
+						$sJoins .= " {$sOn} ";
 					}
-					
-					$sJoins .= " {$sOn} ";
 				}
 			}
 			
@@ -488,6 +618,34 @@
 			return( null );
 		
 		} // FindRelationship()
+		
+		
+		/**
+		 *
+		 *
+		 *		 
+		 */		 		 		
+		protected function FindRelationship2( $sPrimaryTable, $sRelatedTable, $sThroughColumn )
+		{
+			$aForeignKeys = $this->oDatabase->GetTableForeignKeys( $sPrimaryTable );
+			
+			foreach( $aForeignKeys as $aForeignKey )
+			{
+				if( $aForeignKey[ "table" ] == $sRelatedTable ||
+                    current( $aForeignKey[ "local" ] ) == $sThroughColumn )
+				{
+					return( $aForeignKey );
+				}
+			}
+			
+			return( null );
+		
+		} // FindRelationship()
+		
+		
+		
+        /*$aRelationship = $this->FindRelationship2( $this->sTableName,
+            $xJoin[ "table" ], $xJoin[ "on" ] );*/
 		
 		
 		/**

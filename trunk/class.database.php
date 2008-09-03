@@ -21,8 +21,11 @@
 	 * @author		Kristopher Wilson
 	 * @link		http://www.openavanti.com/docs/database
 	 */
-	abstract class Database implements Throwable
-	{
+    abstract class Database implements Throwable
+    {
+        const JoinTypeInner = "inner";
+        const JoinTypeLeft = "left";
+	
 		protected static $aProfiles = array();
 		protected static $aDefaultProfile = array();
 		

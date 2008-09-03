@@ -40,7 +40,7 @@
 		 */
 		protected function __construct( $aProfile )
       	{
-	      	$sString = "";
+            $sString = "";
 	      	
 	      	if( isset( $aProfile[ "host" ] ) )
 	      	{
@@ -412,7 +412,7 @@
 		 * @argument string The value to be formatted into a database-safe representation
 		 * @returns string A string of the formatted value supplied	 		 		 		 
 		 */
-		public function FormatData( $sType, $sValue )
+		public static function FormatData( $sType, $sValue )
 		{
 			$aQuoted_Types = array( "/text/", "/character varying/", "/date/", 
 				"/timestamp/", "/bool/", "/time without time zone/" );
@@ -517,16 +517,16 @@
 				self::$aSchemas[ $sTableName ] = unserialize( $oCache );	
 			}
 			else
-			{
-				$this->GetTableColumns( $sTableName );
-				$this->GetTablePrimaryKey( $sTableName );
-				$this->GetTableForeignKeys( $sTableName );
+			{			 
+                $this->GetTableColumns( $sTableName );
+                $this->GetTablePrimaryKey( $sTableName );
+                $this->GetTableForeignKeys( $sTableName );
 			
-				if( self::$bCacheSchemas )
-				{
-					$oCache = new Cache();
-					$oCache->Save( $sCacheFile, serialize( self::$aSchemas[ $sTableName ] ), true );
-				}
+                if( self::$bCacheSchemas )
+                {
+                    $oCache = new Cache();
+                    $oCache->Save( $sCacheFile, serialize( self::$aSchemas[ $sTableName ] ), true );
+                }
 			}
 			
 			return( self::$aSchemas[ $sTableName ] );
