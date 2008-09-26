@@ -52,7 +52,7 @@
 			
 			if( !is_null( $this->rResult ) )
 			{
-				$this->iNumRows = pg_num_rows( $this->rResult );
+				$this->iNumRows = $this->oDatabase->CountFromResult( $this->rResult );
 			}
 			
 			$this->bValid = $this->Count() != 0;
@@ -79,7 +79,7 @@
 		{
 			$this->Debug( "Count: {$this->iNumRows}" );
 			
-			return( $this->oDatabase->CountFromResult( $this->rResult ) );
+			return( $this->iNumRows );
             
 		} // Count()
 		
