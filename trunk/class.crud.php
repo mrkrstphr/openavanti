@@ -455,10 +455,11 @@
 		 * 	underscores removed and be cased differently		 
 		 * @argument string The value of the column in the first argument that determines which
 		 * 	records will be selected
+		 * @argument string The order clause for the query		 
 		 * @returns CRUD A reference to the current object to support chaining or secondary assignment
 		 * @throws Exception, QueryFailedException		 		 		 		 		 
 		 */
-		protected function GetDataByColumnValue( $sColumn, $sValue )
+		protected function GetDataByColumnValue( $sColumn, $sValue, $sOrder = "" )
 		{
 			$aColumns = $this->oDatabase->GetTableColumns( $this->sTableName );
 			
@@ -480,10 +481,17 @@
 			
 			$sDataType = $aColumn[ "type" ];
 			
-			$this->Find( null, array(
+			$aClauses = array(
 				"where" => $aColumn[ "field" ] . " = " . 
 					$this->oDatabase->FormatData( $sDataType, $sValue )
-			) );
+			);
+			
+			if( !empty( $sOrder ) )
+			{
+                $aClauses[ "order" ] = $sOrder;
+			}
+			
+			$this->Find( null, $aClauses );
 			
 			return( $this );
 			
@@ -887,7 +895,8 @@
 			
 			if( substr( $sName, 0, 5 ) == "getBy" )
 			{			
-				return( $this->GetDataByColumnValue( substr( $sName, 5 ), $aArguments[ 0 ] ) );
+				return( $this->GetDataByColumnValue( substr( $sName, 5 ), $aArguments[ 0 ],
+                    isset( $aArguments[ 1 ] ) ? $aArguments[ 1 ] : null ) );
 			}
 			else if( substr( $sName, 0, 9 ) == "destroyBy" )
 			{				
