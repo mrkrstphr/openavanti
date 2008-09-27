@@ -274,13 +274,13 @@
 
 		/*
 		 * Returns a database-safe formatted representation of the supplied data, based on the 
-		 * supplied data type. This method may be called statically using Database::FormatData(). 
+		 * supplied data type.
 		 * 
 		 * @argument string The data type of the supplied value.
 		 * @argument string The value to be formatted into a database-safe representation.
 		 * @returns string A string of the formatted value supplied.	 		 		 		 
 		 */
-		abstract public static function FormatData( $sType, $sValue );
+		abstract public function FormatData( $sType, $sValue );
 		
 		
 		/*
