@@ -96,7 +96,7 @@
 		public function PullNextResult( &$rResult )
 		{
 			if( !is_null( $rResult ) )
-			{
+			{                
 				return( pg_fetch_object( $rResult ) );
 			}
 			else
@@ -414,20 +414,32 @@
 		 */
 		public static function FormatData( $sType, $sValue )
 		{
-			$aQuoted_Types = array( "/text/", "/character varying/", "/date/", 
-				"/timestamp/", "/bool/", "/time without time zone/" );
-				
-		   if( strlen( $sValue ) == 0 )
-		   {
-		       return( "NULL" );
-		   }
-		
-		   if( preg_replace( $aQuoted_Types, "", $sType ) != $sType )
-		   {
-		       return( "'" . addslashes( $sValue ) . "'" );
-		   }
-		
-		   return( $sValue );
+            $aQuoted_Types = array( "/text/", "/character varying/", "/date/", 
+                "/timestamp/", "/time without time zone/" );
+            
+            if( strlen( $sValue ) == 0 )
+            {
+                return( "NULL" );
+            }
+            
+            if( preg_replace( $aQuoted_Types, "", $sType ) != $sType )
+            {
+                return( "'" . addslashes( $sValue ) . "'" );
+            }
+            else if( strpos( $sType, "bool" ) !== false )
+            {
+                if( $sValue === true || strtolower( $sValue ) == "true" || 
+                    strtolower( $sValue ) == "t" )
+                {
+                    return( "true" );
+                }
+                else
+                {
+                    return( "false" );
+                }
+            }
+            
+            return( $sValue );
 		
 		} // FormatData()
 
