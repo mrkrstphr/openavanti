@@ -406,13 +406,11 @@
 		 * 2. If the data type is of text, varchar, timestamp, or bool, this method returns that 
 		 * 		 value surrounded in single quotes.
 		 * 
-		 * This method may be called statically using PostgresDatabase::FormatData(). 
-		 * 
 		 * @argument string The data type of the supplied value
 		 * @argument string The value to be formatted into a database-safe representation
 		 * @returns string A string of the formatted value supplied	 		 		 		 
 		 */
-		public static function FormatData( $sType, $sValue )
+		public function FormatData( $sType, $sValue )
 		{
             $aQuoted_Types = array( "/text/", "/character varying/", "/date/", 
                 "/timestamp/", "/time without time zone/" );
