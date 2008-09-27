@@ -757,7 +757,6 @@
 		{			
 			if( array_key_exists( $sName, $this->aData ) )
 			{
-			 echo "RETURNING: ";
 				return( $this->aData[ $sName ] );
 			}
 		
@@ -1134,8 +1133,6 @@
 			// update the primary record:
 			$sSQL = $this->UpdateQuery();
 			
-			echo $sSQL;
-			
 			if( !$this->oDatabase->Query( $sSQL ) )
 			{
 				throw new Exception( "Failed on Query: " . $this->oDatabase->GetLastError() );
@@ -1337,9 +1334,7 @@
 		 * @returns CRUD Returns a CRUD object if there data, or null otherwise
 		 */
 		public function Current() 
-		{
-			//echo "CRUD::Current <br />";
-			
+		{			
 			if( $this->Valid() )
 			{
 				return( $this );
@@ -1403,9 +1398,7 @@
 		 * 
 		 */		
 		public function Valid()  
-		{
-			//echo "CRUD::Valid <br />";
-			
+		{			
 			return( $this->oDataSet->Valid() );
 		
 		} // Valid()
