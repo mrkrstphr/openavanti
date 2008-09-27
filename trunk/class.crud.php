@@ -23,12 +23,10 @@
 	class CRUD implements Iterator, Throwable
 	{
 		protected $oDatabase = null;
-		protected $sTableName = null;		
+		protected $sTableName = null;	
+        	
 		protected $oDataSet = null;
-		
 		protected $aData = array();
-		
-		protected $bDirty = true; // I don't know if this is used
 		
 		
 		/**
@@ -69,9 +67,10 @@
 		
 		
 		/**
-		 * Setup variables for each database column for this table
+		 * Grabs all columns for this table and adds each as a key in the data array for
+		 * this object		 
 		 * 
-		 *
+		 * @returns void
 		 */		 		 		 
 		protected function PrepareColumns()
 		{
@@ -359,12 +358,8 @@
 			// Loop the data and create member variables
 			if( $this->oDataSet->Count() != 0 )
 			{
-				$this->oDataSet->Next();
-				
-				$this->Load( $this->oDataSet->Current() );
-			}	
-			
-			$this->bDirty = false;
+				$this->Next();
+			}
 			
 			return( $this );
 			
@@ -653,11 +648,6 @@
 		} // FindRelationship()
 		
 		
-		
-        /*$aRelationship = $this->FindRelationship2( $this->sTableName,
-            $xJoin[ "table" ], $xJoin[ "on" ] );*/
-		
-		
 		/**
 		 * Loads the specified data (either an array or object) into the CRUD object. This 
 		 * array/object to load can contained referenced data (through foreign keys) as either
@@ -767,6 +757,7 @@
 		{			
 			if( array_key_exists( $sName, $this->aData ) )
 			{
+			 echo "RETURNING: ";
 				return( $this->aData[ $sName ] );
 			}
 		
@@ -1009,7 +1000,7 @@
 
 			// Save the primary record
 			
-			if( !$this->Save() )
+			if( !self::Save() )
 			{
 				return( false );
 			}
@@ -1142,6 +1133,8 @@
 		{			
 			// update the primary record:
 			$sSQL = $this->UpdateQuery();
+			
+			echo $sSQL;
 			
 			if( !$this->oDatabase->Query( $sSQL ) )
 			{
@@ -1384,8 +1377,19 @@
 				
 				if( $this->Valid() )
 				{
+				    $aSchema = $this->oDatabase->GetSchema( $this->sTableName );
+				
 					$oData = $this->oDataSet->Current();
-									
+					
+					// Turn any boolean fields into true booleans, instead of chars:
+                    foreach( $oData as $sKey => $sValue )
+                    {    
+                        if( strpos( $aSchema[ "fields" ][ $sKey ][ "type" ], "bool" ) !== false )
+                        {
+                            $oData->$sKey = $sValue == "t" ? true : false;
+                        }
+                    }
+                    	
 					$this->Load( $oData );
 				}
 			}
