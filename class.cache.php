@@ -175,6 +175,6 @@
 			
 		} // __toString()
 		
-	}; // Cache()
+	} // Cache()
 
 ?>
