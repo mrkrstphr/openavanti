@@ -12,7 +12,7 @@
  */
  
 	/**
-	 * Simple object to aid in create CSV documents
+	 * Simple object to aid in creating CSV documents
 	 *
 	 * @category	CSV
 	 * @author		Kristopher Wilson
