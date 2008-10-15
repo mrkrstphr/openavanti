@@ -5,7 +5,6 @@
  * OpenAvanti is an open source, object oriented framework for PHP 5+
  *
  * @author			Kristopher Wilson
- * @dependencies 	Database, CRUD
  * @copyright		Copyright (c) 2008, Kristopher Wilson
  * @license			http://www.openavanti.com/license
  * @link			http://www.openavanti.com
@@ -14,7 +13,8 @@
  */
 
 	/**
-	 * 	 	 
+	 * Provides a method for debugging and logging information by specifying a callback function
+	 * to use as a debug handler.	 
 	 *
 	 * @category	Debugging
 	 * @author		Kristopher Wilson
@@ -46,7 +46,7 @@
 		 */
 		public static function Log( $sMessage )
 		{
-			if( !is_null( self::$cCallback ) )
+            if( !is_null( self::$cCallback ) )
 			{
 				if( is_callable( self::$cCallback ) )
 				{					
@@ -56,6 +56,6 @@
 				
 		} // Log()
 	
-	}; // Debug()
+	} // Debug()
 
 ?>

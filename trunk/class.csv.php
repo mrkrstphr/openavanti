@@ -82,7 +82,7 @@
 		 * This method takes the headers and data stored in this object and creates a CSV
 		 * document from that data.		 
 		 * 		 
-		 * @returns the headers and data supplied as a string formatted as a CSV document
+		 * @returns string The headers and data supplied as a string formatted as a CSV document
 		 */		 		 
 		public function __toString()
 		{
