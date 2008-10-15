@@ -15,8 +15,10 @@
  
 
 	/**
-	 *
-	 *
+	 * This exception extends the PHP Exception class and should be thrown when a query fails so 
+	 * that a developer can properly handle that exception.
+	 * 
+	 * See http://www.php.net/Exception for more information.
 	 */	 	 	
 	class QueryFailedException extends Exception
 	{

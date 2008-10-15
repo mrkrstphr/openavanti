@@ -15,8 +15,10 @@
  
 
 	/**
-	 *
-	 *
+	 * This exception extends the PHP Exception class and should be thrown when an attempted 
+	 * connection to a database fails.
+	 * 
+	 * See http://www.php.net/Exception for more information.
 	 */	 	 	
 	class DatabaseConnectionException extends Exception
 	{
