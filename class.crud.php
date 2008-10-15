@@ -20,7 +20,7 @@
 	 * @author		Kristopher Wilson
 	 * @link		http://www.openavanti.com/docs/crud
 	 */
-	class CRUD implements Iterator, Throwable
+	class CRUD implements Iterator
 	{
 		protected $oDatabase = null;
 		protected $sTableName = null;	

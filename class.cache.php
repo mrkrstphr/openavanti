@@ -5,7 +5,6 @@
  * OpenAvanti is an open source, object oriented framework for PHP 5+
  *
  * @author			Kristopher Wilson
- * @dependencies 	Throwable
  * @copyright		Copyright (c) 2008, Kristopher Wilson
  * @license			http://www.openavanti.com/license
  * @link			http://www.openavanti.com
@@ -21,7 +20,7 @@
 	 * @author		Kristopher Wilson
 	 * @link		http://www.openavanti.com/docs/cache
 	 */
-	class Cache implements Throwable
+	class Cache
 	{
 		private $sFileName = null;
 		private $iCreatedTimestamp = null;
