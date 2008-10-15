@@ -44,8 +44,7 @@
 		
 		
 		/**
-		 * Returns whether or not the specified field has any errors were noted through 
-		 * validation calls
+		 * Returns whether or not the specified field has any errors noted through validation calls
 		 *
 		 * @argument string The name of the field to check for errors on		 
 		 * @returns boolean Returns true if there are any errors stored in the error list for the
@@ -154,7 +153,7 @@
 			if( empty( $sMessage ) )
 			{
 				$sMessage = ucwords( str_replace( "_", " ", $sName ) ) . " does not match the " . 
-				"required value " . $sMatchValue;
+				    "required value " . $sMatchValue;
 			}
 						
 			if( strtolower( trim( $sValue ) ) != strtolower( trim( $sMatchValue ) ) )
@@ -169,7 +168,7 @@
 		
 
 		/**
-		 * Validates that the supplied data is at least fMin characters in length. This method trims
+		 * Validates that the supplied data is at least iMin characters in length. This method trims
 		 * the data before validating. If not, an error message is added to the list of errors. 
 		 * 
 		 * @argument string The name of the field being validated
@@ -180,17 +179,17 @@
 		 * 		 validation fails
 		 * @returns boolean True if the data passes validation, false otherwise			 		 		 		 		 		 		        
 		 */
-		public static function ValidateMinLength( $sName, $sValue, $fMin, $sMessage = "" )
+		public static function ValidateMinLength( $sName, $sValue, $iMin, $sMessage = "" )
 		{
 			if( empty( $sMessage ) )
 			{
 				$sMessage = ucwords( str_replace( "_", " ", $sName ) ) . " must more than " . 
-					"{$fMin} characters in length.";
+					"{$iMin} characters in length.";
 			}
 			
 			$sValue = trim( $sValue );
 			
-			if( strlen( $sValue ) < $fMin )
+			if( strlen( $sValue ) < $iMin )
 			{
 				self::SetError( $sName, $sMessage );
 				return( false );
@@ -202,7 +201,7 @@
 		
 
 		/**
-		 * Validates that the supplied data is not greater than fMax characters in length. This 
+		 * Validates that the supplied data is not greater than iMax characters in length. This 
 		 * method trims the data before validating. If not, an error message is added to the list 
 		 * of errors. 
 		 * 
@@ -214,17 +213,17 @@
 		 * 		 validation fails
 		 * @returns boolean True if the data passes validation, false otherwise			 		 		 		 		 		 		        
 		 */
-		public static function ValidateMaxLength( $sName, $sValue, $fMax, $sMessage = "" )
+		public static function ValidateMaxLength( $sName, $sValue, $iMax, $sMessage = "" )
 		{
 			if( empty( $sMessage ) )
 			{
 				$sMessage = ucwords( str_replace( "_", " ", $sName ) ) . " must less than " . 
-					"{$fMax} characters in length.";
+					"{$iMax} characters in length.";
 			}
 			
 			$sValue = trim( $sValue );
 			
-			if( strlen( $sValue ) > $fMax )
+			if( strlen( $sValue ) > $iMax )
 			{
 				self::SetError( $sName, $sMessage );
 				return( false );
@@ -373,7 +372,7 @@
 			if( empty( $sMessage ) )
 			{
 				$sMessage = ucwords( str_replace( "_", " ", $sName ) ) . " can only contain " . 
-					"alphabetical characters.";
+					"alphabetical and/or numeric characters.";
 			}
 			
 			if( !preg_match( "/^([-a-z0-9])+$/i", $sValue ) )
@@ -402,8 +401,8 @@
 		{
 			if( empty( $sMessage ) )
 			{
-				$sMessage = ucwords( str_replace( "_", " ", $sName ) ) . " can only contain " . 
-					"alphabetical characters.";
+				$sMessage = ucwords( str_replace( "_", " ", $sName ) ) . " is not a valid " . 
+                    "email address.";
 			}
 			
 			$sValue = trim( $sValue );
@@ -508,8 +507,8 @@
 		{
 			if( empty( $sMessage ) )
 			{
-				$sMessage = "No file was uploaded for " . ucwords( str_replace( "_", " ", $sName ) ) . 
-				".";
+				$sMessage = "No file was uploaded for " . 
+                    ucwords( str_replace( "_", " ", $sName ) ) . ".";
 			}
 			
 			if( !isset( $_FILES[ $sName ] ) || empty( $_FILES[ $sName ][ "tmp_name" ] ) )
@@ -530,6 +529,7 @@
 		 * If validation fails, an error message is added to the list of errors.      
 		 * 
 		 * @argument string The name of the file field to validate
+		 * @argument string The name of the uploaded temporary file		 
 		 * @argument array An array of file extensions that are valid for the uploaded file       
 		 * @argument string Optional, the message to store in the list of validation errors if 
 		 * 		 validation fails	        
@@ -592,8 +592,15 @@
 		
 		
 		/**
-		 *
-		 *		 
+		 * Validates that a supplied value matches the supplied regular expression. If 
+		 * validation fails, an error message is added to the list of errors. 
+		 *          		
+		 * @argument string The name of the field being validated
+		 * @argument string The data to validate against
+		 * @argument string The regular expression to match against the supplied data
+		 * @argument string The message to store in the list of validation errors if 
+		 * 		 validation fails
+		 * @returns boolean True if the data passets validation, false otherwise	 
 		 */		 		
 		public static function ValidateByMatch( $sName, $sValue, $sExpr, $sMessage )
 		{
@@ -609,8 +616,20 @@
 		
 		
 		/**
-		 *
-		 *
+		 * Validates that the supplied date is a validate date. Date can be in the following 
+		 * formats:
+		 * 
+		 *    MM/DD/YYYY
+		 *    MM-DD-YYYY
+		 *    YYYYMMDD      
+		 *    
+		 * If validation fails, an error message is added to the list of errors.                                                 		 
+		 * 		 
+		 * @argument string The name of the field being validated
+		 * @argument string The data to validate against
+		 * @argument string The message to store in the list of validation errors if 
+		 * 		 validation fails
+		 * @returns boolean True if the data passets validation, false otherwise
 		 */
 		public static function ValidateDate( $sName, $sValue, $sMessage = "" )
 		{
@@ -673,20 +692,37 @@
 		
 		
 		/**
-		 *
-		 *
+		 * First validates that sValue and sMatch are validate dates using the ValidateDate() 
+		 * method. If these checks pass, this method then validates that sMatch is greater than
+		 * sValue.                                                     		 
+		 * 		 
+		 * @argument string The name of the field being validated
+		 * @argument string The data to validate against
+		 * @argument string The message to store in the list of validation errors if 
+		 * 		 validation fails
+		 * @returns boolean True if the data passets validation, false otherwise
 		 */
-		public static function ValidateDateGreaterThan( $sName, $sValue, $sMatch, $sMessage = "" )
+		public static function ValidateDateGreaterThan( $sName, $sDate, $sMatch, $sMessage = "" )
 		{
 			if( empty( $sMessage ) )
 			{
 				$sMessage = ucwords( str_replace( "_", " ", $sName ) ) . " must be after " . $sMatch;
 			}
 			
-			$sValue = strtotime( $sValue );
+			if( !Validation::ValidateDate( $sName, $sDate ) )
+			{
+                return( false );
+			}
+			
+			if( !Validation::ValidateDate( $sName, $sMatch ) )
+			{
+                return( false );
+			}
+			
+			$sDate = strtotime( $sDate );
 			$sMatch = strtotime( $sMatch );
 			
-			if( $sValue < $sMatch )
+			if( $sDate < $sMatch )
 			{
 				self::SetError( $sName, $sMessage );
 				return( false );
@@ -698,8 +734,18 @@
 		
 		
 		/**
-		 *
-		 *
+		 * Validates that the supplied time value is a validate time. This method basically 
+		 * validates that there are two integer values separated by a colon. Seconds and any
+		 * AM/PM notation are stripped off. The first integer (hours) value must be between 1 and 
+		 * 23, and the second integer value (minutes) must be between 0 and 59.    
+		 * 
+		 * If validation fails, an error message is added to the list of errors.                                                    	
+		 *		 
+		 * @argument string The name of the field being validated
+		 * @argument string The data to validate against
+		 * @argument string The message to store in the list of validation errors if 
+		 * 		 validation fails
+		 * @returns boolean True if the data passets validation, false otherwise
 		 */
 		public static function ValidateTime( $sName, $sValue, $sMessage = "" )
 		{

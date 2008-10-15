@@ -89,7 +89,7 @@
 		/**
 		 * Attempts to save a cache file with the specified contents. If the directory part of
 		 * the supplied file name does not exist, a FileNotFoundException is thrown. If this method
-		 * fails	to write to the supplied file, an Exception is thrown.
+		 * fails to write to the supplied file, an Exception is thrown.
 		 * 
 		 * On a sucessful save, this method loads information about the cache file and stores
 		 * the cache contents. 
