@@ -5,7 +5,7 @@
  * OpenAvanti is an open source, object oriented framework for PHP 5+
  *
  * @author			Kristopher Wilson
- * @dependencies 	
+ * @dependencies 	Database
  * @copyright		Copyright (c) 2008, Kristopher Wilson
  * @license			http://www.openavanti.com/license
  * @link			http://www.openavanti.com
@@ -21,7 +21,7 @@
 	 * @author		Kristopher Wilson
 	 * @link		http://www.openavanti.com/docs/postgresdatabase
 	 */
-	class PostgresDatabase extends Database implements Throwable
+	class PostgresDatabase extends Database
 	{
 		private $hDatabase = null;
         
