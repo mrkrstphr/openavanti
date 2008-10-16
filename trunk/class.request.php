@@ -41,9 +41,10 @@
 		
 		public $bSecureConnection = false;
 		
+		
 		/**
-		 *
-		 *
+		 * Constructor. Determines information about the request type and connection type and 
+		 * stores it within the class.		 
 		 *
 		 */
 		public function __construct()
@@ -55,9 +56,9 @@
 		
 		
 		/**
+		 * Returns true if the current request came via a secure connection, or false otherwise.
 		 *
-		 *
-		 *
+		 * @returns bool True if the current request is a secure connection, false otherwise
 		 */		 		 		 		
 		public function IsSecureConnection()
 		{
@@ -67,9 +68,9 @@
 		
 		
 		/**
+		 * Returns true if the current request is a POST request, or false otherwise.
 		 *
-		 *
-		 *
+		 * @returns bool True if the current request is a POST request, false otherwise
 		 */		 		 		 		
 		public function IsPostRequest()
 		{
@@ -79,9 +80,9 @@
 		
 		
 		/**
+		 * Returns true if the current request is a GET request, or false otherwise.
 		 *
-		 *
-		 *
+		 * @returns bool True if the current request is a GET request, false otherwise
 		 */		 		 		 		
 		public function IsGetRequest()
 		{
@@ -90,6 +91,6 @@
 		} // IsSecureConnection()
 		
 		
-	}; // Request()
+	} // Request()
 
 ?>
