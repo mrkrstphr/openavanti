@@ -22,15 +22,23 @@
 	 */
     abstract class Database
     {
+        /** 
+         * Class constants for query join types (used for CRUD operations)
+         */                          
         const JoinTypeInner = "inner";
         const JoinTypeLeft = "left";
         
+        /**
+         * Defines the syntax for the join type constants
+         */                 
         public static $aJoinTypes = array( 
             self::JoinTypeInner => "INNER JOIN",
             self::JoinTypeLeft => "LEFT JOIN"
         );
         
-	
+        /**
+         * Protected variables for storing database profiles and connections
+         */                 
 		protected static $aProfiles = array();
 		protected static $aDefaultProfile = array();
 		
@@ -171,7 +179,7 @@
 		} // ValidateProfile()
 		
 
-		/*
+		/**
 		 * Queries the database using the supplied SQL query.
 		 * 
 		 * @argument string The SQL query to execute
@@ -180,28 +188,36 @@
 		abstract public function Query( $sSQL );
 		
 		
-		/*
-		 *
-		 *
+		/**
+		 * Pulls the next record from specified database resource and returns it as an object.
+		 *         		
+		 * @argument resource The database connection resource to pull the next record from
+		 * @returns object The next record from the database, or null if there are no more records
 		 */		 		 
 		abstract public function PullNextResult( &$rResult );
 		
 		
-		/*
-		 *
-		 *
+		/**
+		 * Returns the number of results from the last query performed on the specified database
+		 * resource object.		 
+		 *         		
+		 * @argument resource The database connection resource
+		 * @returns int The number of rows in the specified database resource
 		 */	
 		abstract public function CountFromResult( &$rResult );
 		
 		
-		/*
-		 *
-		 *
-		 */	
+		/**
+		 * Attempts to return the internal pointer of the specified database resource to the
+		 * first row. 
+		 * 
+		 * @argument resource The database connection resource to pull the next record from
+		 * @returns bool True if the operation was successful, false otherwise                           		 
+		 */
 		abstract public function ResetResult( &$rResult );
 		
 
-		/*
+		/**
 		 * The Begin() method begins a database transaction which persists until either Commit() or 
 		 * Rollback() is called, or the request ends. If Commit() is not called before the end of the 
 		 * request, the database transaction will automatically roll back.
@@ -211,7 +227,7 @@
 		abstract public function Begin();
 		
 
-		/*
+		/**
 		 * The Commit() method commits a database transaction (assuming one was started with 
 		 * Begin()). If Commit() is not called before the end of the request, the database 
 		 * transaction will automatically roll back.
@@ -221,7 +237,7 @@
 		abstract public function Commit();
 		
 
-		/*
+		/**
 		 * The Rollback() method rolls back a database transaction (assuming one was started with 
 		 * Begin()). The database transaction is automatically rolled back if Commit() is not called.
 		 * 
@@ -230,7 +246,7 @@
 		abstract public function Rollback();
 		
 
-		/*
+		/**
 		 * Returns the last database error, if any.
 		 * 
 		 * @returns string A string representation of the last error		 		 
@@ -238,7 +254,7 @@
 		abstract public function GetLastError();
 		
 
-		/*
+		/**
 		 * The SetCacheDirectory() method stores which directory should be used to load and store 
 		 * database schema cache files. If the directory does not exist, an exception will be thrown.
 		 * Setting the cache directory is useless unless schema caching is turned on using 
@@ -251,7 +267,7 @@
 		abstract public function SetCacheDirectory( $sDirectoryName );
 		
 
-		/*
+		/**
 		 * The CacheSchemas() method toggles whether or not database schemas discovered through the 
 		 * GetSchema(), GetTableColumns(), GetTableForeignKeys() and GetTablePrimaryKey() methods 
 		 * should be cached, and also whether or not those methods will pull their information from a 
@@ -263,7 +279,7 @@
 		abstract public function CacheSchemas( $bEnable );
 		
 
-		/*
+		/**
 		 * Returns the PHP native database connection resource.
 		 * 
 		 * @returns resource A database connection resource.
@@ -271,7 +287,7 @@
 		abstract public function GetResource();
 		
 
-		/*
+		/**
 		 * Returns a database-safe formatted representation of the supplied data, based on the 
 		 * supplied data type.
 		 * 
@@ -282,7 +298,7 @@
 		abstract public function FormatData( $sType, $sValue );
 		
 		
-		/*
+		/**
 		 * This method returns all tables for the database the class is currently connected to.
 		 *		 
 		 * @returns array Returns an array of all tables in the form of table_name => table_name.
@@ -290,7 +306,7 @@
 		abstract public function GetTables();
 		
 		
-		/*
+		/**
 		 * This method returns all databases on the database server. 
 		 *		 
 		 * @returns array An array of all databases on the database server in the formation of 
@@ -299,7 +315,7 @@
 		abstract public function GetDatabases();
 		
 
-		/*
+		/**
 		 * Collects information about the schema for the specified table, including information on 
 		 * columns (name, datatype), primary keys and foreign keys (relationships to other tables).
 		 * 
@@ -314,7 +330,7 @@
 		abstract public function GetSchema( $sTableName );
 		
 
-		/*
+		/**
 		 * Returns an array of columns that belong to the specified table.
 		 * 
 		 * This method stores its information the static variable $aSchemas so that if the data is 
@@ -328,7 +344,7 @@
 		abstract public function GetTableColumns( $sTableName );
 		
 
-		/*
+		/**
 		 * Returns an array of columns that belong to the primary key for the specified table.
 		 * 
 		 * This method stores its information the static variable $aSchemas so that if the data is 
@@ -342,7 +358,7 @@
 		abstract public function GetTablePrimaryKey( $sTableName );
 		
 
-		/*
+		/**
 		 * Returns an array of relationships (foreign keys) for the specified table.
 		 * 
 		 * This method stores its information the static variable $aSchemas so that if the data is 
@@ -356,7 +372,7 @@
 		abstract public function GetTableForeignKeys( $sTableName );
 		
 
-		/*
+		/**
 		 * Returns the data type of the specified column in the specified table.
 		 * 
 		 * @argument string The name of the table that the desired column belongs to
@@ -366,7 +382,7 @@
 		abstract public function GetColumnType( $sTableName, $sFieldName );
 		
 
-		/*
+		/**
 		 * Determines whether the specified table exists in the current database.
 		 * 
 		 * @argument string The name of the table to determine existence
@@ -374,6 +390,6 @@
 		 */		
 		abstract public function TableExists( $sTableName );
 
-    }; // Database()
+    } // Database()
 
 ?>

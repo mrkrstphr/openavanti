@@ -173,7 +173,7 @@
 		
 		
 		/**
-		 * Sets an a data variable that can be used by the view file. Supplying the name and value
+		 * Sets a data variable that can be used by the view file. Supplying the name and value
 		 * of the variable, before loading the view file, these variables will be extracted and
 		 * available in the view file for processing and/or display.
 		 * 
@@ -194,6 +194,8 @@
 		 * Sets a session variable called flash with the supplied message. This can be used on a
 		 * redirect to display a success message (in conjunction with the RedirectTo() method).		 
 		 *
+		 * If a flash message is already set, it will be overwritten on subsequent calls.
+		 *         		 
 		 * @argument string The message to set in the flash session variable
 		 * @returns void		 
 		 */	

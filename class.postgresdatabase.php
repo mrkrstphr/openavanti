@@ -5,7 +5,7 @@
  * OpenAvanti is an open source, object oriented framework for PHP 5+
  *
  * @author			Kristopher Wilson
- * @dependencies 	Database
+ * @dependencies 	Database, ResultSet, StringFunctions
  * @copyright		Copyright (c) 2008, Kristopher Wilson
  * @license			http://www.openavanti.com/license
  * @link			http://www.openavanti.com
@@ -91,7 +91,10 @@
 		
 		
 		/**
-		 *
+		 * Pulls the next record from specified database resource and returns it as an object.
+		 *         		
+		 * @argument resource The database connection resource to pull the next record from
+		 * @returns object The next record from the database, or null if there are no more records
 		 */		 
 		public function PullNextResult( &$rResult )
 		{
@@ -108,8 +111,12 @@
 		
 		
 		/**
-		 *
-		 */
+		 * Returns the number of results from the last query performed on the specified database
+		 * resource object.		 
+		 *         		
+		 * @argument resource The database connection resource
+		 * @returns int The number of rows in the specified database resource
+		 */	
 		public function CountFromResult( &$rResult )
 		{
 			if( $rResult )
@@ -125,7 +132,11 @@
 		
 		
 		/**
-		 *
+		 * Attempts to return the internal pointer of the specified database resource to the
+		 * first row. 
+		 * 
+		 * @argument resource The database connection resource to pull the next record from
+		 * @returns bool True if the operation was successful, false otherwise                           		 
 		 */
 		public function ResetResult( &$rResult )
 		{
@@ -545,7 +556,15 @@
 		
 
 		/**
-		 *
+		 * Returns an array of columns that belong to the specified table.
+		 * 
+		 * This method stores its information the static variable $aSchemas so that if the data is 
+		 * required again, the database does not have to be consoluted.
+		 * 
+		 * If schema caching is on, this method can pull data from a schema cache. 
+		 * 
+		 * @argument string The name of the table for the requested columns
+		 * @returns array An array of columns that belong to the specified table
 		 */
 		public function GetTableColumns( $sTableName )
 		{
@@ -624,7 +643,14 @@
 		
 
 		/**
-		 *
+		 * Returns an array of columns that belong to the primary key for the specified table.
+		 * This method stores its information the static variable $aSchemas so that if the data is 
+		 * required again, the database does not have to be consoluted.
+		 * 
+		 * If schema caching is on, this method can pull data from a schema cache. 
+		 * 
+		 * @argument string The name of hte table for the requested primary key
+		 * @returns An array of columns that belong to the primary key for the specified table                  		 
 		 */
 		public function GetTablePrimaryKey( $sTableName )
 		{
@@ -677,7 +703,15 @@
 		
 
 		/**
-		 *
+		 * Returns an array of relationships (foreign keys) for the specified table. 
+		 * 
+		 * This method stores its information the static variable $aSchemas so that if the data 
+		 * is required again, the database does not have to be consoluted.
+		 * 
+		 * If schema caching is on, this method can pull data from a schema cache. 
+		 * 
+		 * @argument string The name of the table for the requested relationships
+		 * @returns array An array of relationships for the table
 		 */
 		public function GetTableForeignKeys( $sTableName )
 		{
@@ -864,7 +898,12 @@
 		
 
 		/**
+		 * This method determines if the specified tables primary key (or a single column from
+		 * a compound primary key) references another table.		 
 		 *
+		 * @argument string The name of the table that the key exists on
+		 * @argument string The column that is, or is part of, the primary key for the table         		 
+		 * @returns boolean True if the primary key references another table, false otherwise         		 
 		 */
 		public function IsPrimaryKeyReference( $sTableName, $sColumnName )
 		{
@@ -884,7 +923,11 @@
 		
 
 		/**
-		 *
+		 * Returns the data type of the specified column in the specified table. 
+		 * 
+		 * @argument string The name of the table that the desired column belongs to 
+		 * @argument string The name of the column that is desired to know the type of 
+		 * @returns string The data type of the column, if one is found, or null.
 		 */
 		public function GetColumnType( $sTableName, $sFieldName )
 		{
@@ -937,7 +980,13 @@
 		
 
 		/**
-		 *
+		 * Returns the name of the column at the specified position from the specified table. 
+		 * This method is primarily interally as, in the PostgreSQL catalog, table references, 
+		 * indexes, etc, are stored by column number in the catalog tables. 
+		 * 
+		 * @argument string The name of the table that the desired column belongs to 
+		 * @argument int The column number from the table (from the PostgreSQL catalog) 
+		 * @returns string The name of the column, if one is found, or null
 		 */
 		protected function GetColumnByNumber( $sTableName, $iColumnNumber )
 		{
@@ -953,6 +1002,6 @@
 		
 		} // GetColumnByNumber()
 
-    }; // PostgresDatabase()
+    } // PostgresDatabase()
 
 ?>
