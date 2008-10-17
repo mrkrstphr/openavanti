@@ -97,7 +97,9 @@
 		
 		
 		/**
-		 *
+		 * This method takes the name of a file, and creates a new file name using microtime()
+		 * as the file name, and the original file's extension as the extension.
+		 *		 
 		 * @argument string The base file name to use as an example
 		 * @returns string The file name created from microtime
 		 */
@@ -138,36 +140,36 @@
 		} // HandleUploadedFile()
                                                                                     
 
-		/*
+		/**
 		 * Attempts to find the specified file name in the include path. Loops each path in the
 		 * include path, and, upon the first result, returns the absolute path to the file.
 		 *
 		 * @argument string The file name to attempt to find in the include path
-		 * @returns string/bool Returns the absolute path to the file, if found, or false if not
+		 * @returns mixed Returns the absolute path to the file, if found, or false if not
 		 */
 		public static function FileExistsInPath( $sFileName )
 		{
-			$sFileName = strtolower( $sFileName );
-		 	$aPaths = explode( PATH_SEPARATOR, get_include_path() );
-		
-		 	foreach( $aPaths as $sPath )
-		 	{				
-		   	if( file_exists( "{$sPath}/{$sFileName}" ) )
-		    	{
-		      	return( "{$sPath}/{$sFileName}" );
-		    	}
-		  	}
-		
-		 	return( false );
+            $sFileName = strtolower( $sFileName );
+            $aPaths = explode( PATH_SEPARATOR, get_include_path() );
+            
+            foreach( $aPaths as $sPath )
+            {				
+                if( file_exists( "{$sPath}/{$sFileName}" ) )
+                {
+                    return( "{$sPath}/{$sFileName}" );
+                }
+            }
+            
+            return( false );
 		
 		} // FileExistsInPath()
 		
 		
-		/*
+		/**
 		 * Returns a human readable file size format in the form of #.## (bytes|KB|MB|GB)
 		 *
 		 * @argument integer The file size in bytes
-		 * @returns integer A formated string of the file size
+		 * @returns string A formated string of the file size
 		 */
 		public static function HumanReadableSize( $iSizeInBytes )
 		{
@@ -194,8 +196,11 @@
 		
 		
 		/**
-		 *
-		 *
+		 * Creates a temporary directory in the systems temporary directory (determined by the 
+		 * sys_get_temp_dir()). This directory name is the first 8 characters of the the md5 hash 
+		 * of the current microtime().                  		 
+		 * 		 
+		 * @returns string The name of the newly created temporary directory
 		 */		 		 		
 		public static function CreateTemporaryDirectory()
 		{
@@ -214,46 +219,56 @@
 		} // CreateTemporaryDirectory()
 		
 		
-		/**
-		 *
-		 *
-		 */
-		public static function RemoveRecursively( $sFile ) 
-		{
-			if( is_dir( $sFile ) && !is_link( $sFile ) && !in_array( $sFile, array( ".", ".." ) ) )
-			{
-				foreach( glob( "{$sFile}/{,.}*", GLOB_BRACE ) as $sCurrentFile ) 
-				{
-					if( in_array( basename( $sCurrentFile ), array( ".", ".." ) ) )
+        /**
+         * Removes the specified directory and all of it's contents, recursively. The need for
+         * this method arises from the native php rmdir() not being able to delete a directory if
+         * there are files in it. 
+         *  
+         * @argument string The name of the directory to remove (recursively)         
+         * @returns boolean True if the directory was removed successfully, false otherwise
+         */
+        public static function RemoveRecursively( $sPath ) 
+        {
+            if( is_dir( $sPath ) && !is_link( $sPath ) && !in_array( $sPath, array( ".", ".." ) ) )
+            {
+                foreach( glob( "{$sPath}/{,.}*", GLOB_BRACE ) as $sCurrentFile ) 
+                {
+                    if( in_array( basename( $sCurrentFile ), array( ".", ".." ) ) )
 					{
-						continue;
-					}
+                        continue;
+                    }
 					
-		      	if( !FileFunctions::RemoveRecursively( $sCurrentFile ) )
-					{
-		         	return( false );
-		         }
-		      }
+                    if( !FileFunctions::RemoveRecursively( $sCurrentFile ) )
+                    {
+                        return( false );
+                    }
+                }
 		      
-				return( rmdir( $sFile ) );
-			} 
-			else 
-			{
-				return( unlink( $sFile ) );
-			}
+                return( rmdir( $sPath ) );
+            } 
+            else 
+            {
+                return( unlink( $sPath ) );
+            }
 			
-			return( true );
+            return( true );
 			
-		} // RemoveRecursively()
+        } // RemoveRecursively()
 		
 		
 		/**
-		 *
-		 *
+		 * Moves a specified directory to a new location, recursively. The need for this method
+		 * arises from the fact that the native php rename() function cannot move files or 
+		 * directories across partitions on Windows systems.
+		 *		 
+		 * @argument string The directory to recursively move
+		 * @argument string The new directory to move the old directory to         		 
+		 * @returns boolean True if the directory and it's contents were all moved successfully, 
+		 *    false otherwise
 		 */
-		public static function MoveRecursively( $sPath, $sDestination )
+		public static function MoveRecursively( $sOldDirectory, $sNewDirectory )
 		{
-			foreach( glob( "{$sPath}/{,.}*", GLOB_BRACE ) as $sCurrentFile ) 
+			foreach( glob( "{$sOldDirectory}/{,.}*", GLOB_BRACE ) as $sCurrentFile ) 
 			{
 				if( is_dir( $sCurrentFile ) && in_array( basename( $sCurrentFile ), array( ".", ".." ) ) )
 				{
@@ -262,16 +277,16 @@
 				
 				if( is_dir( $sCurrentFile ) )
 				{
-					if( !file_exists( $sDestination . "/" . basename( $sCurrentFile ) ) )
+					if( !file_exists( $sNewDirectory . "/" . basename( $sCurrentFile ) ) )
 					{
 						mkdir( $sDestination . "/" . basename( $sCurrentFile ) );
 					}
 					
-					FileFunctions::MoveRecursively( $sCurrentFile, $sDestination . "/" . basename( $sCurrentFile ) );
+					FileFunctions::MoveRecursively( $sCurrentFile, $sNewDirectory . "/" . basename( $sCurrentFile ) );
 				}
 				else
 				{
-					rename( $sCurrentFile, $sDestination . "/" . basename( $sCurrentFile ) );
+					rename( $sCurrentFile, $sNewDirectory . "/" . basename( $sCurrentFile ) );
 				}
 			}
 			
@@ -279,6 +294,6 @@
 			
 		} // MoveRecursively()
 
-    }; // FileFunctions()
+    } // FileFunctions()
 
 ?>

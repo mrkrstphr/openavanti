@@ -27,6 +27,11 @@
 	{
 		private $aAttributes = array();
 		
+		
+		/**
+		 * Constructor. Currently does nothing.
+		 *
+		 */                  		
 		public function __construct()
 		{
 		
@@ -41,7 +46,7 @@
 		 * and JSONObject objects will be recursively parsed.		 		 		 
 		 * 		 
 		 * @argument string The key for this attribute of the JavaScript object
-		 * @argument mixed The value for this attribute of the JavaScript ojbect, either a string, 
+		 * @argument mixed The value for this attribute of the JavaScript object, either a string, 
 		 * 		 number or another JSONObject object may be passed.		 
 		 * @returns void
 		 */
@@ -131,6 +136,6 @@
 		
 		} // __toString()
 	
-	}; // JSONObject()
+	} // JSONObject()
 
 ?>
