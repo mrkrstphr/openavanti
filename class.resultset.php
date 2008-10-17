@@ -24,35 +24,33 @@
 	 */
 	class ResultSet implements Iterator, Countable
 	{
-		private $oDatabase = null;
-		private $rResult = null;
-		private $oRecord = null;
-      
-      	private $bValid = false;
-		
-		private $iNumRows = 0;
-		
-		private $iCurrentRow = -1;
-		private $aData = array();
-		
-		
-		private $bDebug = false;
+        private $oDatabase = null;
+        private $rQueryResource = null;
+        private $oRecord = null;
+        
+        private $bValid = false;
+        
+        private $iNumRows = 0;
+        
+        private $iCurrentRow = -1;
+        private $aData = array();
 		
 		
 		/**
-		 * Constructor. Prepares the result set for traversing	 
+		 * Stores the supplied database and query resource for later processing. Counts the number
+		 * of rows in the query resource and stores for later use.	 
 		 * 
-		 * @argument Database An instance of a database connect
+		 * @argument Database An instance of a database connection
 		 * @argument Resource A reference to the database result returned by a query
 		 */
-		public function __construct( &$oDatabase, &$rResult )
+		public function __construct( &$oDatabase, &$rQueryResource )
 		{
 			$this->oDatabase = &$oDatabase;
-			$this->rResult = &$rResult;
+			$this->rQueryResource = &$rQueryResource;
 			
-			if( !is_null( $this->rResult ) )
+			if( !is_null( $this->rQueryResource ) )
 			{
-				$this->iNumRows = $this->oDatabase->CountFromResult( $this->rResult );
+				$this->iNumRows = $this->oDatabase->CountFromResult( $this->rQueryResource );
 			}
 			
 			$this->bValid = $this->Count() != 0;
@@ -61,9 +59,9 @@
 	
 	
 		/**
-		 * Returns a copy of the current record	 
+		 * Returns a copy of the current record, if any, or null if no record is stored
 		 * 		 
-		 * @returns StdClass The ccurrent database result, or null if none
+		 * @returns StdClass The current data record, or null if none
 		 */
 		public function GetRecord()
 		{
@@ -73,24 +71,25 @@
 		
 
 		/**
-		 *
+		 * Returns the number of rows returned by the query this result set originated from
+		 * 		 
+		 * @returns int The number of rows in the query resource resulting from the query		 
 		 */
 		public function Count()
-		{
-			$this->Debug( "Count: {$this->iNumRows}" );
-			
+		{			
 			return( $this->iNumRows );
             
 		} // Count()
 		
 
 		/**
-		 *
+		 * Returns the data record for the current row, if any, or false if there is not a current 
+		 * row
+		 *		 
+		 * @returns StdClass The current data record for the current row, or false if there is no data
 		 */
  		public function Current()
-		{
-			$this->Debug( "Current: {$this->iCurrentRow}" );
-			
+		{			
 			if( isset( $this->aData[ $this->iCurrentRow ] ) )
 			{
 				return( $this->aData[ $this->iCurrentRow ] );
@@ -104,7 +103,10 @@
 		
 
 		/**
-		 *
+		 * Returns the key for the current data. This is defined as the current row of data in 
+		 * the query result.		 
+		 * 		 
+		 * @returns int The current row loaded into the ResultSet from the query resource		 
 		 */
  		public function Key()
 		{
@@ -114,102 +116,62 @@
 		
 
 		/**
-		 *
+		 * Attempts to advance the internal pointer of the query result to the next row of data.
+		 * On success, the data is loaded into this object. On failure, the data is cleared and
+		 * operations such as current will return false.         		 
+		 *		 
+		 * @returns void		 
 		 */
  		public function Next()
 		{
 			$this->iCurrentRow++;
-			
-			$this->Debug( "Next: {$this->iCurrentRow}" );
 
-			//if( !isset( $this->aData[ $this->iCurrentRow ] ) )
-			//{
-				if( !is_null( $this->rResult ) )
-	         	{
-	         		$this->Debug( "Fetching row [{$this->iCurrentRow}]" );
-					$this->aData[ $this->iCurrentRow ] = 
-						$this->oDatabase->PullNextResult( $this->rResult );
-					
-					if( !$this->aData[ $this->iCurrentRow ] )
-					{
-	         			$this->Debug( "There is no row [{$this->iCurrentRow}]" );
-					}
-				}
-	         	else
-	         	{
-					$this->aData[ $this->iCurrentRow ] = null;
-	        	}
-         	//}
-         
-			$this->Debug( "<pre>" . print_r( $this->aData, true ) . "</pre>" );
-         
+			if( !is_null( $this->rQueryResource ) )
+         	{
+				$this->aData[ $this->iCurrentRow ] = 
+                    $this->oDatabase->PullNextResult( $this->rQueryResource );
+			}
+         	else
+         	{
+				$this->aData[ $this->iCurrentRow ] = null;
+        	}
+
 			$this->bValid = !is_null( $this->aData[ $this->iCurrentRow ] ) &&
 				$this->aData[ $this->iCurrentRow ] !== false;
-				
-			if( $this->bValid )
-			{
-				$this->Debug( "Next [{$this->iCurrentRow}] is Valid!" );
-			}
 		
 		} // Next()
 		
 
 		/**
-		 *
+		 * Returns the internal pointer of the query result to the first row of the data. 
+		 * 		 
+		 * @returns void		 
 		 */
  		public function Rewind()
-		{
-			$this->Debug( "Rewind: {$this->iCurrentRow} | 0" );
-			
-			$this->oDatabase->ResetResult( $this->rResult );
-			
-			//if( !isset( $this->aData[ 0 ] ) )
-			//{
-				$this->iCurrentRow = -1;
-			/*	$this->Next();			
-			}
-			else
-			{
-				$this->iCurrentRow = 0;
-			}*/
-			
+		{			
+			$this->oDatabase->ResetResult( $this->rQueryResource );
+
+			$this->iCurrentRow = -1;
 			
 			$this->Next();	
 			
 			$this->bValid = $this->Count() != 0;
-			
-			//$this->Next();
 		
 		} // Rewind()
 		
 
 		/**
-		 *
+		 * Returns whether there is any data currently loaded in the ResultSet. If no data was 
+		 * returned by the query, or if the internal pointer is out of bounds (higher than the
+		 * number of results in the query), this method will return false.         		 
+		 *		 
+		 * @returns bool True if there is data currently loaded in the result set, false otherwise		 
 		 */
  		public function Valid()
-		{
-			$this->Debug( "Valid: {$this->iCurrentRow}" );
-			
-			if( $this->bValid )
-			{
-				$this->Debug( "<pre>" . print_r( $this->aData, true ) . "</pre>" );
-			}
-			
+		{			
 			return( $this->bValid );
 		
 		} // Valid()
-		
-		
-		/**
-		 *
-		 */		 		
-		public function Debug( $sMessage )
-		{
-			if( $this->bDebug )
-			{
-				echo $sMessage . "<br />";
-			}
-		}
 		
 	} // ResultSet()
 
