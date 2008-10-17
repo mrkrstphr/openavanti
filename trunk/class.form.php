@@ -5,7 +5,6 @@
  * OpenAvanti is an open source, object oriented framework for PHP 5+
  *
  * @author			Kristopher Wilson
- * @dependencies 	FileInfo
  * @copyright		Copyright (c) 2008, Kristopher Wilson
  * @license			http://www.openavanti.com/license
  * @link			http://www.openavanti.com
@@ -14,7 +13,8 @@
  */
  
 	/**
-	 * A library of form field generation helpers to automate data preservation
+	 * A library of form field generation helpers, mainly useful automate data preservation on
+	 * form errors	 
 	 *
 	 * @category	Forms
 	 * @author		Kristopher Wilson
@@ -23,28 +23,15 @@
 	class Form 
 	{
 		public static $aFields = array();
-		
-		/**
-		 * Loads the specified array into the classes aFields array. These values are later
-		 * used by the field generation helpers for setting the value of the form field.		 
-		 * 
-		 * @argument array An array of keys and values to load into the forms data array
-		 * @returns void
-		 */
-		/*
-		public static function LoadArray( $aArray )
-		{
-			self::$aFields += $aArray;
-		
-		} // LoadArray()
-		*/
 
 		
 		/**
-		 * Loads the specified array into the classes aFields array. These values are later
-		 * used by the field generation helpers for setting the value of the form field.		 
+		 * Loads the specified array or object into the classes aFields array. These values are 
+		 * later used by the field generation helpers for setting the value of the form field. This 
+		 * method will recursively iterate through a multidimensional array, or an object with 
+		 * member objects to load all data within the array or object.		 
 		 * 
-		 * @argument array An array of keys and values to load into the forms data array
+		 * @argument mixed An array or object of keys and values to load into the forms data array
 		 * @returns void
 		 */
 		public static function Load( $oObject, &$aTarget = null )
@@ -82,15 +69,15 @@
 		 */
 		public static function Label( $aAttributes, $bReturn = false )
 		{
-			$sLabel = "Element";
-			
-			if( isset( $aAttributes[ "label" ] ) )
-			{
-				$sLabel = $aAttributes[ "label" ];
-			
-				unset( $aAttributes[ "label" ] );
-			}
-			
+            if( !isset( $aAttributes[ "label" ] ) )
+            {
+                return;
+            }
+            
+			$sLabel = $aAttributes[ "label" ];
+			unset( $aAttributes[ "label" ] );
+				
+				
 			if( class_exists( "Validation" ) && isset( $aAttributes[ "for" ] ) && 
 				Validation::FieldHasErrors( $aAttributes[ "for" ] ) )
 			{
@@ -131,6 +118,11 @@
 		 */
 		public static function Input( $aAttributes, $bReturn = false )
 		{
+            if( !isset( $aAttributes[ "type" ] ) )
+            {
+                return;
+            }
+            
 			if( strtolower( $aAttributes[ "type" ] ) == "checkbox" )
 			{
 				$sValue = self::TranslatePathForValue( $aAttributes[ "name" ] );
@@ -187,6 +179,11 @@
 		 */
 		public static function Select( $aAttributes, $bReturn = false )
 		{
+            if( !isset( $aAttributes[ "options" ] ) || !is_array( $aAttributes[ "options" ] ) )
+            {
+                return;
+            }
+            
 			$sDefault = "";
 			
 			$sValue = self::TranslatePathForValue( $aAttributes[ "name" ] );
