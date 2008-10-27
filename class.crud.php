@@ -1008,7 +1008,7 @@
 
 			// Save the primary record
 			
-			if( !self::Save() )
+			if( !$this->Save() )
 			{
 				return( false );
 			}
