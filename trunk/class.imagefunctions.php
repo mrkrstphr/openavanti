@@ -78,26 +78,26 @@
 		
 			list( $iWidth, $iHeight, $sType, $sAttr ) = $aImage;
 		
-		   $fXRatio = $iMaxWidth / $iWidth;
-		   $fYRatio = $iMaxHeight / $iHeight;
+            $fXRatio = $iMaxWidth / $iWidth;
+            $fYRatio = $iMaxHeight / $iHeight;
+
+            if( ( $iWidth <= $iMaxWidth ) && ( $iHeight <= $iMaxHeight ) )
+            {
+                $iNewWidth = $iWidth;
+                $iNewHeight = $iHeight;
+            }
+            else if( ( $xRatio * $iHeight ) < $iMaxHeight )
+            {
+                $iNewHeight = ceil( $fXRatio * $iHeight );
+                $iNewWidth = $iMaxWidth;
+            }
+            else
+            {
+                $iNewWidth = ceil( $fYRatio * $iWidth );
+                $iNewHeight = $iMaxHeight;
+            }
 		
-		   if( ( $iWidth <= $iMaxWidth ) && ( $iHeight <= $iMaxHeight ) )
-		   {
-		      $iNewWidth = $iWidth;
-		      $iNewHeight = $iHeight;
-		   }
-		   else if( ( $xRatio * $iHeight ) < $iMaxHeight )
-		   {
-		      $iNewHeight = ceil( $fXRatio * $iHeight );
-		      $iNewWidth = $iMaxWidth;
-		   }
-		   else
-		   {
-		      $iNewWidth = ceil( $fYRatio * $iWidth );
-		      $iNewHeight = $iMaxHeight;
-		   }
-		
-			$rImgThumb = imagecreatetruecolor( $newWidth, $newHeight );
+			$rImgThumb = imagecreatetruecolor( $iNewWidth, $iNewHeight );
 		
 			imagecopyresampled( $rImgThumb, $rImage, 0, 0, 0, 0, $iNewWidth,
 				$iNewHeight, imagesx( $rImage ), imagesy( $rImage ) );
@@ -127,6 +127,6 @@
 		} // GenerateThumb()
 		
 		
-	}; // ImageFunctions()
+	} // ImageFunctions()
 
 ?>
