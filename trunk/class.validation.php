@@ -789,6 +789,31 @@
 			return( true );
 
 		} // ValidateTime()
+        
+        
+        /**
+        *
+        *
+        */
+        public static function ValidateDomain( $sName, $sValue, $sMessage = "" )
+        {
+            if( empty( $sMessage ) )
+            {
+                $sMessage = ucwords( str_replace( "_", " ", $sName ) ) .
+                    " is not a valid domain name";
+            }
+            
+            $iMatches = preg_match( "/^([a-z0-9\-]{1,}\.){1,}[a-z]{2,}$/i", $sValue, $aMatches );
+            
+            if( $iMatches === false || $iMatches <= 0 )
+            {
+                self::SetError( $sName, $sMessage );
+                return( false );
+            }
+            
+            return( $iMatches > 0 );
+        
+        } // ValidateDomain()
 
 	} // Validation()
 

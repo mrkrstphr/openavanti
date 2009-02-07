@@ -124,6 +124,14 @@
 		 */
  		public function Next()
 		{
+            // Clean up first to prevent memory problems:
+            
+            if( isset( $this->aData[ $this->iCurrentRow ] ) )
+            {
+                unset( $this->aData[ $this->iCurrentRow ] );
+            }
+            
+            
 			$this->iCurrentRow++;
 
 			if( !is_null( $this->rQueryResource ) )

@@ -41,10 +41,10 @@
 		
 
 		/**
-		 * Wraps CRUD's Save() method to invoke the events OnBeforeUpdate(), OnBeforeSave(), 
-		 * ValidateUpdate(), Validate(), respectively, before calling CRUD::Save() for an UPDATE
-		 * query. Likewise, invokes the events OnBeforeInsert(), OnBeforeSave(), ValidateInsert() and
-		 * Validate(), respectively, before calling CRUD::Save() for an INSERT statement. 
+		 * Wraps CRUD's Save() method to invoke the events ValidateUpdate(), Validate(), 
+		 * OnBeforeUpdate(), OnBeforeSave(), respectively, before calling CRUD::Save() for an UPDATE
+		 * query. Likewise, invokes the events ValidateInsert(), Validate(), OnBeforeInsert() and
+		 * OnBeforeSave(), respectively, before calling CRUD::Save() for an INSERT statement. 
 		 * 
 		 * If any of these events return false, Model::Save() returns false, before calling 
 		 * CRUD::Save().
@@ -109,7 +109,9 @@
 		
 		
 		/**		 		 		 
-		 *
+		 * This method does the same thing as Save(), but also saves all related data loaded into
+		 * the CRUD object as well. See CRUD::SaveAll() for more details		 
+		 * 		 
 		 * @returns bool True if the object can be saved, false if not
 		 */	
 		public function SaveAll()
@@ -118,20 +120,20 @@
 		
 			if( $bUpdate )
 			{
-				if( !$this->ValidateUpdate() ||
-					 !$this->Validate() || 
-					 !$this->OnBeforeUpdate() || 
-					 !$this->OnBeforeSave() )
+				if( !$this->OnBeforeUpdate() || 
+                    !$this->OnBeforeSave() ||
+                    !$this->ValidateUpdate() ||
+                    !$this->Validate() )
 				{
 					return( false );
 				}
 			}
 			else
 			{
-				if( !$this->ValidateInsert() ||
-					 !$this->Validate() ||
-					 !$this->OnBeforeInsert() || 
-					 !$this->OnBeforeSave() )
+				if( !$this->OnBeforeInsert() || 
+                    !$this->OnBeforeSave() || 
+                    !$this->ValidateInsert() ||
+                    !$this->Validate() )
 				{
 					return( false );
 				}
@@ -170,7 +172,7 @@
 		 * CRUD::Destroy(), and to invoke the event OnAfterDestroy() afterwards. If either 
 		 * event returns false, execution of this method will stop and false will be returned.		 		 
 		 *
-		 * @returns bool True if the object can be saved, false if not
+		 * @returns bool True if the object can be destroyed, false if not
 		 */	
 		public function Destroy()
 		{
@@ -188,39 +190,6 @@
 		
 			// Run the OnAfterDestroy() event. If it fails, return false
 			if( !$this->OnAfterDestroy() )
-			{
-				return( false );
-			}			
-			
-			// Everything returned true, so should we:
-			return( true );
-		
-		} // Destroy()
-		
-		
-		/**
-		 * Wraps CRUD's DestroyAll() method to invoke the event OnBeforeDestroyAll() before calling
-		 * CRUD::DestroyAll(), and to invoke the event OnAfterDestroyAll() afterwards. If either 
-		 * event returns false, execution of this method will stop and false will be returned.		 		 
-		 *
-		 * @returns bool True if the object can be saved, false if not
-		 */	
-		public function DestroyAll()
-		{
-			// Run the OnBeforeDestroyAll() event. If it fails, return false
-			if( !$this->OnBeforeDestroyAll() )
-			{
-				return( false );
-			}
-			
-			// Invoke CRUD's DestroyAll() method. If it fails, return false
-			if( !parent::DestroyAll() )
-			{
-				return( false );
-			}
-		
-			// Run the OnAfterDestroyAll() event. If it fails, return false
-			if( !$this->OnAfterDestroyAll() )
 			{
 				return( false );
 			}			
@@ -322,7 +291,7 @@
 		 * Triggered before a call to CRUD::Destroy(). If this method returns false, Model::Destroy() 
 		 * will be halted and false returned.
 		 *
-		 * @returns bool True if the object can be saved, false if not
+		 * @returns bool True if the object can be destroyed, false if not
 		 */
 		protected function OnBeforeDestroy()
 		{
@@ -337,38 +306,9 @@
 		 * will return false. It is up to the user at this point to take the necessary actions, such
 		 * as rolling back the database transaction.		 
 		 *
-		 * @returns bool True if the object can be saved, false if not
+		 * @returns bool True if the object can be destroyed, false if not
 		 */
 		protected function OnAfterDestroy()
-		{
-			// Default return true if this method is not extended:
-			return( true );
-		
-		} // OnBeforeDestroy()
-		
-		
-		/**
-		 * Triggered before a call to CRUD::DestroyAll(). If this method returns false, 
-		 *  Model::DestroyAll() will be halted and false returned.
-		 *
-		 * @returns bool True if the object can be saved, false if not
-		 */
-		protected function OnBeforeDestroyAll()
-		{
-			// Default return true if this method is not extended:
-			return( true );
-		
-		} // OnBeforeDestroy()
-		
-		
-		/**
-		 * Triggered after a call to CRUD::DestroyAll(). If this method returns false, 
-		 * Model::DestroyAll() will return false. It is up to the user at this point to take the 
-		 * necessary actions, such as rolling back the database transaction.		 
-		 *
-		 * @returns bool True if the object can be saved, false if not
-		 */
-		protected function OnAfterDestroyAll()
 		{
 			// Default return true if this method is not extended:
 			return( true );
@@ -417,6 +357,6 @@
 		
 		} // ValidateUpdate()
 	
-	}; // Model()
+	} // Model()
 
 ?>

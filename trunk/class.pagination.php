@@ -5,7 +5,6 @@
  * OpenAvanti is an open source, object oriented framework for PHP 5+
  *
  * @author			Kristopher Wilson
- * @dependencies 	
  * @copyright		Copyright (c) 2008, Kristopher Wilson
  * @license			http://www.openavanti.com/license
  * @link			http://www.openavanti.com
@@ -15,7 +14,8 @@
  
  
 	/**
-	 * A simple library to handle generating calculating pagination links
+	 * A simple library to handle calculating pagination values and returning a set of pagination
+	 * links to output.	 
 	 *
 	 * @category	Pagination
 	 * @author		Kristopher Wilson
@@ -25,7 +25,35 @@
 	{
 
 		/**
-		 * Generates an array of pagination data based on the supplied arguments.	 		  
+		 * Generates an array of pagination data based on the supplied arguments. This array 
+		 * contains an array of individual page links to show, as well as a previous link (if
+		 * there is a previous page) and a next link (if there is a next page). The returned array
+		 * is in the format of:
+		 * 
+		 * Array(
+		 *    links => Array(
+		 *        Array(		 
+		 *            page => 1,              // denotes the page number
+		 *            link => '?page=1'       // denotes the link for the page 
+		 *        ),
+		 *        Array(		 
+		 *            page => 2,              // denotes the page number
+		 *            link => ''              // empty if this is the current page
+		 *        ),
+		 *        Array(		 
+		 *            page => 3,              // denotes the page number
+		 *            link => '?page=3'       // denotes the link for the page 
+		 *        ),		 
+		 *    ),
+		 *    next => Array(                  // empty if no next link
+		 *        page => 3,                  // denotes the page number
+		 *        link => '?page=3'           // denotes the link for the page
+		 *    ),
+		 *    previous => Array(              // empty if no previous link
+		 *        page => 1,                  // denotes the page number
+		 *        link => '?page=1'           // denotes the link for the page
+		 *    )
+		 * )                                                               		  
 		 * 
 		 * @argument string The URL for each pagination link, containing a %s to denote where to 
 		 * 		 place the page number for each page
@@ -33,7 +61,7 @@
 		 * @argument integer The number of elements to show per page
 		 * @argument integer The total number of elements to be paginated
 		 * @argument integer The number of pagination links shown at a given time
-		 * @returns array An array of pagination data. See the manual for more information	 		 
+		 * @returns array An array of pagination data	 		 
 		 */
 		public static function Generate( $sLink, $iStart, $iPerPage, $iTotalResults, $iLinksShown )
 		{
@@ -129,6 +157,6 @@
 		} // Generate()
 
 
-	}; // Pagination()
+	} // Pagination()
 
 ?> 

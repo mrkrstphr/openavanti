@@ -41,7 +41,7 @@
 		 * @argument array An array of width and height to limit the image to 0 => x, 1 => y
 		 * @returns bool True if the thumbnail is created, false otherwise
 		 */
-		public function GenerateThumb( $sFileName, $sThumbName, $aSize )
+		public static function GenerateThumb( $sFileName, $sThumbName, $aSize )
 		{
 			$iMaxWidth = $aSize[ 0 ];
 			$iMaxHeight = $aSize[ 1 ];
@@ -81,24 +81,25 @@
             $fXRatio = $iMaxWidth / $iWidth;
             $fYRatio = $iMaxHeight / $iHeight;
 
-            if( ( $iWidth <= $iMaxWidth ) && ( $iHeight <= $iMaxHeight ) )
-            {
-                $iNewWidth = $iWidth;
-                $iNewHeight = $iHeight;
-            }
-            else if( ( $xRatio * $iHeight ) < $iMaxHeight )
-            {
-                $iNewHeight = ceil( $fXRatio * $iHeight );
-                $iNewWidth = $iMaxWidth;
-            }
-            else
-            {
-                $iNewWidth = ceil( $fYRatio * $iWidth );
-                $iNewHeight = $iMaxHeight;
-            }
-		
+
+		   if( ( $iWidth <= $iMaxWidth ) && ( $iHeight <= $iMaxHeight ) )
+		   {
+		      $iNewWidth = $iWidth;
+		      $iNewHeight = $iHeight;
+		   }
+		   else if( ( $fXRatio * $iHeight ) < $iMaxHeight )
+		   {
+		      $iNewHeight = ceil( $fXRatio * $iHeight );
+		      $iNewWidth = $iMaxWidth;
+		   }
+		   else
+		   {
+		      $iNewWidth = ceil( $fYRatio * $iWidth );
+		      $iNewHeight = $iMaxHeight;
+		   }
+
 			$rImgThumb = imagecreatetruecolor( $iNewWidth, $iNewHeight );
-		
+
 			imagecopyresampled( $rImgThumb, $rImage, 0, 0, 0, 0, $iNewWidth,
 				$iNewHeight, imagesx( $rImage ), imagesy( $rImage ) );
 
