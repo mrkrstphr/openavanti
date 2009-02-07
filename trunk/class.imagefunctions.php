@@ -55,7 +55,7 @@
 		
 			$rImage = null;
 			
-			switch( $sExtension )
+			switch( strtolower( $sExtension ) )
 			{
 				case "jpg":
 				case "jpeg":
@@ -102,8 +102,8 @@
 
 			imagecopyresampled( $rImgThumb, $rImage, 0, 0, 0, 0, $iNewWidth,
 				$iNewHeight, imagesx( $rImage ), imagesy( $rImage ) );
-
-			switch( $sExtension )
+			
+            switch( strtolower( $sExtension ) )
 			{
 				case "jpg":
 				case "jpeg":
