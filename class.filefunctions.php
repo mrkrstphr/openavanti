@@ -114,6 +114,17 @@
 		} // CreateFileNameFromTime()
 		
 		
+		public static function CreateRandomFileNameFromString( $sBase, $sString )
+		{
+			$sExt = self::GetFileExtension( $sBase );
+			
+			$sFileName = substr( md5( microtime( true ) . $sString ), 18, 10 ) . "." . $sExt;
+		
+			return( $sFileName );
+			
+		} // CreateRandomFileNameFromString()
+		
+		
 		/**
 		 * This method takes information about an uploaded file through _FILES and gives the 
 		 * file a unique name using microtime() and the extension of the original file name, as 
