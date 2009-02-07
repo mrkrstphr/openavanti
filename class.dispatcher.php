@@ -241,7 +241,7 @@
 		 * 
 		 * @returns void
 		 */
-		private function InvokeAction( Request &$oRequest ) //&$oController, $sAction, $aArguments )
+		protected function InvokeAction( Request &$oRequest )
 		{
 			// is_callable() is used over method_exists() in order to properly utilize __call()
 			
@@ -273,7 +273,7 @@
 		 * 
 		 * @returns void
 		 */
-		private function LoadView( Request &$oRequest )
+		protected function LoadView( Request &$oRequest )
 		{				
 			if( $oRequest->oController->Is404Error() )
 			{
@@ -320,7 +320,7 @@
 		 * 
 		 * @returns void
 		 */
-		private function Invoke404Error()
+		protected function Invoke404Error()
 		{
 			if( isset( $this->x404Callback ) ) 
 			{
@@ -329,7 +329,7 @@
 					call_user_func_array( 
 						$this->x404Callback, 
 						array( 
-							implode( "/", $_SESSION[ "last-request" ] ), 
+							"/" . implode( "/", $_SESSION[ "last-request" ] ), 
 							isset( $_SERVER[ "HTTP_REFERER" ] ) ? $_SERVER[ "HTTP_REFERER" ] : "" 
 						) 
 					);

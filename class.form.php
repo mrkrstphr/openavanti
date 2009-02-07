@@ -123,8 +123,8 @@
                 return;
             }
             
-            if( strtolower( $aAttributes[ "type" ] ) == "checkbox" ||
-				strtolower( $aAttributes[ "type" ] ) == "radio" )
+			if( strtolower( $aAttributes[ "type" ] ) == "checkbox" ||
+                strtolower( $aAttributes[ "type" ] ) == "radio" )
 			{
 				$sValue = self::TranslatePathForValue( $aAttributes[ "name" ] );
 				
@@ -304,6 +304,15 @@
 				$sValue = $aData;
 			}
 
+			if( $sValue === true )
+			{
+				$sValue = "t";
+			}
+			else if( $sValue === false )
+			{
+				$sValue = "f";
+			}
+			
 			if( $sValue === true )
 			{
 				$sValue = "t";
