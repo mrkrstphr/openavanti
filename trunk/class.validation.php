@@ -814,6 +814,160 @@
             return( $iMatches > 0 );
         
         } // ValidateDomain()
+        
+        
+        /**
+         *
+         *
+         */                          
+        public static function ValidateLuhnNumber( $sName, $sValue, $sMessage = "" )
+        {
+            if( empty( $sMessage ) )
+            {
+                $sMessage = ucwords( str_replace( "_", " ", $sName ) ) .
+                    " is not a valid Luhn number.";
+            }
+        
+        
+            // Remove any non-numeric characters (such as dashes)
+            $sValue = preg_replace( "/\D/", "", $sValue );
+
+            $iLength = strlen( $sValue );
+            $sParity = $iLength % 2;
+
+            $iTotal = 0;
+            
+            for( $i = 0; $i < $iTotal; $i++ )
+            {
+                $iDigit = $sValue[ $i ];
+
+                if( $i % 2 == $sParity )
+                {
+                    $iDigit *= 2;
+
+                    if( $iDigit > 9 )
+                    {
+                        $iDigit -= 9;
+                    }
+                }
+            
+                $iTotal += $iDigit;
+            }
+            
+            
+            if( $iTotal % 10 != 0 )
+            {
+                self::SetError( $sName, $sMessage );
+                return( false );
+            }
+            
+            return( true );
+
+        } // ValidateLuhnNumber()
+        
+        
+        /**
+         *
+         *
+         */
+        public static function ValidateVisa( $sName, $sValue, $sMessage = "" )
+        {
+            if( empty( $sMessage ) )
+            {
+                $sMessage = ucwords( str_replace( "_", " ", $sName ) ) .
+                    " is not a valid credit card number.";
+            }
+            
+            $sValue = trim( str_replace( "-", "", $sValue ) );
+            
+            if( substr( $sValue, 0, 1 ) != "4" || strlen( $sValue ) != 16 )
+            {
+                self::SetError( $sName, $sMessage );
+                return( false );
+            }
+            
+            return( self::ValidateLuhnNumber( $sName, $sValue, $sMessage ) );
+        
+        } // ValidateVisaCard()
+        
+        
+        /**
+         *
+         *
+         */
+        public static function ValidateMasterCard( $sName, $sValue, $sMessage = "" )
+        {
+            if( empty( $sMessage ) )
+            {
+                $sMessage = ucwords( str_replace( "_", " ", $sName ) ) .
+                    " is not a valid credit card number.";
+            }
+            
+            $sValue = trim( str_replace( "-", "", $sValue ) );
+            
+            if( substr( $sValue, 0, 2 ) != "51" || 
+                substr( $sValue, 0, 2 ) != "55" || 
+                strlen( $sValue ) != 16 )
+            {
+                self::SetError( $sName, $sMessage );
+                return( false );
+            }
+            
+            return( self::ValidateLuhnNumber( $sName, $sValue, $sMessage ) );        
+        
+        } // ValidateVisaCard()
+        
+        
+        /**
+         *
+         *
+         */
+        public static function ValidateDiscover( $sName, $sValue, $sMessage = "" )
+        {
+            if( empty( $sMessage ) )
+            {
+                $sMessage = ucwords( str_replace( "_", " ", $sName ) ) .
+                    " is not a valid credit card number.";
+            }
+            
+            $sValue = trim( str_replace( "-", "", $sValue ) );
+            
+            if( substr( $sValue, 0, 1 ) != "6" || strlen( $sValue ) != 16 )
+            {
+                self::SetError( $sName, $sMessage );
+                return( false );
+            }
+            
+            return( self::ValidateLuhnNumber( $sName, $sValue, $sMessage ) );        
+        
+        } // ValidateDiscover()
+        
+        
+        /**
+         *
+         *
+         */
+        public static function ValidateAmericanExpress( $sName, $sValue, $sMessage = "" )
+        {
+            if( empty( $sMessage ) )
+            {
+                $sMessage = ucwords( str_replace( "_", " ", $sName ) ) .
+                    " is not a valid credit card number.";
+            }
+            
+            $sValue = trim( str_replace( "-", "", $sValue ) );
+            
+            if( substr( $sValue, 0, 2 ) != "34" || 
+                substr( $sValue, 0, 2 ) != "37" || 
+                strlen( $sValue ) != 15 )
+            {
+                self::SetError( $sName, $sMessage );
+                return( false );
+            }
+            
+            return( self::ValidateLuhnNumber( $sName, $sValue, $sMessage ) );        
+        
+        } // ValidateAmericanExpress()
 
 	} // Validation()
 
