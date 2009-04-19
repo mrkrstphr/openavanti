@@ -136,8 +136,8 @@
 			else if( strtolower( $aAttributes[ "type" ] ) != "password" )
 			{
 				$sValue = self::TranslatePathForValue( $aAttributes[ "name" ] );
-				
-				$aAttributes[ "value" ] = $sValue !== false ? $sValue : 
+
+                $aAttributes[ "value" ] = $sValue !== false ? $sValue : 
                     ( isset( $aAttributes[ "value" ] ) ? $aAttributes[ "value" ] : "" );
 			}
 		

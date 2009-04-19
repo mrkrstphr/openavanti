@@ -34,9 +34,22 @@
 		 * @argument mixed An array or object of data to load into the CRUD object		 		 		 		 		 
 		 */
 		public function __construct( $sTableName, $oData = null )
-		{			
-			parent::__construct( $sTableName, $oData );
-			
+		{
+            if( is_array( $oData ) || is_object( $oData ) )
+            {
+                parent::__construct( $sTableName, $oData );
+            }
+            else if( is_numeric( $oData ) && strval( intval( $oData ) ) == strval( $oData ) )
+            {
+                parent::__construct( $sTableName );
+                
+                $this->Find( (int)$oData );
+            }
+            else
+            {
+                parent::__construct( $sTableName );
+            }
+            
 		} // __construct()
 		
 
@@ -55,11 +68,11 @@
 		 *
 		 * @returns bool True if the object can be saved, false if not
 		 */	
-		public function Save()
+		public function Save( $bSkipValidation = false )
 		{		
 			$bUpdate = parent::RecordExists();
 		
-			if( $bUpdate )
+			if( $bUpdate && !$bSkipValidation )
 			{
 				if( !$this->ValidateUpdate() ||
 					 !$this->Validate() ||
@@ -69,7 +82,7 @@
 					return( false );
 				}
 			}
-			else
+			else if( !$bSkipValidation )
 			{
 				if( !$this->ValidateInsert() ||
 					 !$this->Validate() ||
@@ -85,7 +98,7 @@
 				return( false );
 			}
 		
-			if( $bUpdate )
+			if( $bUpdate && !$bSkipValidation )
 			{
 				if( !$this->OnAfterUpdate() || 
 					 !$this->OnAfterSave() )
@@ -93,7 +106,7 @@
 					return( false );
 				}
 			}
-			else
+			else if( !$bSkipValidation )
 			{
 				if( !$this->OnAfterInsert() || 
 					 !$this->OnAfterSave() )
@@ -114,57 +127,57 @@
 		 * 		 
 		 * @returns bool True if the object can be saved, false if not
 		 */	
-		public function SaveAll()
-		{		
-			$bUpdate = parent::RecordExists();
-		
-			if( $bUpdate )
-			{
-				if( !$this->OnBeforeUpdate() || 
-                    !$this->OnBeforeSave() ||
-                    !$this->ValidateUpdate() ||
-                    !$this->Validate() )
-				{
-					return( false );
-				}
-			}
-			else
-			{
-				if( !$this->OnBeforeInsert() || 
-                    !$this->OnBeforeSave() || 
-                    !$this->ValidateInsert() ||
-                    !$this->Validate() )
-				{
-					return( false );
-				}
-			}	
-			
-			if( !parent::SaveAll() )
-			{
-				return( false );
-			}
-		
-			if( $bUpdate )
-			{
-				if( !$this->OnAfterUpdate() || 
-					 !$this->OnAfterSave() )
-				{
-					return( false );
-				}
-			}
-			else
-			{
-				if( !$this->OnAfterInsert() || 
-					 !$this->OnAfterSave() )
-				{
-					return( false );
-				}
-			}
-			
-			// Everything returned true, so should we:
-			return( true );			
-		
-		} // SaveAll()
+        public function SaveAll( $bSkipValidation )
+        {       
+            $bUpdate = parent::RecordExists();
+        
+            if( $bUpdate && !$bSkipValidation )
+            {
+                if( !$this->ValidateUpdate() ||
+                    !$this->Validate() ||
+                    !$this->OnBeforeUpdate() || 
+                    !$this->OnBeforeSave() )
+                {
+                    return( false );
+                }
+            }
+            else if( !$bSkipValidation )
+            {
+                if( !$this->ValidateInsert() ||
+                    !$this->Validate() || 
+                    !$this->OnBeforeInsert() || 
+                    !$this->OnBeforeSave() )
+                {
+                    return( false );
+                }
+            }   
+            
+            if( !parent::SaveAll() )
+            {
+                return( false );
+            }
+        
+            if( $bUpdate && !$bSkipValidation )
+            {
+                if( !$this->OnAfterUpdate() || 
+                     !$this->OnAfterSave() )
+                {
+                    return( false );
+                }
+            }
+            else if( !$bSkipValidation )
+            {
+                if( !$this->OnAfterInsert() || 
+                     !$this->OnAfterSave() )
+                {
+                    return( false );
+                }
+            }
+            
+            // Everything returned true, so should we:
+            return( true );         
+        
+        } // SaveAll()
 		
 		
 		/**

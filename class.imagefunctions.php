@@ -55,8 +55,8 @@
 		
 			$rImage = null;
 			
-			switch( strtolower( $sExtension ) )
-			{
+            switch( strtolower( $sExtension ) )
+            {
 				case "jpg":
 				case "jpeg":
 					$rImage = imagecreatefromjpeg( $sFileName );
@@ -102,9 +102,9 @@
 
 			imagecopyresampled( $rImgThumb, $rImage, 0, 0, 0, 0, $iNewWidth,
 				$iNewHeight, imagesx( $rImage ), imagesy( $rImage ) );
-			
+
             switch( strtolower( $sExtension ) )
-			{
+            {
 				case "jpg":
 				case "jpeg":
 					imagejpeg( $rImgThumb, $sThumbName );

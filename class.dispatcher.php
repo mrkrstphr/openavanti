@@ -34,6 +34,16 @@
 		
 		private $sHeaderFile = "header.php";
 		private $sFooterFile = "footer.php";
+        
+        
+        /**
+         *
+         *
+         */                          
+        public function __construct()
+        {
+        
+        } // __construct()
 		
 		
 		/**
@@ -193,7 +203,8 @@
 			$oRequest->sControllerName = count( $aRequest ) > 0 ? 
 				str_replace( "-", "_", array_shift( $aRequest ) ) . "Controller" : "";
 			
-			$oRequest->sAction = count( $aRequest ) > 0 ? array_shift( $aRequest ) : "";
+            $oRequest->sAction = count( $aRequest ) > 0 ? 
+                str_replace( "-", "_", array_shift( $aRequest ) ) : "";
 			$oRequest->aArguments = !empty( $aRequest ) ? $aRequest : array();
 				
 			
@@ -325,7 +336,7 @@
 			if( isset( $this->x404Callback ) ) 
 			{
 				if( is_callable( $this->x404Callback ) )
-				{					
+				{
 					call_user_func_array( 
 						$this->x404Callback, 
 						array( 
@@ -340,15 +351,15 @@
 				header( "HTTP/1.0 404 Not Found", true, 404 );
 					
 				if( ( $sView = FileFunctions::FileExistsInPath( $this->s404ViewFile ) ) !== false )
-				{					
-					if( !self::IsAjaxRequest() && isset( $this->sHeaderFile ) )
+				{
+                    if( !self::IsAjaxRequest() && !empty( $this->sHeaderFile ) )
 					{
 						require( $this->sHeaderFile );
 					}
 					
 					require( $sView );
 					
-					if( !self::IsAjaxRequest() && isset( $this->sFooterFile ) )
+                    if( !self::IsAjaxRequest() && !empty( $this->sFooterFile ) )
 					{
 						require( $this->sFooterFile );
 					}

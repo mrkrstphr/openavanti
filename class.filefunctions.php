@@ -112,6 +112,24 @@
 			return( $sFileName );
 		
 		} // CreateFileNameFromTime()
+        
+        
+        /**
+         * 
+         *          
+         * @argument string The name of the original file, used to get the file extension         
+         * @argument string 
+         * @returns string The name of the randomly generated file name
+         */                                   
+        public static function CreateRandomFileNameFromString( $sBase, $sString )
+        {
+            $sExt = self::GetFileExtension( $sBase );
+            
+            $sFileName = substr( md5( microtime( true ) . $sString ), 18, 10 ) . "." . $sExt;
+        
+            return( $sFileName );
+            
+        } // CreateRandomFileNameFromString()
 		
 		
 		public static function CreateRandomFileNameFromString( $sBase, $sString )
