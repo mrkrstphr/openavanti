@@ -593,7 +593,7 @@
          * column name (which may have had underscores removed and be cased differently) and
          * column value.
          * 
-         * This method is invoked through __call() when the user uses the CRUD::getBy[column]()
+         * This method is invoked through __call() when the user uses the CRUD::FindBy[column]()
          * "virtual" method.                                     
          *
          * @argument string The name of the column we are pulling records by. This name may 
@@ -798,7 +798,7 @@
             
             return( null );
         
-        } // FindRelationship()
+        } // FindRelationship2()
         
         
         /**
