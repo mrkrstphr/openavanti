@@ -8,7 +8,7 @@
  * @copyright       Copyright (c) 2008, Kristopher Wilson
  * @license         http://www.openavanti.com/license
  * @link            http://www.openavanti.com
- * @version         0.6.7-beta
+ * @version         1.0
  *
  */
 
@@ -61,7 +61,15 @@
                 $aProfile[ "host" ] = "localhost";
             }
             
-            self::$aProfiles[ $aProfile[ "driver" ] . "_" . $aProfile[ "name" ] ] = $aProfile;
+            $sProfileName = isset( $aProfile[ "profile_name" ] ) && !empty( $aProfile[ "profile_name" ] ) ? 
+                $aProfile[ "profile_name" ] : $aProfile[ "driver" ] . "_" . $aProfile[ "name" ];
+                
+            if( isset( self::$aProfiles[ $sProfileName ] ) )
+            {
+                throw new Exception( "Profile [{$sProfileName}] already in use." );
+            }
+            
+            self::$aProfiles[ $sProfileName ] = $aProfile;
             
         } // AddProfile()
         
@@ -389,6 +397,15 @@
          * @returns bool True or false, depending on whether the table exists.                   
          */     
         abstract public function TableExists( $sTableName );
+
+
+    
+        /**
+         * Returns the version of the database server.
+         *
+         * @returns string The database server version reported by the database server
+         */
+        abstract public function GetVersion();
 
     } // Database()
 

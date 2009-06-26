@@ -9,7 +9,7 @@
  * @copyright       Copyright (c) 2008, Kristopher Wilson
  * @license         http://www.openavanti.com/license
  * @link            http://www.openavanti.com
- * @version         0.6.7-beta
+ * @version         1.0
  *
  */
 
@@ -1001,6 +1001,21 @@
             return( null );
         
         } // GetColumnByNumber()
+
+
+    
+        /**
+         * Returns the version of the database server.
+         *
+         * @returns string The database server version reported by the database server
+         */
+        public function GetVersion()
+        {
+            $aVersions = pg_version( $this->hDatabase );
+            
+            return( $aVersions[ "server" ] );
+
+        } // GetVersion()
 
     } // PostgresDatabase()
 
