@@ -6,10 +6,10 @@
  *
  * @author          Kristopher Wilson
  * @dependencies    Database, StringFunctions
- * @copyright       Copyright (c) 2008, Kristopher Wilson
+ * @copyright       Copyright (c) 2007-2009, Kristopher Wilson
  * @license         http://www.openavanti.com/license
  * @link            http://www.openavanti.com
- * @version         0.6.7-beta
+ * @version         1.0
  *
  */
  
