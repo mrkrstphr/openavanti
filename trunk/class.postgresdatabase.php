@@ -6,7 +6,7 @@
  *
  * @author          Kristopher Wilson
  * @dependencies    Database, ResultSet, StringFunctions
- * @copyright       Copyright (c) 2008, Kristopher Wilson
+ * @copyright       Copyright (c) 2007-2009, Kristopher Wilson
  * @license         http://www.openavanti.com/license
  * @link            http://www.openavanti.com
  * @version         1.0

@@ -6,10 +6,10 @@
  *
  * @author          Kristopher Wilson
  * @dependencies    FileFunctions
- * @copyright       Copyright (c) 2008, Kristopher Wilson
+ * @copyright       Copyright (c) 2007-2009, Kristopher Wilson
  * @license         http://www.openavanti.com/license
- * @link                http://www.openavanti.com
- * @version         0.6.4-alpha
+ * @link            http://www.openavanti.com
+ * @version         1.0
  *
  */
  
