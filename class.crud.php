@@ -363,8 +363,6 @@
                 $this->Load( $this->oDataSet->Current() );
             }
 
-            $this->bDirty = false;
-
             return( $this );
 
         } // Find()
@@ -789,7 +787,7 @@
             
             foreach( $aForeignKeys as $aForeignKey )
             {
-                if( $aForeignKey[ "table" ] == $sRelatedTable ||
+                if( $aForeignKey[ "table" ] == $sRelatedTable &&
                     current( $aForeignKey[ "local" ] ) == $sThroughColumn )
                 {
                     return( $aForeignKey );
