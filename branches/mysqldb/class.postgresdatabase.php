@@ -354,50 +354,6 @@
         
 
         /**
-         * The SetCacheDirectory() method stores which directory should be used to load and store 
-         * database schema cache files. If the directory does not exist, an exception will be thrown.
-         * 
-         * Setting the cache directory is useless unless schema caching is turned on using 
-         * CacheSchemas().
-         * 
-         * Schema caching is primarily used by the CRUD object, which analyzes database schemas to 
-         * automate database operations. 
-         * 
-         * @argument The absolute path to the directory in the system to store and read cached 
-         *       database schema files
-         * @returns void                         
-         */
-        public function SetCacheDirectory( $sDirectoryName )
-        {
-            self::$sCacheDirectory = $sDirectoryName;
-        
-        } // SetCacheDirectory()
-        
-
-        /**
-         * The CacheSchemas() method toggles whether or not database schemas discovered through the 
-         * GetSchema(), GetTableColumns(), GetTableForeignKeys() and GetTablePrimaryKey() methods 
-         * should be cached, and also whether or not those methods will pull their information from a 
-         * cache, if available.
-         * 
-         * Attempting to cache schemas without properly setting the cache directory using 
-         * SetCacheDirectory(). If caching is attempted without setting the directory, an exception 
-         * will be thrown.
-         * 
-         * Schema caching is primarily used by the CRUD object, which analyzes database schemas to 
-         * automate database operations. 
-         * 
-         * @argument boolean Toggles whether or not to cache discovered database schemas
-         * @returns void         
-         */
-        public function CacheSchemas( $bEnable )
-        {
-            self::$bCacheSchemas = $bEnable;
-
-        } // CacheSchemas()
-        
-
-        /**
          * Returns the native PHP database resource
          * 
          * @returns resource The native PHP database resource                
