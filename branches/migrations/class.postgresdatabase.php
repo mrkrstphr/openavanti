@@ -9,7 +9,7 @@
  * @copyright       Copyright (c) 2007-2009, Kristopher Wilson
  * @license         http://www.openavanti.com/license
  * @link            http://www.openavanti.com
- * @version         1.0
+ * @version         1.0.5
  *
  */
 
@@ -1016,6 +1016,197 @@
             return( $aVersions[ "server" ] );
 
         } // GetVersion()
+        
+        
+        //
+        // TABLE MANIPULATION METHODS
+        //
+        
+        /**
+         * 
+         * 
+         */
+        public function CreateTable( $sTableName, $sOwner = "" ) 
+        { 
+            $sSQL = "CREATE TABLE \"" . addslashes( $sTableName ) . "\" ();";
+            
+            $rResult = $this->Query( $sSQL );
+            
+            return( !is_null( $rResult ) );
+            
+        } // CreateTable()
+        
+        
+        /**
+         * 
+         * 
+         */
+        public function DropTable( $sTableName )
+        {
+            $sSQL = "DROP TABLE \"" . addslashes( $sTableName ) . "\";";
+            
+            $rResult = $this->Query( $sSQL );
+            
+            return( !is_null( $rResult ) );
+            
+        } // DropTable()
+        
+        
+        /**
+         * 
+         * 
+         */
+        public function RenameTable( $sOldTableName, $sNewTableName )
+        {
+            $sSQL = "ALTER TABLE \"" . addslashes( $sOldTableName ) . "\" " . 
+                "RENAME TO \"" . addslashes( $sNewTableName ) . "\"";
+            
+            $rResult = $this->Query( $sSQL );
+            
+            return( !is_null( $rResult ) );
+            
+        } // RenameTable()
+        
+        
+        /**
+         * 
+         * 
+         */
+        public function AddColumn( $sTableName, $sColumnName, $sColumnType, $aOptions = null ) 
+        {
+            echo '<pre>' . print_r( func_get_args(), true ) . '</pre>';
+
+            $sSQL = "ALTER TABLE \"" . addslashes( $sTableName ) . "\" " . 
+                "ADD COLUMN \"" . addslashes( $sColumnName ) . "\" " . addslashes( $sColumnType ) . " ";
+            
+            if( isset( $aOptions[ "size" ] ) && !empty( $aOptions[ "size" ] ) )
+            {
+                $sSQL .= "( " . addslashes( $aOptions[ "size" ] ) . " ) ";
+            }
+            
+            if( isset( $aOptions[ "primary" ] ) && $aOptions[ "primary" ] === true )
+            {
+                $sSQL .= " PRIMARY KEY ";
+            }
+            
+            if( isset( $aOptions[ "null" ] ) && $aOptions[ "null" ] === false )
+            {
+                $sSQL .= " NOT NULL ";
+            }
+
+
+            echo $sSQL . "<br />";
+            
+            $rResult = $this->Query( $sSQL );
+            
+            return( !is_null( $rResult ) );
+
+        } // AddColumn()
+        
+        
+        /**
+         * 
+         * 
+         */
+        public function RemoveColumn( $sTableName, $sColumnName )
+        {
+            $sSQL = "ALTER TABLE \"" . addslashes( $sTableName ) . "\" " . 
+                "DROP COLUMN \"" . addslashes( $sColumnName ) . "\"";
+            
+            $rResult = $this->Query( $sSQL );
+            
+            return( !is_null( $rResult ) );
+            
+        } // RemoveColumn()
+        
+        
+        /**
+         * 
+         * 
+         */
+        public function RenameColumn( $sTableName, $sOldColumnName, $sNewColumnName )
+        {
+            $sSQL = "ALTER TABLE \"" . addslashes( $sTableName ) . "\" " . 
+                "RENAME COLUMN \"" . addslashes( $sOldColumnName ) . "\" " . 
+                "TO \"" . addslashes( $sNewColumnName ) . "\"";
+            
+            $rResult = $this->Query( $sSQL );
+            
+            return( !is_null( $rResult ) );
+            
+        } // RenameColumn()
+        
+        
+        /**
+         * 
+         * 
+         */
+        public function AlterColumn( $sTableName, $sColumnName, $sType, $aOptions = null )
+        {
+            
+        } // AlterColumn()
+        
+        
+        /**
+         * 
+         * 
+         */
+        public function AddForeignKey( $sTableName, $sColumnName, $sRefTableName, $sRefColumnName, $aActions = null )
+        {
+            
+        } // AddForeignKey()
+        
+        
+        /**
+         * 
+         * 
+         */
+        public function DropForeignKey( $sTableName, $sColumnName )
+        {
+            
+        } // DropForeignKey()
+        
+        
+        /**
+         * 
+         * 
+         */
+        public function CreateSequence( $sName, $iStart = null, $iMinValue = null, 
+            $iMaxValue = null, $iIncrementBy = null, $bCycle = false )
+        {
+            
+            $sSQL = "CREATE SEQUENCE \"" . addslashes( $sName ) . "\" ";
+            
+            if( !empty( $iStart ) )
+            {
+                $sSQL .= " START " . max( 1, intval( $iStart ) ) . " ";
+            }
+            
+            if( !empty( $iMinValue ) )
+            {
+                $sSQL .= " MINVALUE " . intval( $iMinValue ) . " ";
+            }
+            
+            if( !empty( $iMaxValue ) )
+            {
+                $sSQL .= " MAXVALUE " . intval( $iMaxValue ) . " ";
+            }
+            
+            if( !empty( $iIncrementBy ) )
+            {
+                $sSQL .= " INCREMENT BY  " . intval( $iIncrementBy ) . " ";
+            }
+            
+            if( $bCycle === true )
+            {
+                $sSQL .= "CYCLE";
+            }
+            
+            $rResult = $this->Query( $sSQL );
+            
+            return( !is_null( $rResult ) );
+            
+        } // CreateSequence()
 
     } // PostgresDatabase()
 

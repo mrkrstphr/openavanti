@@ -8,7 +8,7 @@
  * @copyright       Copyright (c) 2007-2009, Kristopher Wilson
  * @license         http://www.openavanti.com/license
  * @link            http://www.openavanti.com
- * @version         1.0
+ * @version         1.0.5
  *
  */
 
@@ -406,6 +406,69 @@
          * @returns string The database server version reported by the database server
          */
         abstract public function GetVersion();
+        
+        
+        /**
+         * 
+         * 
+         */
+        abstract public function CreateTable( $sTableName, $sOwner = "" );
+        
+        
+        /**
+         * 
+         * 
+         */
+        abstract public function DropTable( $sTableName );
+        
+        
+        /**
+         * 
+         * 
+         */
+        abstract public function RenameTable( $sOldTableName, $sNewTableName );
+        
+        
+        /**
+         * 
+         * 
+         */
+        abstract public function AddColumn( $sTableName, $sColumnName, $sColumnType, $aOptions = null );
+        
+        
+        /**
+         * 
+         * 
+         */
+        abstract public function RemoveColumn( $sTableName, $sColumnName );
+        
+        
+        /**
+         * 
+         * 
+         */
+        abstract public function RenameColumn( $sTableName, $sOldColumnName, $sNewColumnName );
+        
+        
+        /**
+         * 
+         * 
+         */
+        abstract public function AlterColumn( $sTableName, $sColumnName, $sType, $aOptions = null );
+        
+        
+        /**
+         * 
+         * 
+         */
+        abstract public function AddForeignKey( $sTableName, $sColumnName, $sRefTableName, $sRefColumnName, $aActions = null );
+        
+        
+        /**
+         * 
+         * 
+         */
+        abstract public function DropForeignKey( $sTableName, $sColumnName );
 
     } // Database()
 
