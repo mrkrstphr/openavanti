@@ -9,7 +9,7 @@
  * @copyright       Copyright (c) 2007-2009, Kristopher Wilson
  * @license         http://www.openavanti.com/license
  * @link            http://www.openavanti.com
- * @version         1.0
+ * @version         1.2.0-beta
  */
  
  
@@ -21,23 +21,67 @@
      * @link        http://www.openavanti.com/docs/controller
      */
     class Controller
-    {       
+    {
+        protected $oDispatcher = null;
+        
         public $aData = array();
+        public $sLayout = "";
         public $sView = "";
         
         public $b404Error = false;
         
         
         /**
-         * Constructor. Currently does not do anything.                                                      
+         * The final constructor; sets up data for the controller and calls init()
          * 
-         * @returns void 
+         * @final
+         * @arguments Dispatcher The dispatcher class that loaded this controller
          */
-        public function __construct()
+        public final function __construct( &$oDispatcher )
         {
-        
+            $this->oDispatcher = &$oDispatcher;
+                        
+            $this->SetDefaultView();
+
+            $this->init();
+            
         } // __construct()
-                
+        
+        
+        /**
+         * 
+         * 
+         */
+        protected function SetDefaultView( $sController = null, $sAction = null )
+        {
+            if( empty( $sController ) )
+            {
+                $sController = substr( get_class( $this ), 0, 
+                    strlen( get_class( $this ) ) - strlen( "Controller" ) );
+            }
+            
+            if( empty( $sAction ) )
+            {
+                $sAction = $this->GetRequest()->sAction;
+            }
+            
+            $this->sView = strtolower( $sController . "/" . $sAction . ".php" );
+            
+        } // SetDefaultView()
+        
+        
+        /**
+         * Provides initialization mechanism for the Controller class and is called by the
+         * constructor. Subclasses cannot override the constructor due to the possibility of not
+         * passing the correct required parameters.
+         * 
+         * @returns void
+         */
+        public function init()
+        {
+            
+        } // init()
+        
         
         /**
          * Every controller must have an index() method defined for default requests to the 
@@ -51,6 +95,34 @@
             $this->b404Error = true;
                 
         } // index()
+        
+        
+        
+        /**
+         * Returns a copy of the Dispatcher class that handled the current request and loaded
+         * this controller. 
+         * 
+         * @returns Dispatcher The Dispatcher class that handled this request and loaded the 
+         *      controller
+         */
+        public function GetDispatcher()
+        {
+            return( $this->oDispatcher );
+        
+        } // GetDispatcher()
+        
+        
+        /**
+         * Returns a copy of the Dispatcher's Request object which contains information about
+         * the current request.
+         *
+         * @returns Request The Request object containing information about the current request
+         */
+        public function GetRequest()
+        {
+            return( $this->oDispatcher->GetRequest() );
+            
+        } // GetRequest()
         
         
         /**
@@ -158,6 +230,64 @@
         
         
         /**
+         * Similar to RedirectTo(), forwardAction() sends processing to the specified action, 
+         * or controller and action. An optional arguments parameter allows you to pass information
+         * to this action, and the view and data setup by the new action will be copied to this
+         * controller.
+         * 
+         * @argument string The action to which processing should be forwarded
+         * @argument string The controller to which processing should be forwarded to, used in
+         *      conjunction with the specified action.
+         * @argument mixed The data to be forwarded as arguments to the action. Can be a scalar 
+         *      value or an array of values. 
+         * @returns void
+         */
+        public function forwardAction( $sAction, $sController = null, $xArguments = null )
+        {
+            $this->SetDefaultView( $sController, $sAction );
+            
+            $oController = &$this;
+            
+            if( !is_null( $sController ) )
+            {
+                $sController = $sController . "Controller";
+                $oController = new $sController( $this->GetDispatcher() );
+            }
+            
+            if( !is_callable( array( $oController, $sAction ) ) )
+            {
+                return;
+            }
+            
+            if( is_array( $xArguments ) )
+            {
+                call_user_func_array( array( $oController, $sAction ), $xArguments );
+            }
+            else if( is_scalar( $xArguments ) )
+            {
+                $oController->$sAction( $xArguments );
+            }
+            
+            $this->sView = $oController->sView; 
+            $this->aData = $oController->aData;
+            
+        } // forwardAction()
+        
+        
+        /**
+         * Sets the layout file to use for this controller. 
+         * 
+         * @argument string The file name of the layout file that should be loaded
+         * @returns void
+         */
+        public function SetLayout( $sLayoutFile )
+        {
+            $this->sLayout = $sLayoutFile;
+            
+        } // SetLayout()
+        
+        
+        /**
          * Sets the view file that should be loaded at the end of the request. This method does not
          * check to ensure that the file specified actually exists. It is up to the code that loads
          * the view file to do this (normally the Dispatcher class).                 
@@ -195,13 +325,14 @@
          * redirect to display a success message (in conjunction with the RedirectTo() method).      
          *
          * If a flash message is already set, it will be overwritten on subsequent calls.
-         *               
+         * 
+         * @argument string The scope or name of the flash message to set; default = flash
          * @argument string The message to set in the flash session variable
-         * @returns void         
+         * @returns void
          */ 
-        public function SetFlash( $sMessage )
+        public function SetFlash( $sMessage, $sScope = "flash" )
         {
-            $_SESSION[ "flash" ] = $sMessage;
+            $_SESSION[ (string)$sScope ] = $sMessage;
             
         } // SetFlash()
         
@@ -210,18 +341,20 @@
          * Retrieves any flash message stored in the flash session variable, if any. See the
          * SetFlash() method.        
          *
+         * @argument string The scope or name of the flash message to get; default = flash
          * @returns string The flash message, if any, stored in the session
          */ 
-        public function GetFlash()
+        public function GetFlash( $sScope = "flash" )
         {
-            $sFlash = isset( $_SESSION[ "flash" ] ) ? $_SESSION[ "flash" ] : "";
+            $sFlash = isset( $_SESSION[ (string)$sScope] ) ? 
+                $_SESSION[ (string)$sScope ] : "";
             
-            unset( $_SESSION[ "flash" ] );
+            unset( $_SESSION[ (string)$sScope ] );
             
             return( $sFlash );
             
         } // GetFlash()
-    
+
     } // Controller()
 
 ?>
