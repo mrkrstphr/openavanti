@@ -9,7 +9,7 @@
  * @copyright       Copyright (c) 2007-2009, Kristopher Wilson
  * @license         http://www.openavanti.com/license
  * @link            http://www.openavanti.com
- * @version         1.0
+ * @version         1.2.0-beta
  *
  */
 
@@ -27,15 +27,11 @@
         public $sRewrittenURI = null;
         
         public $sControllerName = null;
-        public $oController = null;
-        
         public $sAction = null;
         
         public $aArguments = array();
         
         public $aLoadedData = array();
-        
-        public $sView = null;
         
         public $sRequestType = "";
         
@@ -50,7 +46,8 @@
         public function __construct()
         {
             $this->sRequestType = $_SERVER[ "REQUEST_METHOD" ];
-            $this->bSecureConnection = isset( $_SERVER[ "HTTPS" ] ) && !empty( $_SERVER[ "HTTPS" ] );
+            $this->bSecureConnection = isset( $_SERVER[ "HTTPS" ] ) && 
+                !empty( $_SERVER[ "HTTPS" ] );
         
         } // __construct()
         
@@ -89,6 +86,18 @@
             return( strtolower( $sRequestType ) == "get" );
             
         } // IsSecureConnection()
+        
+        
+        /**
+         * Determines whether or not the current HTTP request came via AJAX.                                             
+         * 
+         * @returns boolean True of the request is via AJAX, false otherwise 
+         */
+        public static function IsAjaxRequest()
+        {
+            return( isset( $_SERVER[ "HTTP_X_REQUESTED_WITH" ] ) );
+            
+        } // IsAjaxRequest()
         
         
     } // Request()
