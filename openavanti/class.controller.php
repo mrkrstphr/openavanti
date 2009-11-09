@@ -22,17 +22,19 @@
      */
     class Controller
     {
+        // Stores a reference to the dispatcher that spawned this controller:
         protected $oDispatcher = null;
         
-        public $aData = array();
-        public $sLayout = "";
-        public $sView = "";
+        // Stores a reference to the view file that will render the page:
+        protected $oView = null;
         
+        // Stores whether or not the request resulted in a 404 error:
         public $b404Error = false;
         
         
         /**
-         * The final constructor; sets up data for the controller and calls init()
+         * The final constructor; sets up data for the controller and calls 
+         * init() to do user intialization.
          * 
          * @final
          * @arguments Dispatcher The dispatcher class that loaded this controller
@@ -40,19 +42,45 @@
         public final function __construct( &$oDispatcher )
         {
             $this->oDispatcher = &$oDispatcher;
-                        
-            $this->SetDefaultView();
-
+            
+            $this->oView = new View( $this );
+            
+            $this->setDefaultView();
+            
             $this->init();
             
         } // __construct()
         
         
         /**
+         * Provides initialization mechanism for the Controller class and is called by the
+         * constructor. Subclasses cannot override the constructor due to the possibility of not
+         * passing the correct required parameters.
          * 
-         * 
+         * @returns void
          */
-        protected function SetDefaultView( $sController = null, $sAction = null )
+        public function init()
+        {
+        
+        } // init()
+        
+        
+        /**
+         * This method uses the name of a controller and the name of an action
+         * to try to guess the name of the view file that should be loaded. 
+         * The constructed view file name is in the form of: 
+         *  
+         *      [controller]/[action].php
+         * 
+         * If no arguments are passed to this method, the current controller
+         * and action are pulled from the Request object to construct the 
+         * view file name.
+         * 
+         * @argument string Optional; The name of the controller
+         * @argument string Optional; The name of the action
+         * @returns void
+         */
+        protected function setDefaultView( $sController = null, $sAction = null )
         {
             if( empty( $sController ) )
             {
@@ -65,22 +93,9 @@
                 $sAction = $this->GetRequest()->sAction;
             }
             
-            $this->sView = strtolower( $sController . "/" . $sAction . ".php" );
+            $this->oView->SetView( strtolower( $sController . "/" . $sAction . ".php" ) );
             
-        } // SetDefaultView()
-        
-        
-        /**
-         * Provides initialization mechanism for the Controller class and is called by the
-         * constructor. Subclasses cannot override the constructor due to the possibility of not
-         * passing the correct required parameters.
-         * 
-         * @returns void
-         */
-        public function init()
-        {
-            
-        } // init()
+        } // setDefaultView()
         
         
         /**
@@ -105,11 +120,11 @@
          * @returns Dispatcher The Dispatcher class that handled this request and loaded the 
          *      controller
          */
-        public function GetDispatcher()
+        public function getDispatcher()
         {
             return( $this->oDispatcher );
         
-        } // GetDispatcher()
+        } // getDispatcher()
         
         
         /**
@@ -118,11 +133,11 @@
          *
          * @returns Request The Request object containing information about the current request
          */
-        public function GetRequest()
+        public function getRequest()
         {
             return( $this->oDispatcher->GetRequest() );
             
-        } // GetRequest()
+        } // getRequest()
         
         
         /**
@@ -130,11 +145,11 @@
          *
          * @returns bool True if a 404 error was encountered, false otherwise
          */                             
-        public function Is404Error()
+        public function is404Error()
         {
             return( $this->b404Error );
             
-        } // Is404Error()
+        } // is404Error()
         
         
         /**
@@ -143,23 +158,24 @@
          * @argument bool True to trigger a 404 error, false to clear the 404 flag, default: true
          * @returns void
          */ 
-        public function Set404Error( $bIs404Error = true )
+        public function set404Error( $bIs404Error = true )
         {
             $this->b404Error = $bIs404Error;
             
-        } // Set404Error()
+        } // set404Error()
         
         
         /**
          * Determines whether or not the current HTTP request came via AJAX.                                             
          * 
+         * @deprecated Use getRequest()->isAjaxRequest()
          * @returns boolean True of the request is via AJAX, false otherwise 
          */
-        public function IsAjaxRequest()
+        public function isAjaxRequest()
         {
             return( Dispatcher::IsAjaxRequest() );
         
-        } // IsAjaxRequest()
+        } // isAjaxRequest()
         
         
         /**
@@ -169,7 +185,7 @@
          * @argument int The HTTP status code
          * @returns bool True if the operation was successful, false on failure
          */
-        public function SetHTTPStatus( $iCode )
+        public function setHTTPStatus( $iCode )
         {
             if( !headers_sent() )
             {
@@ -180,7 +196,7 @@
             
             return( false );
             
-        } // SetHTTPStatus()
+        } // setHTTPStatus()
         
         
         /**
@@ -193,13 +209,13 @@
          * @argument int The response code to send to the browser, default: 400
          * @returns void                         
          */                     
-        public function AjaxError( $sError, $iResponseCode = 400 )
+        public function ajaxError( $sError, $iResponseCode = 400 )
         {
             $this->SetHTTPStatus( $iResponseCode );
             
             echo $sError;
             
-        } // AjaxError()
+        } // ajaxError()
         
         
         /**
@@ -215,7 +231,7 @@
          * @argument bool True to signal a permanent redirect, false to not set the HTTP response code       
          * @returns bool True if the redirect was sucessfull, false otherwise        
          */ 
-        public function RedirectTo( $sURL, $bPermanentRedirect = true )
+        public function redirectTo( $sURL, $bPermanentRedirect = true )
         {
             if( !headers_sent() )
             {
@@ -226,7 +242,7 @@
             
             return( false );
             
-        } // RedirectTo()
+        } // redirectTo()
         
         
         /**
@@ -268,23 +284,10 @@
                 $oController->$sAction( $xArguments );
             }
             
-            $this->sView = $oController->sView; 
-            $this->aData = $oController->aData;
+            $this->oView->SetView( $oController->sView ); 
+            $this->oView->aData = $oController->aData;
             
         } // forwardAction()
-        
-        
-        /**
-         * Sets the layout file to use for this controller. 
-         * 
-         * @argument string The file name of the layout file that should be loaded
-         * @returns void
-         */
-        public function SetLayout( $sLayoutFile )
-        {
-            $this->sLayout = $sLayoutFile;
-            
-        } // SetLayout()
         
         
         /**
@@ -292,14 +295,27 @@
          * check to ensure that the file specified actually exists. It is up to the code that loads
          * the view file to do this (normally the Dispatcher class).                 
          *       
+         * @deprecated Use $this->oView->setView()
          * @argument string The file name of the view file that should be loaded.
          * @returns void
          */ 
-        public function SetView( $sView )
+        public function setView( $sView )
         {
-            $this->sView = $sView;
+            $this->oView->setView( $sView );
         
-        } // SetView()
+        } // setView()
+        
+        
+        /**
+         * Returns a reference to the View object that will render the page
+         * 
+         * @returns View A refernece to the View that will render the page
+         */ 
+        public function getView()
+        {
+            return( $this->oView );
+        
+        } // getView()
         
         
         /**
@@ -309,15 +325,16 @@
          * 
          * If the supplied variable already exists, it will be overwritten.                                  
          *
+         * @deprecated Use $this->oView->[name] = [value]
          * @argument string The name of the variable to set
          * @argument mixed The value of the variable to set                  
          * @returns void
          */ 
-        public function SetData( $sName, $sValue )
+        public function setData( $sName, $sValue )
         {
-            $this->aData[ $sName ] = $sValue;
+            $this->oView->$sName = $sValue;
             
-        } // SetData()
+        } // setData()
         
         
         /**
@@ -330,11 +347,11 @@
          * @argument string The message to set in the flash session variable
          * @returns void
          */ 
-        public function SetFlash( $sMessage, $sScope = "flash" )
+        public function setFlash( $sMessage, $sScope = "flash" )
         {
             $_SESSION[ (string)$sScope ] = $sMessage;
             
-        } // SetFlash()
+        } // setFlash()
         
         
         /**
@@ -344,7 +361,7 @@
          * @argument string The scope or name of the flash message to get; default = flash
          * @returns string The flash message, if any, stored in the session
          */ 
-        public function GetFlash( $sScope = "flash" )
+        public function getFlash( $sScope = "flash" )
         {
             $sFlash = isset( $_SESSION[ (string)$sScope] ) ? 
                 $_SESSION[ (string)$sScope ] : "";
@@ -353,7 +370,7 @@
             
             return( $sFlash );
             
-        } // GetFlash()
+        } // getFlash()
 
     } // Controller()
 

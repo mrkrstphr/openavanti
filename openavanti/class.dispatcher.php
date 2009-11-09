@@ -25,14 +25,24 @@
      */
     class Dispatcher
     {
+        // Stores a list of routes that determine how to map a URI:
         private $aRoutes = array();
-        protected $bRequireViewFiles = true;
         
+        // Toggles whether to require view files: 
+        //protected $bRequireViewFiles = true;
+        
+        // Stores the name of the error controller that will handle 
+        // dispatching errors:
         protected $sErrorController = "ErrorController";
-                
-        protected $sDefaultLayout = "";
         
+        // Stores a reference to the Request object for this request:
         protected $oRequest = null;
+        
+        // Stores a reference to the Controller that will handle this requet:
+        protected $oController = null;
+        
+        // Stores a reference to the View that will render the page:
+        protected $oView = null;
         
         
         /**
@@ -42,11 +52,11 @@
          * @argument bool True if views should be required, false otherwise      
          * @returns void
          */
-        public function RequireViewFiles( $bRequireViewFiles )
+        /*public function RequireViewFiles( $bRequireViewFiles )
         {
             $this->bRequireViewFiles = $bRequireViewFiles;
             
-        } // RequireViewFiles()
+        }*/ // RequireViewFiles()
 
         
         /**
@@ -56,11 +66,11 @@
          * @argument string The name of the layout file to load when one isn't specified
          * @returns void
          */
-        public function SetDefaultLayout( $sLayoutFile )
+        /*public function SetDefaultLayout( $sLayoutFile )
         {
             $this->sDefaultLayout = $sLayoutFile;
             
-        } // SetDefaultLayout()
+        }*/ // SetDefaultLayout()
         
         
         /**
@@ -71,11 +81,11 @@
          * @argument callback The callback to invoke upon a 404 error        
          * @returns void
          */
-        public function Set404Handler( $xCallback )
+        public function set404Handler( $xCallback )
         {
             $this->x404Callback = $xCallback;
             
-        } // Set404Handler()
+        } // set404Handler()
 
 
         /**
@@ -87,14 +97,14 @@
          * @argument string The string to rewrite to
          * @returns void
          */
-        public function AddRoute( $sPattern, $sReplacement )
+        public function addRoute( $sPattern, $sReplacement )
         {
             $this->aRoutes[] = array(
                 "pattern" => $sPattern,
                 "replace" => $sReplacement
             );
         
-        } // AddRoute()
+        } // addRoute()
     
     
         /**
@@ -102,11 +112,11 @@
          * 
          * @returns Request The current Request object
          */
-        public function GetRequest()
+        public function getRequest()
         {
             return( $this->oRequest );
             
-        } // GetRequest()
+        } // getRequest()
         
     
         /**
@@ -127,7 +137,7 @@
          * @argument string The current request URI
          * @returns void
          */
-        public function Connect( $sRequest )
+        public function connect( $sRequest )
         {
             $this->oRequest = new Request();
             $this->oRequest->sURI = $sRequest;
@@ -138,7 +148,11 @@
             
             // Load an empty controller. This may be replaced if we found a controller through a route.
             
-            $this->oRequest->oController = new Controller( $this );
+            //$this->oRequest->oController = new Controller( $this );
+            
+            $this->oController = new Controller( $this );
+            
+            $this->oView = $this->oController->GetView();
             
             // Loop each stored route and attempt to find a match to the URI:
             
@@ -177,123 +191,62 @@
                 class_exists( $this->oRequest->sControllerName, true ) )
             {
                 // Replace our empty controller with the routed one:                
-                $this->oRequest->oController = new $this->oRequest->sControllerName( $this );
+                $this->oController = new $this->oRequest->sControllerName( $this );
+                
+                $this->oView = $this->oController->GetView();
                 
                 // Attempt to invoke an action on this controller:              
-                $this->InvokeAction();
+                $this->invokeAction();
             }
             else
             {
                 // If we can't find the controller, we must throw an error:
-                return( $this->HandleError( ErrorHandler::CONTROLLER_NOT_FOUND ) );
+                return( $this->handleError( ErrorHandler::CONTROLLER_NOT_FOUND ) );
             }
             
             // Continue on with the view loader method which will put the appropriate presentation
             // on the screen:
             
-            $this->LoadView();
+            $this->oView->renderPage();
+            
+            //$this->LoadView();
         
             return( $this->oRequest );
         
-        } // Connect()
+        } // connect()
         
         
         /**
-         * Determines whether or not the current HTTP request came via AJAX.                                             
-         * 
-         * @returns boolean True of the request is via AJAX, false otherwise 
-         */
-        public static function IsAjaxRequest()
-        {
-            return( isset( $_SERVER[ "HTTP_X_REQUESTED_WITH" ] ) );
-            
-        } // IsAjaxRequest()
-        
-        
-        /**
-         * Called from Connect(), responsible for calling the method of the controller
+         * Called from connect(), responsible for calling the method of the controller
          * routed from the URI
          * 
          * @returns void
          */
-        protected function InvokeAction()
+        protected function invokeAction()
         {
             // is_callable() is used over method_exists() in order to properly utilize __call()
             
             if( !empty( $this->oRequest->sAction ) && 
-                is_callable( array( $this->oRequest->oController, $this->oRequest->sAction ) ) )
+                is_callable( array( $this->oController, $this->oRequest->sAction ) ) )
             {
                 // Call $oController->$sAction() with arguments $aArguments:
-                call_user_func_array( array( $this->oRequest->oController, $this->oRequest->sAction ), 
+                call_user_func_array( array( $this->oController, $this->oRequest->sAction ), 
                     $this->oRequest->aArguments );
             }
             else if( empty( $this->oRequest->sAction ) )
             {
                 // Default to the index file:
-                $this->oRequest->oController->index();
+                $this->oController->index();
             }
             else
             {
                 // Action is not callable, throw an error:
-                return( $this->HandleError( ErrorHandler::ACTION_NOT_FOUND ) );
+                return( $this->handleError( ErrorHandler::ACTION_NOT_FOUND ) );
             }
             
-            $this->oRequest->aLoadedData = &$this->oRequest->oController->aData;
+            $this->oRequest->aLoadedData = &$this->oController->aData;
         
-        } // InvokeAction()
-        
-        
-        /**
-         * Called from Connect(), responsible for loading any view file
-         * 
-         * @returns void
-         */
-        protected function LoadView()
-        {               
-            if( $this->oRequest->oController->Is404Error() )
-            {
-                return( $this->HandleError( ErrorHandler::FILE_NOT_FOUND ) );
-            }
-            else if( !empty( $this->oRequest->oController->sView ) )
-            {
-                if( $this->bRequireViewFiles )
-                {                     
-                    extract( $this->oRequest->oController->aData );
-
-                    if( !empty( $this->oRequest->oController->sLayout ) )
-                    {
-                        require( $this->oRequest->oController->sLayout );
-                    }
-                    else if( !empty( $this->sDefaultLayout ) )
-                    {
-                        require( $this->sDefaultLayout );
-                    }
-                }
-            }
-        
-        } // LoadView()
-        
-        
-        /**
-         * Called from the layout file to load the action specific view file into the layout.
-         * 
-         * @returns void
-         */
-        public function GetContent()
-        {
-            extract( $this->oRequest->oController->aData );
-
-            if( ( $sView = FileFunctions::FileExistsInPath( $this->oRequest->oController->sView ) ) !== false )
-            {
-                $this->oRequest->sView = $sView;
-                require( $sView );
-            }
-            else
-            {
-                $this->HandleError( ErrorHandler::VIEW_NOT_FOUND );
-            }
-            
-        } // GetContent()
+        } // invokeAction()
         
         
         /**
@@ -302,7 +255,7 @@
          * 
          * @returns void
          */
-        protected function HandleError( $sErrorCode )
+        protected function handleError( $sErrorCode )
         {
             if( !empty( $this->sErrorController ) && class_exists( $this->sErrorController, true ) )
             {
@@ -314,23 +267,23 @@
                 throw new Exception( "No ErrorController configured; cannot handle error" );
             }
             
-        } // HandleError()
+        } // handleError()
         
         
         /**
          * Called to handle a 404 error
          * 
-         * @deprecated Use HandleError( ErrorHandler::FILE_NOT_FOUND );
+         * @deprecated Use handleError( ErrorHandler::FILE_NOT_FOUND );
          * @returns void
          */
-        protected function Invoke404Error()
+        protected function invoke404Error()
         {
             if( !headers_sent() )
             {
                 header( "HTTP/1.0 404 Not Found", true, 404 );
             }
             
-            $this->HandleError( ErrorHandler::FILE_NOT_FOUND );
+            $this->handleError( ErrorHandler::FILE_NOT_FOUND );
         
         } // Invoke404Error()
         
