@@ -28,9 +28,6 @@
         // Stores a reference to the view file that will render the page:
         protected $oView = null;
         
-        // Stores whether or not the request resulted in a 404 error:
-        public $b404Error = false;
-        
         
         /**
          * The final constructor; sets up data for the controller and calls 
@@ -107,7 +104,7 @@
          */
         public function index()
         {
-            $this->b404Error = true;
+            $this->getResponse()->set404Error( true );
                 
         } // index()
         
@@ -120,9 +117,9 @@
          * @returns Dispatcher The Dispatcher class that handled this request and loaded the 
          *      controller
          */
-        public function getDispatcher()
+        public function &getDispatcher()
         {
-            return( $this->oDispatcher );
+            return $this->oDispatcher;
         
         } // getDispatcher()
         
@@ -133,36 +130,24 @@
          *
          * @returns Request The Request object containing information about the current request
          */
-        public function getRequest()
+        public function &getRequest()
         {
-            return( $this->oDispatcher->GetRequest() );
+            return $this->oDispatcher->getRequest();
             
         } // getRequest()
         
         
         /**
-         * Returns the internal 404 status to determine if a 404 error flag was triggered
+         * Returns a copy of the Dispatcher's Response object which contains information about
+         * the HTTP response.
          *
-         * @returns bool True if a 404 error was encountered, false otherwise
-         */                             
-        public function is404Error()
+         * @returns Request The Response object containing information about the HTTP response
+         */
+        public function &getResponse()
         {
-            return( $this->b404Error );
+            return $this->oDispatcher->getResponse();
             
-        } // is404Error()
-        
-        
-        /**
-         * Sets or clears the internal 404 error status flag. 
-         * 
-         * @argument bool True to trigger a 404 error, false to clear the 404 flag, default: true
-         * @returns void
-         */ 
-        public function set404Error( $bIs404Error = true )
-        {
-            $this->b404Error = $bIs404Error;
-            
-        } // set404Error()
+        } // getResponse()
         
         
         /**
@@ -173,49 +158,9 @@
          */
         public function isAjaxRequest()
         {
-            return( Dispatcher::IsAjaxRequest() );
+            return Dispatcher::IsAjaxRequest();
         
         } // isAjaxRequest()
-        
-        
-        /**
-         * Sets the HTTP status code header. This method will only work if no output or headers
-         * have already been sent.
-         *       
-         * @argument int The HTTP status code
-         * @returns bool True if the operation was successful, false on failure
-         */
-        public function setHTTPStatus( $iCode )
-        {
-            if( !headers_sent() )
-            {
-                header( " ", true, $iCode );
-                
-                return( true );
-            }
-            
-            return( false );
-            
-        } // setHTTPStatus()
-        
-        
-        /**
-         * This specialized method does two things: it attempts to set the HTTP status code,
-         * 400 by default, to inform the web browser that there was an error, and second, 
-         * echoes the supplied error message to the browser, which could be a simple string or
-         * a JSON object.                
-         *
-         * @argument string The error message to output
-         * @argument int The response code to send to the browser, default: 400
-         * @returns void                         
-         */                     
-        public function ajaxError( $sError, $iResponseCode = 400 )
-        {
-            $this->SetHTTPStatus( $iResponseCode );
-            
-            echo $sError;
-            
-        } // ajaxError()
         
         
         /**
@@ -237,10 +182,10 @@
             {
                 header( "Location: {$sURL}", true, $bPermanentRedirect ? 301 : null );
                 
-                return( true );
+                return true;
             }
             
-            return( false );
+            return false;
             
         } // redirectTo()
         
@@ -311,9 +256,9 @@
          * 
          * @returns View A refernece to the View that will render the page
          */ 
-        public function getView()
+        public function &getView()
         {
-            return( $this->oView );
+            return $this->oView;
         
         } // getView()
         
@@ -368,7 +313,7 @@
             
             unset( $_SESSION[ (string)$sScope ] );
             
-            return( $sFlash );
+            return $sFlash;
             
         } // getFlash()
 
