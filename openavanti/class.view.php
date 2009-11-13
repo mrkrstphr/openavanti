@@ -1,5 +1,5 @@
 <?php
-/***************************************************************************************************
+/*******************************************************************************
  * OpenAvanti
  *
  * OpenAvanti is an open source, object oriented framework for PHP 5+
@@ -46,7 +46,8 @@
         
         
         /**
-         * The final constructor; sets up data for the controller and calls init()
+         * The final constructor; sets up data for the controller and calls 
+         * init()
          * 
          * @final
          * @argument Dispatcher The dispatcher class that loaded this controller
@@ -65,9 +66,9 @@
         
         
         /**
-         * Provides initialization mechanism for the View class and is called by the
-         * constructor. Subclasses cannot override the constructor due to the possibility of not
-         * passing the correct required parameters.
+         * Provides initialization mechanism for the View class and is called 
+         * by the constructor. Subclasses cannot override the constructor due 
+         * to the possibility of not passing the correct required parameters.
          * 
          * @returns void
          */
@@ -83,11 +84,11 @@
          * 
          * @returns Dispatcher The Controller class
          */
-        public function getController()
+        public function &getController()
         {
-            return( $this->oController );
+            return $this->oController;
         
-        } // GetController()
+        } // getController()
         
         
         /**
@@ -101,7 +102,7 @@
         {
             $this->sLayout = $sLayoutFile;
             
-        } // SetLayout()
+        } // setLayout()
         
         
         /**
@@ -115,22 +116,24 @@
         {
             self::$sDefaultLayout = $sLayoutFile;
             
-        } // SetDefaultLayout()
+        } // setDefaultLayout()
         
         
         /**
-         * Sets the view file that should be loaded at the end of the request. This method does not
-         * check to ensure that the file specified actually exists. It is up to the code that loads
-         * the view file to do this (normally the Dispatcher class).                 
+         * Sets the view file that should be loaded at the end of the request. 
+         * This method does not check to ensure that the file specified 
+         * actually exists. It is up to the code that loads the view file to 
+         * do this (normally the Dispatcher class).                 
          *       
-         * @argument string The file name of the view file that should be loaded.
+         * @argument string The file name of the view file that should be 
+         *      loaded.
          * @returns void
          */ 
         public function setView( $sView )
         {
             $this->sView = $sView;
         
-        } // SetView()
+        } // setView()
         
         
         /**
@@ -142,33 +145,37 @@
          */
         public function renderPage()
         {
-            // TODO Finalize this code
-            
-            /*if( $this->oController->Is404Error() )
+            if( $this->bRenderLayout )
             {
-                return( $this->HandleError( ErrorHandler::FILE_NOT_FOUND ) );
-            }
-            else*/ 
-            if( !empty( $this->sView ) )
-            {
-                if( $this->bRenderLayout )
+                if( !empty( $this->sLayout ) )
                 {
-                    // TODO deprecate this
-
-                    extract( $this->aData );
-
-                    if( !empty( $this->sLayout ) )
+                    if( FileFunctions::fileExistsInPath( $this->sLayout ) )
                     {
                         require( $this->sLayout );
                     }
-                    else if( !empty( self::$sDefaultLayout ) )
+                    else
+                    {
+                        throw new Exception( ErrorHandler::VIEW_NOT_FOUND );
+                    }
+                }                
+                else if( !empty( self::$sDefaultLayout ) )
+                {
+                    if( FileFunctions::fileExistsInPath( self::$sDefaultLayout ) )
                     {
                         require( self::$sDefaultLayout );
                     }
+                    else
+                    {
+                        throw new Exception( ErrorHandler::VIEW_NOT_FOUND );
+                    }
                 }
             }
+            else if( $this->bRenderView )
+            {
+                return $this->RenderContent();
+            }
 
-        } // RenderPage()
+        } // renderPage()
 
 
         /**
@@ -177,24 +184,32 @@
          * 
          * @returns void
          */
-        public function RenderContent()
+        public function renderContent()
         {
-            // TODO deprecate this
-            
-            extract( $this->aData );
-
-            if( ( $sView = FileFunctions::FileExistsInPath( $this->sView ) ) !== false )
+            if( $this->bRenderView )
             {
-                require( $sView );
-            }
-            else
-            {
-                // FIXME this method doesn't exist 
-                
-                $this->HandleError( ErrorHandler::VIEW_NOT_FOUND );
+                if( ( $sView = FileFunctions::FileExistsInPath( $this->sView ) ) !== false )
+                {
+                    require( $sView );
+                }
+                else
+                {
+                    throw new Exception( ErrorHandler::VIEW_NOT_FOUND );
+                }
             }
             
-        } // RenderContent()
+        } // renderContent()
+        
+        
+        /**
+         * 
+         * 
+         */
+        public function handleError( $sErrorCode )
+        {
+            $this->oController->getDispatcher()->handleError( $sErrorCode );
+            
+        } // handleError()
         
         
         /**
@@ -208,7 +223,7 @@
          */
         public function __get( $sName )
         {
-            return( $this->aData[ $sName ] );
+            return $this->aData[ $sName ];
             
         } // __get()
         
@@ -226,6 +241,17 @@
             $this->aData[ $sName ] = $sValue;
             
         } // __set()
+        
+        
+        /**
+         * 
+         * 
+         */
+        public function __isset( $sName )
+        {
+            return isset( $this->aData[ $sName ] );
+
+        } // __isset()
 
     } // View()
 

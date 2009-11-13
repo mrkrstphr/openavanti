@@ -26,7 +26,7 @@
     class Dispatcher
     {
         // Stores a list of routes that determine how to map a URI:
-        private $aRoutes = array();
+        protected $aRoutes = array();
         
         // Toggles whether to require view files: 
         //protected $bRequireViewFiles = true;
@@ -38,40 +38,15 @@
         // Stores a reference to the Request object for this request:
         protected $oRequest = null;
         
+        // Stores a reference to the Response object for this transaction:
+        protected $oResponse = null;
+        
         // Stores a reference to the Controller that will handle this requet:
         protected $oController = null;
         
         // Stores a reference to the View that will render the page:
         protected $oView = null;
-        
-        
-        /**
-         * Toggles whether or not the controller should load view files (header, the view setup
-         * by the controller, and the footer view file.          
-         * 
-         * @argument bool True if views should be required, false otherwise      
-         * @returns void
-         */
-        /*public function RequireViewFiles( $bRequireViewFiles )
-        {
-            $this->bRequireViewFiles = $bRequireViewFiles;
-            
-        }*/ // RequireViewFiles()
-
-        
-        /**
-         * Sets the default layout file to load when one isn't specified for the specific
-         * request via the controller. 
-         * 
-         * @argument string The name of the layout file to load when one isn't specified
-         * @returns void
-         */
-        /*public function SetDefaultLayout( $sLayoutFile )
-        {
-            $this->sDefaultLayout = $sLayoutFile;
-            
-        }*/ // SetDefaultLayout()
-        
+                
         
         /**
          * Allows the specification of a callback method to invoke upon a 404 error, instead of 
@@ -112,9 +87,21 @@
          * 
          * @returns Request The current Request object
          */
-        public function getRequest()
+        public function &getRequest()
         {
-            return( $this->oRequest );
+            return $this->oRequest;
+            
+        } // getRequest()
+    
+    
+        /**
+         * Returns the Request object for the current request
+         * 
+         * @returns Request The current Request object
+         */
+        public function &getResponse()
+        {
+            return $this->oResponse;
             
         } // getRequest()
         
@@ -142,17 +129,18 @@
             $this->oRequest = new Request();
             $this->oRequest->sURI = $sRequest;
             
+            $this->oResponse = new Response();
+            
             $sController = "";
             $sAction = "";
             $aArguments = array();
             
             // Load an empty controller. This may be replaced if we found a controller through a route.
+            // FIXME Why were we doing this?
             
-            //$this->oRequest->oController = new Controller( $this );
+            //$this->oController = new Controller( $this );
             
-            $this->oController = new Controller( $this );
-            
-            $this->oView = $this->oController->GetView();
+            //$this->oView = &$this->oController->GetView();
             
             // Loop each stored route and attempt to find a match to the URI:
             
@@ -176,13 +164,15 @@
             $aRequest = explode( "/", $sRequest );
             
             // Store this as the last request:
-            $_SESSION[ "last-request" ] = $aRequest;
+            // FIXME - what was the point of this?
+            //$_SESSION[ "last-request" ] = $aRequest;
             
             $this->oRequest->sControllerName = count( $aRequest ) > 0 ? 
                 str_replace( "-", "_", array_shift( $aRequest ) ) . "Controller" : "";
             
             $this->oRequest->sAction = count( $aRequest ) > 0 ? 
                 str_replace( "-", "_", array_shift( $aRequest ) ) : "index";
+                
             $this->oRequest->aArguments = !empty( $aRequest ) ? $aRequest : array();
                 
             
@@ -207,10 +197,15 @@
             // Continue on with the view loader method which will put the appropriate presentation
             // on the screen:
             
-            $this->oView->renderPage();
+            try
+            {
+                $this->oView->renderPage();
+            }
+            catch( Exception $e )
+            {
+                $this->handleError( $e->getMessage() );
+            }
             
-            //$this->LoadView();
-        
             return( $this->oRequest );
         
         } // connect()
@@ -243,8 +238,6 @@
                 // Action is not callable, throw an error:
                 return( $this->handleError( ErrorHandler::ACTION_NOT_FOUND ) );
             }
-            
-            $this->oRequest->aLoadedData = &$this->oController->aData;
         
         } // invokeAction()
         
@@ -255,7 +248,7 @@
          * 
          * @returns void
          */
-        protected function handleError( $sErrorCode )
+        public function handleError( $sErrorCode )
         {
             if( !empty( $this->sErrorController ) && class_exists( $this->sErrorController, true ) )
             {
