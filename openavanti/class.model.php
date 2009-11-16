@@ -50,7 +50,15 @@
                 parent::__construct( $sTableName );
             }
             
+            $this->init();
+            
         } // __construct()
+        
+        
+        public function init()
+        {
+        
+        } // init()
         
 
         /**
