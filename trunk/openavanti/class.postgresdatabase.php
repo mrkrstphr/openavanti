@@ -528,7 +528,7 @@
          * and key information.
          *       
          */
-        public function GetSchema( $sTableName )
+        public function getTableDefinition( $sTableName )
         {       
             $sCacheFile = self::$sCacheDirectory . "/" . md5( $sTableName );
             
@@ -552,7 +552,7 @@
             
             return( self::$aSchemas[ $sTableName ] );
         
-        } // GetSchema()
+        } // getTableDefinition()
         
 
         /**

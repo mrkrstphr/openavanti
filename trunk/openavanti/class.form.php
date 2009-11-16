@@ -24,7 +24,7 @@
     {
         public static $aFields = array();
 
-        
+
         /**
          * Loads the specified array or object into the classes aFields array. These values are 
          * later used by the field generation helpers for setting the value of the form field. This 
@@ -32,9 +32,10 @@
          * member objects to load all data within the array or object.       
          * 
          * @argument mixed An array or object of keys and values to load into the forms data array
+         * @argument array 
          * @returns void
          */
-        public static function Load( $oObject, &$aTarget = null )
+        public static function loadData( $oObject, &$aTarget = null )
         {
             is_null( $aTarget ) ? $aTarget = &self::$aFields : $aTarget = $aTarget;
         
@@ -55,7 +56,75 @@
                 }
             }
                         
-        } // Load()     
+        } // loadData()
+        
+
+        /**
+         * Loads the specified array or object into the classes aFields array. These values are 
+         * later used by the field generation helpers for setting the value of the form field. This 
+         * method will recursively iterate through a multidimensional array, or an object with 
+         * member objects to load all data within the array or object.       
+         * 
+         * @deprecated Use Form::loadData
+         * @argument mixed An array or object of keys and values to load into the forms data array
+         * @returns void
+         */
+        public static function load( $oObject, &$aTarget = null )
+        {
+            return( self::loadData( $oObject, $aTarget ) )
+                        
+        } // load()
+        
+        
+        /**
+         *
+         *
+         *
+         */
+        public static function loadSanitizedPost()
+        {
+            $aData = $_POST;
+            
+            // TODO sanitize the data
+            
+            self::$aFields += $aData;
+            
+            return( self::$aFields );
+
+        } // loadSanitizedPost()
+        
+        
+        /**
+         *
+         *
+         *
+         */
+        public static function loadSanitizedGet()
+        {
+            $aData = $_GET;
+            
+            // TODO sanitize the data
+            
+            self::$aFields += $aData;
+            
+            return( self::$aFields );
+
+        } // loadSanitizedGet()
+        
+        
+        /**
+         *
+         *
+         *
+         */
+        public static function loadSanitizedRequest()
+        {
+            self::loadSanitizedGet();
+            self::loadSanitizedPost();
+            
+            return( self::$aFields );
+            
+        } // loadSanitizedRequest()
         
         
         /**
