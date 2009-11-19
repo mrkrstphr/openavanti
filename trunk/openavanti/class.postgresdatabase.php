@@ -23,12 +23,12 @@
      */
     class PostgresDatabase extends Database
     {
-        private $hDatabase = null;
+        private $_databaseResource = null;
         
-        protected static $aSchemas = array();
+        protected static $_schemas = array();
         
-        private static $sCacheDirectory = "";
-        private static $bCacheSchemas = false;
+        private static $_cacheDirectory = "";
+        private static $_cacheSchemas = false;
         
 
         /**
@@ -38,33 +38,33 @@
          * 
          * @argument array The database profile array containing connection information                              
          */
-        protected function __construct( $aProfile )
+        protected function __construct($profile)
         {
-            $sString = "";
+            $connectionString = "";
             
-            if( isset( $aProfile[ "host" ] ) )
+            if(isset($profile["host"]))
             {
-                $sString .= " host=" . $aProfile[ "host" ] . " ";
+                $connectionString .= " host=" . $profile["host"] . " ";
             }
       
-            $sString .= " dbname=" . $aProfile[ "name" ] . " ";
+            $connectionString .= " dbname=" . $profile["name"] . " ";
         
-            if( isset( $aProfile[ "user" ] ) )
+            if(isset($profile["user"]))
             {
-                $sString .= " user=" . $aProfile[ "user" ] . " ";
+                $connectionString .= " user=" . $profile["user"] . " ";
             }
             
-            if( isset( $aProfile[ "password" ] ) )
+            if(isset($profile["password"]))
             {
-                $sString .= " password=" . $aProfile[ "password" ] . " ";
+                $connectionString .= " password=" . $profile["password"] . " ";
             }
             
-            $this->hDatabase = @pg_connect( $sString );
+            $this->_databaseResource = @pg_connect($connectionString);
             
-            if( !$this->hDatabase )
+            if(!$this->_databaseResource)
             {
-                throw new DatabaseConnectionException( "Failed to connect to Postgres server: " . 
-                    $aProfile[ "host" ] . "." . $aProfile[ "name" ] );
+                throw new DatabaseConnectionException("Failed to connect to Postgres server: " . 
+                    $profile["host"] . "." . $profile["name"]);
             }
             
         } // __construct()
@@ -76,18 +76,18 @@
          * @argument string The PostgreSQL query to execute
          * @returns string A ResultSet object containing the results of the database query                   
          */
-        public function Query( $sSQL )
+        public function &query($sql)
         {
-            $rResult = @pg_query( $this->hDatabase, $sSQL );
+            $resultResource = @pg_query($this->_databaseResource, $sql);
             
-            if( !$rResult )
+            if(!$resultResource)
             {
-                return( null );
+                return null;
             }
             
-            return( new ResultSet( $this, $rResult ) );
+            return new ResultSet($this, $resultResource);
         
-        } // Query()
+        } // query()
         
         
         /**
@@ -96,18 +96,18 @@
          * @argument resource The database connection resource to pull the next record from
          * @returns object The next record from the database, or null if there are no more records
          */      
-        public function PullNextResult( &$rResult )
+        public function pullNextResult(&$resultResource)
         {
-            if( !is_null( $rResult ) )
+            if(!is_null($resultResource))
             {                
-                return( pg_fetch_object( $rResult ) );
+                return pg_fetch_object($resultResource);
             }
             else
             {
-                return( null );
+                return null;
             }
             
-        } // PullNextResult()
+        } // pullNextResult()
         
         
         /**
@@ -117,18 +117,18 @@
          * @argument resource The database connection resource
          * @returns int The number of rows in the specified database resource
          */ 
-        public function CountFromResult( &$rResult )
+        public function countFromResult(&$resultResource)
         {
-            if( $rResult )
+            if($resultResource)
             {
-                return( pg_num_rows( $rResult ) );
+                return pg_num_rows($resultResource);
             }
             else
             {
-                return( 0 );
+                return 0;
             }
             
-        } // CountFromResult()
+        } // countFromResult()
         
         
         /**
@@ -138,11 +138,11 @@
          * @argument resource The database connection resource to pull the next record from
          * @returns bool True if the operation was successful, false otherwise                                   
          */
-        public function ResetResult( &$rResult )
+        public function resetResult(&$resultResource)
         {
-            return( @pg_result_seek( $rResult, 0 ) );
+            return @pg_result_seek($resultResource, 0);
         
-        } // ResetResult()
+        } // resetResult()
         
 
         /**
@@ -152,14 +152,14 @@
          * 
          * @returns void                 
          */
-        public function Begin()
+        public function begin()
         {
-            $rResult = @pg_query( $this->hDatabase, "BEGIN" ) or
-                trigger_error( "Failed to begin transaction", E_USER_ERROR );
+            $resultResource = @pg_query($this->_databaseResource, "BEGIN") or
+                trigger_error("Failed to begin transaction", E_USER_ERROR);
 
-            return( $rResult ? true : false );
+            return $resultResource ? true : false;
 
-        } // Begin()
+        } // begin()
         
 
         /**
@@ -169,14 +169,14 @@
          * 
          * @returns void         
          */
-        public function Commit()
+        public function commit()
         {
-            $rResult = @pg_query( $this->hDatabase, "COMMIT" ) or
-                trigger_error( "Failed to commit transaction", E_USER_ERROR );
+            $resultResource = @pg_query($this->_databaseResource, "COMMIT") or
+                trigger_error("Failed to commit transaction", E_USER_ERROR);
         
-            return( $rResult ? true : false );
+            return $resultResource ? true : false;
         
-        } // Commit()
+        } // commit()
         
 
         /**
@@ -185,14 +185,14 @@
          *       
          * @returns void         
          */
-        public function Rollback()
+        public function rollback()
         {
-            $rResult = @pg_query( $this->hDatabase, "ROLLBACK" ) or
-                trigger_error( "Failed to rollback transaction", E_USER_ERROR );
+            $resultResource = @pg_query($this->_databaseResource, "ROLLBACK") or
+                trigger_error("Failed to rollback transaction", E_USER_ERROR);
         
-            return( $rResult ? true : false );
+            return $resultResource ? true : false;
         
-        } // Rollback()
+        } // rollback()
         
 
         /**
@@ -201,27 +201,27 @@
          * @argument string The name of the database sequence to advance and get the current value of
          * @returns integer An integer representation of the next value of the sequence
          */
-        public function NextVal( $sSequenceName )
+        public function nextVal($sequenceName)
         {
-            $sSQL = "SELECT
-                NEXTVAL( '{$sSequenceName}' )
+            $sql = "SELECT
+                NEXTVAL('{$sequenceName}')
             AS
                 next_val";
             
-            $rResult = @pg_query( $this->hDatabase, $sSQL ) or
-                trigger_error( "Failed to query sequence value: " . $this->getLastError(), 
-                    E_USER_ERROR );
+            $resultResource = @pg_query($this->_databaseResource, $sql) or
+                trigger_error("Failed to query sequence value: " . $this->getLastError(), 
+                    E_USER_ERROR);
             
-            $oRecord = pg_fetch_object( $rResult );
+            $record = pg_fetch_object($resultResource);
         
-            if( $oRecord )
+            if($record)
             {
-                return( $oRecord->next_val );
+                return $record->next_val;
             }
         
-            return( null );
+            return null;
         
-        } // NextVal()
+        } // nextVal()
         
 
         /**
@@ -236,27 +236,27 @@
          * @argument string The name of the database sequence to get the current value of
          * @returns integer An integer representation of the current value of the sequence.
          */
-        public function CurrVal( $sSequenceName )
+        public function currVal($sequenceName)
         {
-            $sSQL = "SELECT
-                CURRVAL( '{$sSequence}' )
+            $sql = "SELECT
+                CURRVAL('{$sequenceName}')
             AS
                 current_value";
             
-            $rResult = @pg_query( $this->hDatabase, $sSQL ) or
-                trigger_error( "Failed to query sequence value: " . $this->getLastError(), 
-                        E_USER_ERROR );
+            $resultResource = @pg_query($this->_databaseResource, $sql) or
+                trigger_error("Failed to query sequence value: " . $this->getLastError(), 
+                        E_USER_ERROR);
                 
-            $oRecord = pg_fetch_object( $rResult );
+            $record = pg_fetch_object($resultResource);
             
-            if( $oRecord )
+            if($record)
             {
-                return( $oRecord->current_value );
+                return $record->current_value;
             }
             
-            return( null );
+            return null;
         
-        } // CurrVal()
+        } // currVal()
         
 
         /**
@@ -275,32 +275,32 @@
          * @argument string The name of the database table column with the sequence as a default value
          * @returns integer An integer representation of the current value of the sequence
          */
-        public function SerialCurrVal( $sTableName, $sColumnName )
+        public function serialCurrVal( $tableName, $columnName )
         {
-            $sSQL = "SELECT
+            $sql = "SELECT
                 CURRVAL(
                     PG_GET_SERIAL_SEQUENCE(
-                        '{$sTableName}', 
-                        '{$sColumnName}'
+                        '{$tableName}', 
+                        '{$columnName}'
                     )
                 )
             AS
                 current_value";
             
-            $rResult = @pg_query( $this->hDatabase, $sSQL ) or
-                trigger_error( "Failed to query sequence value: " . $this->getLastError(), 
-                E_USER_ERROR );
+            $resultResource = @pg_query($this->_databaseResource, $sql) or
+                trigger_error("Failed to query sequence value: " . $this->getLastError(), 
+                E_USER_ERROR);
                 
-            $oRecord = pg_fetch_object( $rResult );
+            $record = pg_fetch_object($resultResource);
             
-            if( $oRecord )
+            if( $record )
             {
-                return( $oRecord->current_value );
+                return $record->current_value;
             }
             
-            return( null );
+            return null;
         
-        } // SerialCurrVal()
+        } // serialCurrVal()
         
 
         /**
@@ -313,32 +313,32 @@
          * @argument string The name of the database table column with the sequence as a default value
          * @returns integer An integer representation of the next value of the sequence                  
          */
-        public function SerialNextVal( $sTableName, $sColumnName )
+        public function serialNextVal($tableName, $columnName)
         {
-            $sSQL = "SELECT
+            $sql = "SELECT
                 NEXTVAL(
                     PG_GET_SERIAL_SEQUENCE(
-                        '{$sTableName}', 
-                        '{$sColumnName}'
+                        '{$tableName}', 
+                        '{$columnName}'
                     )
                 )
             AS
                 next_value";
             
-          $rResult = @pg_query( $this->hDatabase, $sSQL ) or
-             trigger_error( "Failed to query sequence value: " . $this->getLastError(), 
-                    E_USER_ERROR );
+          $resultResource = @pg_query($this->_databaseResource, $sql) or
+             trigger_error("Failed to query sequence value: " . $this->getLastError(), 
+                    E_USER_ERROR);
                 
-            $oRecord = pg_fetch_object( $rResult );
+            $record = pg_fetch_object($resultResource);
             
-            if( $oRecord )
+            if($record)
             {
-                return( $oRecord->next_value );
+                return $record->next_value;
             }
             
-            return( null );
+            return null;
         
-        } // SerialNextVal()
+        } // serialNextVal()
         
 
         /**
@@ -346,11 +346,11 @@
          * 
          * @returns string A string representation of the last PostgreSQL error              
          */
-        public function GetLastError()
+        public function getLastError()
         {
-            return( pg_last_error() );
+            return pg_last_error();
         
-        } // GetLastError()
+        } // getLastError()
         
 
         /**
@@ -367,11 +367,11 @@
          *       database schema files
          * @returns void                         
          */
-        public function SetCacheDirectory( $sDirectoryName )
+        public function setCacheDirectory($directoryName)
         {
-            self::$sCacheDirectory = $sDirectoryName;
+            self::$_cacheDirectory = $directoryName;
         
-        } // SetCacheDirectory()
+        } // setCacheDirectory()
         
 
         /**
@@ -390,11 +390,11 @@
          * @argument boolean Toggles whether or not to cache discovered database schemas
          * @returns void         
          */
-        public function CacheSchemas( $bEnable )
+        public function cacheSchemas($enabled)
         {
-            self::$bCacheSchemas = $bEnable;
+            self::$_cacheSchemas = $enabled;
 
-        } // CacheSchemas()
+        } // cacheSchemas()
         
 
         /**
@@ -402,11 +402,11 @@
          * 
          * @returns resource The native PHP database resource                
          */
-        public function GetResource()
+        public function &getResource()
         {
-            return( $this->hDatabase );
+            return $this->_databaseResource;
         
-        } // GetResource()
+        } // getResource()
         
 
         /**
@@ -421,36 +421,36 @@
          * @argument string The value to be formatted into a database-safe representation
          * @returns string A string of the formatted value supplied                          
          */
-        public function FormatData( $sType, $sValue )
+        public function formatData($dataType, $value)
         {
-            $aQuoted_Types = array( "/text/", "/character varying/", "/date/", 
-                "/timestamp/", "/time without time zone/" );
+            $quotedTypes = array("/text/", "/character varying/", "/date/", 
+                "/timestamp/", "/time without time zone/");
             
-            if( strlen( $sValue ) == 0 )
+            if(strlen($value) == 0)
             {
-                return( "NULL" );
+                return "NULL";
             }
             
-            if( preg_replace( $aQuoted_Types, "", $sType ) != $sType )
+            if(preg_replace($quotedTypes, "", $dataType) != $dataType)
             {
-                return( "'" . addslashes( $sValue ) . "'" );
+                return "'" . addslashes($value) . "'";
             }
-            else if( strpos( $sType, "bool" ) !== false )
+            else if(strpos($dataType, "bool") !== false)
             {
-                if( $sValue === true || strtolower( $sValue ) == "true" || 
-                    strtolower( $sValue ) == "t" )
+                if($value === true || strtolower($value) == "true" || 
+                    strtolower($value) == "t")
                 {
-                    return( "true" );
+                    return "true";
                 }
                 else
                 {
-                    return( "false" );
+                    return "false";
                 }
             }
             
-            return( $sValue );
+            return $value;
         
-        } // FormatData()
+        } // formatData()
 
 
         /**
@@ -459,30 +459,30 @@
          * @returns array An array of all databases on the database server in the formation of 
          *       database_name => database_name
          */      
-        public function GetDatabases()
+        public function getDatabases()
         {
-            $sSQL = "SELECT
+            $sql = "SELECT
                 datname
             FROM
                 pg_database
             ORDER BY
                 datname";
                 
-            if( !( $oDatabases = $this->Query( $sSQL ) ) )
+            if(!($databasesObj = $this->query($sql)))
             {
-                throw new QueryFailedException( $this->GetLastError() );
+                throw new QueryFailedException($this->getLastError());
             }
             
-            $aDatabases = array();
+            $databases = array();
             
-            foreach( $oDatabases as $oDatabase )
+            foreach($databasesObj as $database)
             {
-                $aDatabases[ $oDatabase->datname ] = $oDatabase->datname;
+                $databases[$database->datname] = $database->datname;
             }
             
-            return( $aDatabases );
+            return $databases;
         
-        } // GetDatabases()
+        } // getDatabases()
         
         
         /**
@@ -490,11 +490,11 @@
          *       
          * @returns array Returns an array of all tables in the form of table_name => table_name.
          */ 
-        public function GetTables()
+        public function getTables()
         {               
-            $aTables = array();
+            $tables = array();
 
-            $sSQL = "SELECT 
+            $sql = "SELECT 
                 pt.tablename, 
                 pp.typrelid 
             FROM 
@@ -506,21 +506,19 @@
             AND
                 pt.tablename NOT LIKE 'sql_%'";
             
-            if( !( $oTables = $this->Query( $sSQL ) ) )
+            if(!($tablesObj = $this->query($sql)))
             {
-                throw new QueryFailedException( $this->GetLastError() );
+                throw new QueryFailedException($this->getLastError());
             }
 
-            $aTables = array();
-
-            foreach( $oTables as $oTable ) 
+            foreach($tablesObj as $table) 
             {
-                $aTables[ $oTable->typrelid ] = $oTable->tablename;
+                $tables[ $table->typrelid ] = $table->tablename;
             }
 
-            return( $aTables );
+            return $tables;
         
-        } // GetTables()
+        } // getTables()
         
 
         /**
@@ -528,29 +526,29 @@
          * and key information.
          *       
          */
-        public function getTableDefinition( $sTableName )
+        public function getTableDefinition($tableName)
         {       
-            $sCacheFile = self::$sCacheDirectory . "/" . md5( $sTableName );
+            $cacheFile = self::$_cacheDirectory . "/" . md5($tableName);
             
-            if( self::$bCacheSchemas && !isset( self::$aSchemas[ $sTableName ] ) && Cache::Exists( $sCacheFile ) )
+            if(self::$_cacheSchemas && !isset(self::$_schemas[$tableName]) && Cache::Exists($cacheFile))
             {
-                $oCache = new Cache( $sCacheFile );
-                self::$aSchemas[ $sTableName ] = unserialize( $oCache );    
+                $cache = new Cache($cacheFile);
+                self::$_schemas[$tableName] = unserialize($cache);    
             }
             else
             {            
-                $this->GetTableColumns( $sTableName );
-                $this->GetTablePrimaryKey( $sTableName );
-                $this->GetTableForeignKeys( $sTableName );
+                $this->getTableColumns($tableName);
+                $this->getTablePrimaryKey($tableName);
+                $this->getTableForeignKeys($tableName);
             
-                if( self::$bCacheSchemas )
+                if(self::$_cacheSchemas)
                 {
-                    $oCache = new Cache();
-                    $oCache->Save( $sCacheFile, serialize( self::$aSchemas[ $sTableName ] ), true );
+                    $cache = new Cache();
+                    $cache->save($cacheFile, serialize(self::$_schemas[$tableName]), true);
                 }
             }
             
-            return( self::$aSchemas[ $sTableName ] );
+            return self::$_schemas[$tableName];
         
         } // getTableDefinition()
         
@@ -558,7 +556,7 @@
         /**
          * Returns an array of columns that belong to the specified table.
          * 
-         * This method stores its information the static variable $aSchemas so that if the data is 
+         * This method stores its information the static variable $_schemas so that if the data is 
          * required again, the database does not have to be consoluted.
          * 
          * If schema caching is on, this method can pull data from a schema cache. 
@@ -566,16 +564,16 @@
          * @argument string The name of the table for the requested columns
          * @returns array An array of columns that belong to the specified table
          */
-        public function GetTableColumns( $sTableName )
+        public function getTableColumns($tableName)
         {
-            if( isset( self::$aSchemas[ $sTableName ][ "fields" ] ) )
+            if(isset(self::$_schemas[$tableName]["fields"]))
             {
-                return( self::$aSchemas[ $sTableName ][ "fields" ] );
+                return self::$_schemas[$tableName]["fields"];
             }
             
-            $aFields = array();
+            $fieldsReturn = array();
 
-            $sSQL = "SELECT 
+            $sql = "SELECT 
                 pa.attname, 
                 pa.attnum,
                 pat.typname,
@@ -600,51 +598,51 @@
             AND
                 pad.adnum = pa.attnum
             WHERE  
-                pt.typname = '{$sTableName}' 
+                pt.typname = '{$tableName}' 
             AND 
                 pa.attnum > 0 
             ORDER BY 
                 pa.attnum";
                 
-            if( !( $oFields = $this->Query( $sSQL ) ) )
+            if(!($fields = $this->query($sql)))
             {
-                throw new QueryFailedException( $this->GetLastError() );
+                throw new QueryFailedException($this->getLastError());
             }
             
-            foreach( $oFields as $iCount => $oField )
+            foreach($fields as $fieldCount => $field)
             {           
                 // When dropping a column with PostgreSQL, you get a lovely .pg.dropped. column
                 // in the PostgreSQL catalog
                 
-                if( strpos( $oField->attname, ".pg.dropped." ) !== false )
+                if(strpos($field->attname, ".pg.dropped.") !== false)
                 {
                     continue;
                 }
                 
-                $aFields[ $oField->attname ] = array(
-                    "number" => $oField->attnum,
-                    "field" => $oField->attname, 
-                    "type" => $oField->data_type,
-                    "not-null" => $oField->attnotnull == "t",
-                    "default" => $oField->default_value
+                $fieldsReturn[$field->attname] = array(
+                    "number" => $field->attnum,
+                    "field" => $field->attname, 
+                    "type" => $field->data_type,
+                    "not-null" => $field->attnotnull == "t",
+                    "default" => $field->default_value
                 );
                  
-                if( $oField->typname == "_varchar" )
+                if($field->typname == "_varchar")
                 {
-                    $aFields[ $oField->attname ][ "size" ] = $oField->atttypmod - 4;
+                    $fieldsReturn[$field->attname]["size"] = $field->atttypmod - 4;
                 }
             }
             
-            self::$aSchemas[ $sTableName ][ "fields" ] = $aFields;
+            self::$_schemas[$tableName]["fields"] = $fieldsReturn;
  
-            return( $aFields );
+            return $fieldsReturn;
             
-        } // GetTableColumns()
+        } // getTableColumns()
         
 
         /**
          * Returns an array of columns that belong to the primary key for the specified table.
-         * This method stores its information the static variable $aSchemas so that if the data is 
+         * This method stores its information the static variable $_schemas so that if the data is 
          * required again, the database does not have to be consoluted.
          * 
          * If schema caching is on, this method can pull data from a schema cache. 
@@ -652,18 +650,18 @@
          * @argument string The name of hte table for the requested primary key
          * @returns An array of columns that belong to the primary key for the specified table                           
          */
-        public function GetTablePrimaryKey( $sTableName )
+        public function getTablePrimaryKey($tableName)
         {
-            if( isset( self::$aSchemas[ $sTableName ][ "primary_key" ] ) )
+            if(isset(self::$_schemas[$tableName]["primary_key"]))
             {
-                return( self::$aSchemas[ $sTableName ][ "primary_key" ] );
+                return self::$_schemas[$tableName]["primary_key"];
             }
         
-            $aLocalTable = $this->GetTableColumns( $sTableName );
+            $localTable = $this->getTableColumns($tableName);
             
-            self::$aSchemas[ $sTableName ][ "primary_key" ] = array();
+            self::$_schemas[$tableName]["primary_key"] = array();
                     
-            $sSQL = "SELECT 
+            $sql = "SELECT 
                 pi.indkey
             FROM 
                 pg_index AS pi 
@@ -672,40 +670,40 @@
             ON 
                 pt.typrelid = pi.indrelid 
             WHERE 
-                pt.typname = '{$sTableName}' 
+                pt.typname = '{$tableName}' 
             AND 
                 pi.indisprimary = true";            
             
-            if( !( $oPrimaryKeys = $this->Query( $sSQL ) ) )
+            if(!($primaryKeys = $this->query($sql)))
             {
-                throw new QueryFailedException( $this->GetLastError() );
+                throw new QueryFailedException($this->getLastError());
             }
 
-            if( $oPrimaryKeys->Count() != 0 )
+            if($primaryKeys->Count() != 0)
             {
-                $oPrimaryKeys->Next();              
-                $oPrimaryKey = $oPrimaryKeys->Current();
+                $primaryKeys->Next();              
+                $primaryKey = $primaryKeys->Current();
                 
-                $aIndexFields = explode( " ", $oPrimaryKey->indkey );
+                $indexFields = explode(" ", $primaryKey->indkey);
                 
-                foreach( $aIndexFields as $iField )
+                foreach($indexFields as $fieldNumber)
                 {
-                    $aField = $this->GetColumnByNumber( $sTableName, $iField );
+                    $field = $this->getColumnByNumber($tableName, $fieldNumber);
                     
-                    self::$aSchemas[ $sTableName ][ "primary_key" ][] = 
-                        $aField[ "field" ];
+                    self::$_schemas[$tableName]["primary_key"][] = 
+                        $field["field"];
                 }
             }
     
-            return( self::$aSchemas[ $sTableName ][ "primary_key" ] );
+            return self::$_schemas[$tableName]["primary_key"];
         
-        } // GetTablePrimaryKey()
+        } // getTablePrimaryKey()
         
 
         /**
          * Returns an array of relationships (foreign keys) for the specified table. 
          * 
-         * This method stores its information the static variable $aSchemas so that if the data 
+         * This method stores its information the static variable $_schemas so that if the data 
          * is required again, the database does not have to be consoluted.
          * 
          * If schema caching is on, this method can pull data from a schema cache. 
@@ -713,22 +711,22 @@
          * @argument string The name of the table for the requested relationships
          * @returns array An array of relationships for the table
          */
-        public function GetTableForeignKeys( $sTableName )
+        public function getTableForeignKeys($tableName)
         {
-            if( isset( self::$aSchemas[ $sTableName ][ "foreign_key" ] ) )
+            if(isset(self::$_schemas[$tableName]["foreign_key"]))
             {
-                return( self::$aSchemas[ $sTableName ][ "foreign_key" ] );
+                return self::$_schemas[$tableName]["foreign_key"];
             }
         
             //
             // This method needs to be cleaned up and consolidated
             //
             
-            $aLocalTable = $this->GetTableColumns( $sTableName );
+            $localTable = $this->getTableColumns($tableName);
             
-            self::$aSchemas[ $sTableName ][ "foreign_key" ] = array();
+            self::$_schemas[$tableName]["foreign_key"] = array();
         
-            $sSQL = "SELECT 
+            $sql = "SELECT 
                 rpt.typname,
                 pc.confrelid,
                 pc.conkey,
@@ -744,66 +742,65 @@
             ON
                 rpt.typrelid = confrelid
             WHERE
-                pt.typname = '{$sTableName}'
+                pt.typname = '{$tableName}'
             AND
                 contype = 'f'
             AND
                 confrelid IS NOT NULL";
                 
-            if( !( $oForeignKeys = $this->Query( $sSQL ) ) )
+            if(!($foreignKeys = $this->query($sql)))
             {
-                throw new QueryFailedException( "Failed on Query: " . $sSQL . "\n" . $this->GetLastError() );
+                throw new QueryFailedException($this->getLastError());
             }
             
-            $iCount = 0;
+            $count = 0;
             
-            foreach( $oForeignKeys as $oForeignKey )
+            foreach($foreignKeys as $foreignKey)
             {               
-                $aLocalFields = $aArray = explode( ",", 
-                    str_replace( array( "{", "}" ), "", $oForeignKey->conkey ) );
+                $localFields = explode(",", 
+                    str_replace(array("{", "}"), "", $foreignKey->conkey));
             
-                $aForeignFields = $aArray = explode( ",", 
-                    str_replace( array( "{", "}" ), "", $oForeignKey->confkey ) );
-            
-                    
-                $aFields = $this->GetTableColumns( $oForeignKey->typname );
+                $foreignFields = explode(",", 
+                    str_replace(array("{", "}"), "", $foreignKey->confkey));
+
+                $fields = $this->getTableColumns($foreignKey->typname);
                 
-                foreach( $aForeignFields as $iIndex => $iField )
+                foreach($foreignFields as $index => $fieldNumber)
                 {
-                    $aField = $this->GetColumnByNumber( $oForeignKey->typname, $iField );
-                    $aForeignFields[ $iIndex ] = $aField[ "field" ];
+                    $field = $this->GetColumnByNumber($foreignKey->typname, $fieldNumber);
+                    $foreignFields[$index] = $field["field"];
                 }
                 
-                foreach( $aLocalFields as $iIndex => $iField )
+                foreach($localFields as $index => $fieldNumber)
                 {
-                    $aField = $this->GetColumnByNumber( $sTableName, $iField );
-                    $aLocalFields[ $iIndex ] = $aField[ "field" ];
+                    $field = $this->GetColumnByNumber($tableName, $fieldNumber);
+                    $localFields[$index] = $field["field"];
                 }
             
                 // we currently do not handle references to multiple fields:
 
-                $localField = current( $aLocalFields );
+                $localField = current($localFields);
 
-                $sName = substr( $localField, strlen( $localField ) - 3 ) == "_id" ? 
-                    substr( $localField, 0, strlen( $localField ) - 3 ) : $localField;
+                $name = substr($localField, strlen($localField) - 3) == "_id" ? 
+                    substr($localField, 0, strlen($localField) - 3) : $localField;
                 
-                $sName = StringFunctions::ToSingular( $sName );
+                $name = StringFunctions::toSingular($name);
                 
-                self::$aSchemas[ $sTableName ][ "foreign_key" ][ $sName ] = array(
-                    "table" => $oForeignKey->typname,
-                    "name" => $sName,
-                    "local" => $aLocalFields,
-                    "foreign" => $aForeignFields,
+                self::$_schemas[$tableName]["foreign_key"][$name] = array(
+                    "table" => $foreignKey->typname,
+                    "name" => $name,
+                    "local" => $localFields,
+                    "foreign" => $foreignFields,
                     "type" => "m-1",
                     "dependency" => true
                 );
             
-                $iCount++;
+                $count++;
             }
             
             // find tables that reference us:
                     
-            $sSQL = "SELECT 
+            $sql = "SELECT 
                 ptr.typname,
                 pc.conrelid,
                 pc.conkey,
@@ -819,82 +816,80 @@
             ON
                 ptr.typrelid = pc.conrelid  
             WHERE
-                pt.typname = '{$sTableName}'
+                pt.typname = '{$tableName}'
             AND
                 contype = 'f'
             AND
                 confrelid IS NOT NULL";
-                
-                
-            if( !( $oForeignKeys = $this->Query( $sSQL ) ) )
+
+            if(!($foreignKeys = $this->query($sql)))
             {
-                throw new QueryFailedException( $this->GetLastError() );
+                throw new QueryFailedException($this->getLastError());
             }
 
-            foreach( $oForeignKeys as $oForeignKey )
+            foreach($foreignKeys as $foreignKey)
             {
-                $aLocalFields = $aArray = explode( ",", 
-                    str_replace( array( "{", "}" ), "", $oForeignKey->confkey ) );
+                $localFields = explode(",", 
+                    str_replace(array("{", "}"), "", $foreignKey->confkey));
             
-                $aForeignFields = $aArray = explode( ",", 
-                    str_replace( array( "{", "}" ), "", $oForeignKey->conkey ) );
+                $foreignFields = explode( ",", 
+                    str_replace(array("{", "}"), "", $foreignKey->conkey));
                 
-            
-                $this->GetSchema( $oForeignKey->typname );
+                $this->getTableDefintion($foreignKey->typname);
                 
-                $aFields = $this->GetTableColumns( $oForeignKey->typname );
+                $fields = $this->getTableColumns($foreignKey->typname);
                 
-                foreach( $aForeignFields as $iIndex => $iField )
+                foreach($foreignFields as $index => $fieldNumber)
                 {
-                    $aField = $this->GetColumnByNumber( $oForeignKey->typname, $iField );
-                    $aForeignFields[ $iIndex ] = $aField[ "field" ];
+                    $field = $this->getColumnByNumber($foreignKey->typname, $fieldNumber);
+                    $foreignFields[$index] = $field["field"];
                 }
                 
-                foreach( $aLocalFields as $iIndex => $iField )
+                foreach($localFields as $index => $fieldNumber)
                 {
-                    $aField = $this->GetColumnByNumber( $sTableName, $iField );
-                    $aLocalFields[ $iIndex ] = $aField[ "field" ];
+                    $field = $this->getColumnByNumber($tableName, $fieldNumber);
+                    $localFields[$index] = $field["field"];
                 }
 
-                $localField = reset( $aLocalFields );
-                $foreignField = reset( $aForeignFields );
+                $localField = reset($localFields);
+                $foreignField = reset($foreignFields);
                 
                 // if foreign_table.local_field == foreign_table.primary_key AND
                 // if local_table.foreign_key == local_table.primary_key THEN
                 //      Relationship = 1-1
                 // end
                 
-                $aTmpForeignPrimaryKey = &self::$aSchemas[ $oForeignKey->typname ][ "primary_key" ];
-                $aTmpLocalPrimaryKey = &self::$aSchemas[ $sTableName ][ "primary_key" ];
+                $tmpForeignPrimaryKey = &self::$_schemas[$foreignKey->typname]["primary_key"];
+                $tmpLocalPrimaryKey = &self::$_schemas[$tableName]["primary_key"];
                 
-                $bForeignFieldIsPrimary = count( $aTmpForeignPrimaryKey ) == 1 &&
-                    reset( $aTmpForeignPrimaryKey ) == $foreignField;
-                $bLocalFieldIsPrimary = count( $aTmpLocalPrimaryKey ) &&
-                    reset( $aTmpLocalPrimaryKey ) == $localField;
-                $bForeignIsSingular = count( $aForeignFields ) == 1;
+                $foreignFieldIsPrimary = count($tmpForeignPrimaryKey) == 1 &&
+                    reset($tmpForeignPrimaryKey) == $foreignField;
+                $localFieldIsPrimary = count($tmpLocalPrimaryKey) &&
+                    reset($tmpLocalPrimaryKey) == $localField;
+                $foreignIsSingular = count($foreignFields) == 1;
                 
-                $sType = "1-m";
+                $type = "1-m";
                 
-                if( $bForeignFieldIsPrimary && $bLocalFieldIsPrimary && $bForeignIsSingular )
+                if($foreignFieldIsPrimary && $localFieldIsPrimary && $foreignIsSingular)
                 {
-                    $sType = "1-1";
+                    $type = "1-1";
                 }
 
-                self::$aSchemas[ $sTableName ][ "foreign_key" ][ $oForeignKey->typname ] = array(
-                    "table" => $oForeignKey->typname,
-                    "name" => $oForeignKey->typname,
-                        "local" => $aLocalFields,
-                    "foreign" => $aForeignFields,
-                    "type" => $sType,
+                self::$_schemas[$tableName]["foreign_key"][$foreignKey->typname] = array(
+                    "table" => $foreignKey->typname,
+                    "name" => $foreignKey->typname,
+                        "local" => $localFields,
+                    "foreign" => $foreignFields,
+                    "type" => $type,
                     "dependency" => false
                 );
                 
-                $iCount++;
+                $count++;
             }
             
-            return( self::$aSchemas[ $sTableName ][ "foreign_key" ] );
+            return self::$_schemas[$tableName][ "foreign_key"];
         
-        } // GetTableForeignKeys()
+        } // getTableForeignKeys()
         
 
         /**
@@ -905,21 +900,21 @@
          * @argument string The column that is, or is part of, the primary key for the table                 
          * @returns boolean True if the primary key references another table, false otherwise                
          */
-        public function IsPrimaryKeyReference( $sTableName, $sColumnName )
+        public function isPrimaryKeyReference($tableName, $columnName)
         {
-            $aForeignKeys = $this->GetTableForeignKeys( $sTableName );
+            $foreignKeys = $this->getTableForeignKeys($tableName);
                         
-            foreach( $aForeignKeys as $aForeignKey )
+            foreach($foreignKeys as $foreignKey)
             {
-                if( $aForeignKey[ "dependency" ] && reset( $aForeignKey[ "local" ] ) == $sColumnName )
+                if($foreignKey["dependency"] && reset($foreignKey["local"]) == $columnName)
                 {
-                    return( true );
+                    return true;
                 }
             }
             
-            return( false );
+            return false;
         
-        } // IsPrimaryKeyReference()
+        } // isPrimaryKeyReference()
         
 
         /**
@@ -929,21 +924,21 @@
          * @argument string The name of the column that is desired to know the type of 
          * @returns string The data type of the column, if one is found, or null.
          */
-        public function GetColumnType( $sTableName, $sFieldName )
+        public function getColumnType($tableName, $columnName)
         {
-            $aFields = $this->GetTableColumns( $sTableName );
+            $columns = $this->getTableColumns($tableName);
             
-            foreach( $aFields as $aField )
+            foreach($columns as $column)
             {
-                if( $sFieldName == $aField[ "field" ] )
+                if($columnName == $column["field"])
                 {
-                    return( $aField[ "type" ] );
+                    return $column[ "type" ];
                 }
             }
             
-            return( null );
+            return null;
         
-        } // GetColumnType()
+        } // getColumnType()
         
 
         /**
@@ -955,28 +950,28 @@
          * @argument string The name of the table to determine existence
          * @returns boolean True or false, depending on whether the table exists             
          */
-        public function TableExists( $sTableName )
+        public function tableExists($tableName)
         {
-            if( isset( self::$aSchemas[ $sTableName ] ) )
+            if(isset(self::$_schemas[$tableName]))
             {
-                return( true );
+                return true;
             }
             
-            $sSQL = "SELECT
+            $sql = "SELECT
                 1
             FROM
                 pg_tables
             WHERE
-                LOWER( tablename ) = '" . strtolower( addslashes( $sTableName ) ) . "'";
+                LOWER(tablename) = '" . strtolower(addslashes($tableName)) . "'";
                             
-            if( !( $oResultSet = $this->Query( $sSQL ) ) )
+            if(!($resultSet = $this->query($sql)))
             {
-                throw new QueryFailedException( $this->GetLastError() );
+                throw new QueryFailedException($this->getLastError());
             }
             
-            return( $oResultSet->Count() );
+            return $resultSet->count();
         
-        } // TableExists()
+        } // tableExists()
         
 
         /**
@@ -988,34 +983,33 @@
          * @argument int The column number from the table (from the PostgreSQL catalog) 
          * @returns string The name of the column, if one is found, or null
          */
-        protected function GetColumnByNumber( $sTableName, $iColumnNumber )
+        protected function getColumnByNumber($tableName, $columnNumber)
         {
-            foreach( self::$aSchemas[ $sTableName ][ "fields" ] as $aField )
+            foreach(self::$_schemas[$tableName]["fields"] as $field)
             {
-                if( $aField[ "number" ] == $iColumnNumber )
+                if($field[ "number" ] == $columnNumber)
                 {
-                    return( $aField );
+                    return $field;
                 }
             }
         
-            return( null );
+            return null;
         
-        } // GetColumnByNumber()
+        } // getColumnByNumber()
 
 
-    
         /**
          * Returns the version of the database server.
          *
          * @returns string The database server version reported by the database server
          */
-        public function GetVersion()
+        public function getVersion()
         {
-            $aVersions = pg_version( $this->hDatabase );
+            $versions = pg_version( $this->_databaseResource );
             
-            return( $aVersions[ "server" ] );
+            return $versions[ "server" ];
 
-        } // GetVersion()
+        } // getVersion()
 
     } // PostgresDatabase()
 

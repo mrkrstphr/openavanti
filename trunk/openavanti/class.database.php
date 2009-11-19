@@ -31,7 +31,7 @@
         /**
          * Defines the syntax for the join type constants
          */                 
-        public static $aJoinTypes = array( 
+        public static $_joinTypes = array( 
             self::JoinTypeInner => "INNER JOIN",
             self::JoinTypeLeft => "LEFT JOIN"
         );
@@ -40,7 +40,7 @@
          * Protected variables for storing database profiles and connections
          */                 
         protected static $_profiles = array();
-        protected static $_defaultProfile = array();
+        protected static $_defaultProfile = "";
         
         protected static $_connectionStore = array();
         
@@ -49,27 +49,25 @@
          * Adds a database profile to the list of known database profiles. These profiles contain
          * connection information for the database, including driver, host, name, user and password.                                                 
          * 
+         * @argument string A unique name for the profile used to get connections
          * @argument array The profile array with database connection information        
          * @returns void 
          */ 
-        final public static function addProfile( $aProfile )
+        final public static function addProfile($profileName, $profile)
         {
-            self::ValidateProfile( $aProfile );
+            self::ValidateProfile($profile);
             
-            if( !isset( $aProfile[ "host" ] ) )
+            if(!isset($profile["host"]))
             {
-                $aProfile[ "host" ] = "localhost";
+                $profile["host"] = "localhost";
             }
-            
-            $sProfileName = isset( $aProfile[ "profile_name" ] ) && !empty( $aProfile[ "profile_name" ] ) ? 
-                $aProfile[ "profile_name" ] : $aProfile[ "driver" ] . "_" . $aProfile[ "name" ];
                 
-            if( isset( self::$_profiles[ $sProfileName ] ) )
+            if(isset(self::$_profiles[$profileName]))
             {
-                throw new Exception( "Profile [{$sProfileName}] already in use." );
+                throw new Exception("Profile [{$profileName}] already in use.");
             }
             
-            self::$_profiles[ $sProfileName ] = $aProfile;
+            self::$_profiles[$profileName] = $profile;
             
         } // addProfile()
         
@@ -82,14 +80,14 @@
          * @argument string The name of the profile to be used as the default database profile
          * @returns void 
          */ 
-        final public static function setDefaultProfile( $sProfile )
+        final public static function setDefaultProfile($profileName)
         {
-            if( !isset( self::$_profiles[ $sProfile ] ) )
+            if(!isset(self::$_profiles[ $profileName]))
             {
-                throw new DatabaseConnectionException( "Unknown database profile: {$sProfile}" );
+                throw new DatabaseConnectionException("Unknown database profile: {$profileName}");
             }
         
-            self::$_defaultProfile = self::$_profiles[ $sProfile ];
+            self::$_defaultProfile = self::$profileName;
         
         } // setDefaultProfile()
         
@@ -105,44 +103,54 @@
          * checks to see if there is only one profile stored. If so, that profile is used. If none
          * of these conditions are met, an exception is thrown.                                          
          * 
-         * @argument array The profile array with database connection information. If not supplied,
+         * @argument string The name of the profile to get a connection for. If not supplied,
          *       and a profile is already loaded, that profile will be used. If no profile is 
-         *       supplied and more than one profile has been loaded, an exception is thrown.                     
+         *       supplied and more than one profile has been loaded, null is returned. 
+         * @argument bool Optional; Should this connection be unique, in other words, not 
+         *      reused on subsequent calls for a connection to this profile?                   
          * @returns Database A database object; the type depends on the database driver being used. 
          *       This object contains an active connection to the database.      
          */ 
-        final public static function getConnection( $aProfile = array() )
+        final public static function getConnection($profileName = null, $unique = false)
         {
-            if( !empty( $aProfile ) )
+            if(!empty($profileName))
             {
-                self::ValidateProfile( $aProfile );
-                
-                self::AddProfile( $aProfile );
+                if(!isset(self::$_profiles[$profileName]))
+                {
+                    return null;
+                }
             }
-            else if( !empty( self::$_defaultProfile ) )
+            else if(!empty(self::$_defaultProfile))
             {
-                $aProfile = self::$_defaultProfile;
+                $profileName = self::$_defaultProfile;
             }
-            else if( empty( $aProfile ) && count( self::$_profiles ) != 1 )
+            else if(empty($profileName) && count(self::$_profiles) != 1)
             {
-                throw new Exception( "No profile specified for database connection" );
+                return null;
             }
             else
             {
-                $aProfile = current( self::$_profiles );
+                $profileName = key(self::$_profiles);
             }
             
-            $sProfile = $aProfile[ "driver" ] . "_" . $aProfile[ "name" ];
+            $profile = self::$_profiles[$profileName];
             
-            if( !isset( self::$connectionStore[ $sProfile ] ) )
+            if($bUnique)
             {
-                $sDatabaseDriver = $aProfile[ "driver" ] . "Database";
+                // Let's create a timestamped profile name to prevent reuse
+                // of this connection:
                 
-                self::$connectionStore[ $sProfile ] = new $sDatabaseDriver( $aProfile );
+                $profileName = md5(microtime());
+            }
+                
+            if(!isset(self::$connectionStore[$profileName]))
+            {                
+                $databaseDriver = $profile["driver"] . "Database";
+                
+                self::$connectionStore[$profileName] = new $databaseDriver($profile);
             }
             
-            
-            return( self::$connectionStore[ $sProfile ] );         
+            return self::$connectionStore[$profileName];         
             
         } // getConnection()
         
@@ -160,28 +168,28 @@
          * @argument array The profile array with database connection information to validate                
          * @returns Void     
          */
-        private static function validateProfile( $aProfile )
+        private static function validateProfile($profile)
         {
-            if( !isset( $aProfile[ "driver" ] ) )
+            if(!isset($profile["driver"]))
             {
-                throw new Exception( "No database driver specified in database profile" );
+                throw new Exception("No database driver specified in database profile");
             }
             
-            if( !isset( $aProfile[ "name" ] ) )
+            if(!isset($profile["name"]))
             {
-                throw new Exception( "No database name specified in database profile" );
+                throw new Exception("No database name specified in database profile");
             }
             
-            $sDriver = $aProfile[ "driver" ];
+            $driver = $profile["driver"];
             
-            if( !class_exists( "{$sDriver}Database", true ) )
+            if(!class_exists("{$driver}Database", true))
             {
-                throw new Exception( "Unknown database driver specified: " . $aProfile[ "driver" ] );
+                throw new Exception("Unknown database driver specified: " . $profile["driver"]);
             }
             
-            if( !is_subclass_of( "{$sDriver}Database", "Database" ) )
+            if(!is_subclass_of("{$driver}Database", "Database"))
             {
-                throw new Exception( "Database driver does not properly extend the Database class." );
+                throw new Exception("Database driver does not properly extend the Database class.");
             }
             
         } // validateProfile()
@@ -193,7 +201,7 @@
          * @argument string The SQL query to execute
          * @returns ResultSet A ResultSet object containing the results of the database query
          */
-        abstract public function query( $sSQL );
+        abstract public function query($sql);
         
         
         /**
@@ -202,7 +210,7 @@
          * @argument resource The database connection resource to pull the next record from
          * @returns object The next record from the database, or null if there are no more records
          */              
-        abstract public function pullNextResult( &$rResult );
+        abstract public function pullNextResult(&$resultResource);
         
         
         /**
@@ -212,7 +220,7 @@
          * @argument resource The database connection resource
          * @returns int The number of rows in the specified database resource
          */ 
-        abstract public function countFromResult( &$rResult );
+        abstract public function countFromResult(&$resultResource);
         
         
         /**
@@ -222,7 +230,7 @@
          * @argument resource The database connection resource to pull the next record from
          * @returns bool True if the operation was successful, false otherwise                                   
          */
-        abstract public function resetResult( &$rResult );
+        abstract public function resetResult(&$resultResource);
         
 
         /**
@@ -272,7 +280,7 @@
          *       database schema files.
          * @returns void                 
          */        
-        abstract public function setCacheDirectory( $sDirectoryName );
+        abstract public function setCacheDirectory($directoryName);
         
 
         /**
@@ -284,7 +292,7 @@
          * @argument boolean Toggles whether or not to cache discovered database schemas
          * @returns void         
          */
-        abstract public function cacheSchemas( $bEnable );
+        abstract public function cacheSchemas($enable);
         
 
         /**
@@ -303,7 +311,7 @@
          * @argument string The value to be formatted into a database-safe representation.
          * @returns string A string of the formatted value supplied.                             
          */
-        abstract public function formatData( $sType, $sValue );
+        abstract public function formatData($dataType, $value);
         
         
         /**
@@ -335,7 +343,7 @@
          * @argument string The name of the table for the requested schema
          * @returns array An array of schema information for the specified table     
          */     
-        abstract public function getTableDefinition( $sTableName );
+        abstract public function getTableDefinition($tableName);
         
 
         /**
@@ -349,7 +357,7 @@
          * @argument string The name of the table for the requested columns
          * @returns array An array of columns that belong to the specified table
          */
-        abstract public function getTableColumns( $sTableName );
+        abstract public function getTableColumns($tableName);
         
 
         /**
@@ -363,7 +371,7 @@
          * @argument string The name of the table for the requested primary key
          * @returns array An array of columns that belong to the primary key for the specified table
          */
-        abstract public function getTablePrimaryKey( $sTableName );
+        abstract public function getTablePrimaryKey($tableName);
         
 
         /**
@@ -377,7 +385,7 @@
          * @argument string The name of the table for the requested relationships
          * @returns array An array of relationships for the specified table
          */
-        abstract public function getTableForeignKeys( $sTableName );
+        abstract public function getTableForeignKeys($tableName);
         
 
         /**
@@ -387,7 +395,7 @@
          * @argument string The name of the column that is desired to know the type of
          * @returns string The data type of the column, if one is found, or null.
          */
-        abstract public function getColumnType( $sTableName, $sFieldName );
+        abstract public function getColumnType($tableName, $fieldName);
         
 
         /**
@@ -396,7 +404,7 @@
          * @argument string The name of the table to determine existence
          * @returns bool True or false, depending on whether the table exists.                   
          */     
-        abstract public function tableExists( $sTableName );
+        abstract public function tableExists($tableName);
 
 
     
