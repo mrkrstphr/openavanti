@@ -22,6 +22,21 @@
      */
     class StringFunctions
     {
+        protected $_dictionary = array(
+            "person" => "people", "deer" => "deer", "beer" => "beer", 
+            "goose" => "geese", "mouse" => "mice", "content" => "content"
+        );
+        
+        /**
+         *
+         *
+         */                     
+        private function __construct()
+        {
+            // this class cannot be instantiated
+            
+        } // __construct()
+
 
         /**
          * Attempts to turn a supplied string, preferably an English, singular word, into the
@@ -30,29 +45,31 @@
          * @argument string the singular word to attempt to make plural
          * @returns string the result of attempting to make the word plural
          */
-        public static function ToSingular( $sString )
+        public static function toSingular($inputString)
         {
-            if( strtolower( $sString ) == "people" )
+            $dictionary = array_reverse(self::$_dictionary);
+            
+            if(isset($dictionary[strtolower($inputString)]))
             {
-                return( "person" );
+                return $dictionary[strtolower($inputString)];
             }
         
-            if( substr( $sString, strlen( $sString ) - 3, 3 ) == "ies" )
+            if(substr($inputString, strlen($inputString) - 3, 3) == "ies")
             {
-                $sString = substr( $sString, 0, strlen( $sString ) - 3 ) . "y";
+                $inputString = substr($inputString, 0, strlen($inputString) - 3) . "y";
             }
-            else if( substr( $sString, strlen( $sString ) - 2, 2 ) == "es" )
+            else if(substr($inputString, strlen($inputString) - 2, 2) == "es")
             {
-                $sString = substr( $sString, 0, strlen( $sString ) - 2 );
+                $inputString = substr($inputString, 0, strlen($inputString) - 2);
             }
-            else if( substr( $sString, strlen( $sString ) - 1, 1 ) == "s" )
+            else if(substr($inputString, strlen($inputString) - 1, 1) == "s")
             {
-                $sString = substr( $sString, 0, strlen( $sString ) - 1 );
+                $inputString = substr($inputString, 0, strlen($inputString) - 1);
             }
             
-            return( $sString );
+            return $inputString;
         
-        } // ToSingular()
+        } // toSingular()
         
         
         /**
@@ -62,54 +79,79 @@
          * @argument string the plural word to attempt to make singular
          * @returns string the result of attempting to make the word singular
          */
-        public static function ToPlural( $sString )
+        public static function toPlural($inputString)
         {       
-            if( strtolower( $sString ) == "person" )
+            if(isset(self::$_dictionary[strtolower($inputString)]))
             {
-                return( "people" );
+                return self::$_dictionary[strtolower($inputString)];
             }
         
-            if( substr( $sString, strlen( $sString ) - 1, 1 ) == "y" )
+            if(substr($inputString, strlen($inputString) - 1, 1) == "y")
             {
-                $sString = substr( $sString, 0, strlen( $sString ) - 1 ) . "ies";
+                $inputString = substr($inputString, 0, strlen($inputString) - 1 ) . "ies";
             }
-            else if( substr( $sString, strlen( $sString ) - 1, 1 ) != "s" )
+            elseif(substr($inputString, strlen($inputString) - 1, 1) == "x")
             {
-                $sString .= "s";
+                $inputString .= "es";
+            }
+            else if(substr($inputString, strlen( $inputString) - 1, 1) != "s")
+            {
+                $inputString .= "s";
             }
             
-            return( $sString );
+            return $inputString;
         
-        } // ToSingular()
-    
-    
+        } // toPlural()
+        
+        
         /**
-         * Takes a string of PHP code and uses highlight_string() to syntax highlight the code,
-         * then explodes n each line and returns the code wrapped in a div with an ordered list,
-         * each line of code being a line in the ordered list to provide line numbers. It is
-         * up to the user to style this returned HTML.                    
+         * Allows for adding custom words to the single/plural dictionary used by the toSingular()
+         * and toPlural() methods. Either two strings can be supplied as arguments, the singular
+         * and plural forms of the words, respectively, or one array can be given that contains
+         * an associative array of rules in the form of singular => plural.
          *
-         * @argument string The string of PHP code to format
-         * @returns string The formatted PHP code
+         * @argument string|array Either the singular form of the word, or an array of 
+         *      single => plural
+         * @argument string Optional; Either the plural form of the word or null if an array was
+         *      passed for the first argument
+         * @returns array A copy of the dictionary
          */
-        public static function FormatPHPCode( $sCode ) 
+        public static function addToDictionary($single, $plural = null)
         {
-            $sCode = highlight_string( trim( $sCode ), true );
-            $aCode = explode( "<br />", $sCode );
-            
-            $sCode = "";
-            
-            
-            foreach( $aCode as $sLine )
+            if(is_array($single))
             {
-                $sCode .= "\t\t<li><code>{$sLine}</code></li>\n";
+                // We could simply add or merge this array with the dictionary, but let's loop
+                // each element and make sure both the key and value are strings to try to prevent
+                // bad data:
+                
+                foreach($single as $key => $value)
+                {
+                    if(is_string($key) && is_string($value))
+                    {
+                        self::$_dictionary[strtolower(strval($key))] = strtolower(strval($value));  
+                    }
+                }
+            }
+            else if(!empty($plural) && is_string($plural))
+            {
+                self::$_dictionary[strtolower(strval($single))] = strtolower(strval($plural));
             }
             
-            $sCode = "<div>\n\t<ol>\n{$sCode}</ol>\n</div>";
+            return self::$_dictionary;
             
-            return( $sCode );
+        } // addToDictionary()
         
-        } // FormatPHPCode()
+        
+        /**
+         * Allows the retrieval of the full dictionary used by toSingular() and toPlural().
+         *
+         * @returns array A copy of the dictionary
+         */
+        public function getDictionary()
+        {
+            return self::$_dictionary;
+            
+        } // getDictionary()
         
         
         /**
@@ -120,12 +162,12 @@
          * @argument string The delimiter that we're searching for
          * @returns string The generated substring
          */
-        public static function AfterLastOccurrenceOf( $sString, $sDelim )
+        public static function afterLastOccurrenceOf($inputString, $deliminator)
         {
-            return( substr( $sString, strrpos( $sString, $sDelim ) + 1 ) );
+            return(substr($inputString, strrpos($inputString, $deliminator) + 1));
         
-        } // AfterLastOccurrenceOf()
+        } // afterLastOccurrenceOf()
     
-    } // SringFunctions()
+    } // StringFunctions()
 
 ?>

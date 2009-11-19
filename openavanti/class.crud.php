@@ -48,17 +48,23 @@
          *  allowing for faster subsequent page loads.       
          *       
          * @argument string The name of the database table
-         * @argument mixed An array or object of data to load into the CRUD object       
+         * @argument mixed Optional; An array or object of data to load into the CRUD object
+         * @argument string Optional; The name of the database profile to use 
          * @returns void
          */
-        public function __construct( $tableName, $data = null )
+        public function __construct($tableName, $data = null, $profileName = "")
         {
-            $this->_database = Database::getConnection( $this->_profileName );
+            if(!empty($profileName))
+            {
+                $this->_profileName = $profileName;
+            }
+            
+            $this->_database = Database::getConnection($this->_profileName);
 
             $this->_tableName = $tableName;
         
             // Get the schema for this table:
-            $this->_database->getTableDefinition( $this->_tableName );
+            $this->_database->getTableDefinition($this->_tableName);
             
             // Prepare the fields for this table for CRUD->column access:
             $this->prepareColumns();
@@ -71,7 +77,7 @@
             }
             else if(is_array($data) || is_obj($data)))
             {
-                $this->load( $data );
+                $this->load($data);
             }
 
         } // __construct()
@@ -83,17 +89,17 @@
          * 
          * @returns void
          */                      
-        protected function PrepareColumns()
+        protected function prepareColumns()
         {
-            $columns = $this->_database->GetTableColumns( $this->_tableName );
+            $columns = $this->_database->getTableColumns($this->_tableName);
             
             // Loop each column in the table and create a member variable for it:           
-            foreach( $columns as $column )
+            foreach($columns as $column)
             {
                 $this->_data[ $column[ "field" ] ] = null;
             }
         
-        } // PrepareColumns()
+        } // prepareColumns()
 
 
         /**
