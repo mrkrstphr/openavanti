@@ -75,7 +75,7 @@
             {
                 $this->Find($data);
             }
-            else if(is_array($data) || is_obj($data)))
+            else if(is_array($data) || is_object($data))
             {
                 $this->load($data);
             }
@@ -96,7 +96,7 @@
             // Loop each column in the table and create a member variable for it:           
             foreach($columns as $column)
             {
-                $this->_data[ $column[ "field" ] ] = null;
+                $this->_data[$column["field"]] = null;
             }
         
         } // prepareColumns()
@@ -113,71 +113,62 @@
          *       Join is an array of referenced tables to inner join.
          * @returns CRUD returns a reference to itself to allow chaining
          */
-        public function Find( $xId = null, $aClauses = array() )
+        public function find($data = null) //$xId = null, $aClauses = array() )
         {
-            $aPrimaryKey = $this->_database->GetTablePrimaryKey( $this->_tableName );
-
-            if( !empty( $xId ) )
+            $primaryKey = $this->_database->getTablePrimaryKey($this->_tableName);
+                        
+            $queryClauses = array();
+            
+            if(is_numeric($data))
             {
-                // If we have a primary key specified, make sure it the number of columns matches:
-                if( count( $aPrimaryKey ) > 1 && ( !is_array( $xId ) ||
-                    count( $xId ) != count( $aPrimaryKey ) ) )
+                if(count($primaryKey) > 1)
                 {
-                    throw new QueryFailedException( "Invalid record key provided" );
+                    throw new QueryFailedException("Primary key is compound but scalar provided.");
                 }
+                
+                $primaryKeyColumn = reset($primaryKey);
+                
+                $columnType = $this->_database->getColumnType($this->_tableName, $primaryKeyColumn);
+                    
+                $queryClauses["where"] = "{$primaryKeyColumn} = " . 
+                    $this->_database->formatData($columnType, $data); 
             }
-
-            $sTableAlias = StringFunctions::ToSingular( $this->_tableName );
-
-
-            $sWhere = isset( $aClauses[ "where" ] ) ? $aClauses[ "where" ] : "";
-
-
-            // Handle our provided key:
-
-            if( !empty( $sWhere ) )
+            else if(!is_array($data) && !is_null($data))
             {
-                $sWhere = " WHERE {$sWhere} ";
+                $args = func_get_args();
+                
+                var_dump( $args );
+            
+                throw new QueryFailedException("Invalid argument provided to " . 
+                    __METHOD__ . ": " . gettype($data));
             }
-
-            if( is_array( $xId ) && count( $aPrimaryKey ) > 0 )
+            else
             {
-                // our primary key value is an array -- put the data in the WHERE clause:
-
-                foreach( $xId as $sField => $sValue )
-                {
-                    $sType = $this->_database->GetColumnType( $this->_tableName, $sField );
-
-                    $sWhere .= !empty( $sWhere ) ? " AND " : " WHERE ";
-                    $sWhere .= "_{$sTableAlias}.{$sField} = " .
-                        $this->_database->FormatData( $sType, $sValue ) . " ";
-                }
+                $queryClauses = $data;
             }
-            else if( !empty( $xId ) )
+
+            $tableAlias = StringFunctions::ToSingular( $this->_tableName );
+
+            $whereClause = isset($queryClauses["where"] ) ? $queryClauses["where"] : "";
+
+            if(!empty($whereClause))
             {
-                // we have a singular primary key -- put the data in the WHERE clause:
-                $sKey = reset( $aPrimaryKey );
-                $sType = $this->_database->GetColumnType( $this->_tableName, $sKey );
-
-                $sWhere .= !empty( $sWhere ) ? " AND " : " WHERE ";
-                $sWhere .= "_{$sTableAlias}.{$sKey} = " .
-                    $this->_database->FormatData( $sType, $xId ) . " ";
+                $whereClause = " WHERE {$whereClause} ";
             }
 
-            $iLimit = isset( $aClauses[ "limit" ] ) ?
-                " LIMIT " . intval( $aClauses[ "limit" ] ) : "";
+            $limitClause = isset($queryClauses["limit"]) ?
+                " LIMIT " . intval($queryClauses["limit"]) : "";
 
-            $iOffset = isset( $aClauses[ "offset" ] ) ?
-                " OFFSET " . intval( $aClauses[ "offset" ] ) : "";
-
+            $offsetClause = isset($queryClauses["offset"]) ?
+                " OFFSET " . intval($queryClauses["offset"]) : "";
 
             // Setup supplied joins:
 
-            $sJoins = "";
+            $joinClause = "";
 
-            if( isset( $aClauses[ "join" ] ) )
+            if(isset($queryClauses["join"]))
             {
-                foreach( $aClauses[ "join" ] as &$xJoin )
+                foreach($queryClauses["join"] as &$xJoin)
                 {
                     //
                     // xJoin may be either a relationship name, or it might be an array of
@@ -194,31 +185,31 @@
 
                     // If the join is an array:
 
-                    if( is_array( $xJoin ) )
+                    if(is_array($xJoin))
                     {
                         // Make sure the table value is provided:
-                        if( !isset( $xJoin[ "table" ] ) )
+                        if(!isset($xJoin["table"]))
                         {
-                            throw new Exception( "Join table not specified" );
+                            throw new Exception("Join table not specified");
                         }
 
                         // Make sure the column is provided:
-                        if( !isset( $xJoin[ "on" ] ) )
+                        if(!isset($xJoin["on"]))
                         {
-                            throw new Exception( "Join column not specified" );
+                            throw new Exception("Join column not specified");
                         }
 
-                        $sJoinType = isset( $xJoin[ "type" ] ) ?
-                            $xJoin[ "type" ] : Database::JoinTypeInner;
+                        $sJoinType = isset($xJoin["type"]) ?
+                            $xJoin["type"] : Database::JoinTypeInner;
 
-                        if( !isset( Database::$aJoinTypes[ $sJoinType ] ) )
+                        if(!isset(Database::$_joinTypes[$sJoinType]))
                         {
-                            throw new Exception( "Unknown join type specified: " . $xJoin[ "type" ] );
+                            throw new Exception("Unknown join type specified: " . $xJoin["type"]);
                         }
 
-                        $sJoinType = Database::$aJoinTypes[ $sJoinType ];
+                        $sJoinType = Database::$_joinTypes[$sJoinType];
 
-                        if( isset( $xJoin[ "through" ] ) )
+                        if(isset($xJoin["through"]))
                         {
                             //throw new Exception( "through not yet implemented!" );
 
@@ -227,11 +218,11 @@
 
                             $aJoin = array();
 
-                            foreach( $aClauses[ "join" ] as $xJoinSub )
+                            foreach($queryClauses["join"] as $xJoinSub)
                             {
-                                if( isset( $xJoinSub[ "as" ] ) )
+                                if(isset($xJoinSub["as"]))
                                 {
-                                    if( $xJoin[ "through" ] == $xJoinSub[ "as" ] )
+                                    if($xJoin["through"] == $xJoinSub["as"])
                                     {
                                         $aJoin = $xJoinSub;
                                         break;
@@ -239,125 +230,124 @@
                                 }
                             }
 
-                            if( empty( $aJoin ) )
+                            if(empty($aJoin))
                             {
-                                throw new Exception( "Invalid through join specified: " .
-                                    $xJoin[ "through" ] );
+                                throw new Exception("Invalid through join specified: " .
+                                    $xJoin["through"]);
                             }
 
                             // Find the relationship:
-                            $aRelationship = $this->FindRelationship2( $aJoin[ "table" ],
-                                $xJoin[ "table" ], $xJoin[ "on" ] );
+                            $aRelationship = $this->FindRelationship2($aJoin[ "table" ],
+                                $xJoin["table"], $xJoin["on"]);
 
                             // If the relationship doesn't exist:
-                            if( empty( $aRelationship ) )
+                            if(empty($aRelationship))
                             {
-                                throw new Exception( "Relationship not found: " .
-                                    $this->_tableName . " -> " . $xJoin[ "table" ] . "." .
-                                    $xJoin[ "on" ] );
+                                throw new Exception("Relationship not found: " .
+                                    $this->_tableName . " -> " . $xJoin["table"] . "." .
+                                    $xJoin["on"]);
                             }
 
 
                             // Start the join:
-                            $sJoins .= "{$sJoinType} " . $xJoin[ "table" ] . " ";
+                            $joinClause .= "{$sJoinType} " . $xJoin["table"] . " ";
 
                             // Determine the alias (AS):
-                            $sAs = "_" . $aRelationship[ "name" ];
+                            $sAs = "_" . $aRelationship["name"];
 
-                            if( !empty( $xJoin[ "as" ] ) )
+                            if(!empty($xJoin["as"]))
                             {
-                                $sAs = $xJoin[ "as" ];
+                                $sAs = $xJoin["as"];
                             }
 
-                            $xJoin[ "as" ] = $sAs; // Store this for later use!
+                            $xJoin["as"] = $sAs; // Store this for later use!
 
                             // Add the alias:
-                            $sJoins .= " AS " . $sAs . " ";
+                            $joinClause .= " AS " . $sAs . " ";
 
                             // Add the ON clause:
-                            $sJoins .= " ON " . $aJoin[ "as" ] . "." .
-                                current( $aRelationship[ "local" ] ) . " = " .
-                                $sAs . "." . current( $aRelationship[ "foreign" ] ) . " ";
+                            $joinClause .= " ON " . $aJoin["as"] . "." .
+                                current($aRelationship["local"]) . " = " .
+                                $sAs . "." . current($aRelationship["foreign"]) . " ";
                         }
                         else
                         {
                             // Find the relationship:
-                            $aRelationship = $this->FindRelationship2( $this->_tableName,
-                                $xJoin[ "table" ], $xJoin[ "on" ] );
+                            $aRelationship = $this->FindRelationship2($this->_tableName,
+                                $xJoin["table"], $xJoin["on"]);
 
                             // If the relationship doesn't exist:
-                            if( empty( $aRelationship ) )
+                            if(empty($aRelationship))
                             {
-                                throw new Exception( "Relationship not found: " .
-                                    $this->_tableName . " -> " . $xJoin[ "table" ] . "." .
-                                    $xJoin[ "on" ] );
+                                throw new Exception("Relationship not found: " .
+                                    $this->_tableName . " -> " . $xJoin["table"] . "." .
+                                    $xJoin["on"]);
                             }
-
 
                             // Start the join:
-                            $sJoins .= "{$sJoinType} " . $xJoin[ "table" ] . " ";
+                            $joinClause .= "{$sJoinType} " . $xJoin["table"] . " ";
 
                             // Determine the alias (AS):
-                            $sAs = "_" . $aRelationship[ "name" ];
+                            $sAs = "_" . $aRelationship["name"];
 
-                            if( !empty( $xJoin[ "as" ] ) )
+                            if(!empty($xJoin["as"]))
                             {
-                                $sAs = $xJoin[ "as" ];
+                                $sAs = $xJoin["as"];
                             }
 
-                            $xJoin[ "as" ] = $sAs; // Store this for later use!
+                            $xJoin["as"] = $sAs; // Store this for later use!
 
                             // Add the alias:
-                            $sJoins .= " AS " . $sAs . " ";
+                            $joinClause .= " AS " . $sAs . " ";
 
                             // Add the ON clause:
-                            $sJoins .= " ON _" . $sTableAlias . "." .
-                                current( $aRelationship[ "local" ] ) . " = " .
-                                $sAs . "." . current( $aRelationship[ "foreign" ] ) . " ";
+                            $joinClause .= " ON _" . $sTableAlias . "." .
+                                current($aRelationship["local"]) . " = " .
+                                $sAs . "." . current($aRelationship["foreign"]) . " ";
                         }
                     }
                     else
                     {
-                        $aRelationship = $this->FindRelationship( $xJoin );
+                        $aRelationship = $this->FindRelationship($xJoin);
 
-                        if( !count( $aRelationship ) )
+                        if(!count($aRelationship))
                         {
-                            throw new Exception( "Unknown join relationship specified: {$xJoin}" );
+                            throw new Exception("Unknown join relationship specified: {$xJoin}");
                         }
 
-                        $sJoins .= " INNER JOIN " . $aRelationship[ "table" ] . " AS " .
-                            "_" . $aRelationship[ "name" ] . " ON ";
+                        $joinClause .= " INNER JOIN " . $aRelationship["table"] . " AS " .
+                            "_" . $aRelationship["name"] . " ON ";
 
                         $sOn = "";
 
-                        foreach( $aRelationship[ "local" ] as $iIndex => $sField )
+                        foreach($aRelationship["local"] as $iIndex => $sField)
                         {
-                            $sOn .= ( !empty( $sOn ) ? " AND " : "" ) .
-                                "_" . StringFunctions::ToSingular( $this->_tableName ) .
-                                "." . $sField . " = " . "_" . $aRelationship[ "name" ] .
-                                "." . $aRelationship[ "foreign" ][ $iIndex ];
+                            $sOn .= (!empty($sOn) ? " AND " : "") .
+                                "_" . StringFunctions::ToSingular($this->_tableName) .
+                                "." . $sField . " = " . "_" . $aRelationship["name"] .
+                                "." . $aRelationship["foreign"][$iIndex];
                         }
 
-                        $sJoins .= " {$sOn} ";
+                        $joinClause .= " {$sOn} ";
                     }
                 }
             }
 
-            $sFields = "_" . StringFunctions::ToSingular( $this->_tableName ) . ".*";
+            $sFields = "_" . StringFunctions::toSingular($this->_tableName) . ".*";
+
+            $orderClause = isset( $queryClauses[ "order" ]) ?
+                "ORDER BY " . $queryClauses[ "order" ] : "";
+
+            if(isset($queryClauses["distinct"]) && $queryClauses["distinct"] === true)
+            {
+                $sFields = " DISTINCT {$sFields} ";
+            }
 
             // TODO test this functionality:
             
-            if(isset($aClauses["count"]) && $aClauses["count"] === true)
+            if(isset($queryClauses["count"]) && $queryClauses["count"] === true)
             {
                 $sFields = "COUNT({$sFields})";
-            }
-
-            $sOrder = isset( $aClauses[ "order" ] ) ?
-                "ORDER BY " . $aClauses[ "order" ] : "";
-
-            if( isset( $aClauses[ "distinct" ] ) && $aClauses[ "distinct" ] === true )
-            {
-                $sFields = " DISTINCT {$sFields} ";
             }
 
             // Concatenate all the pieces of the query together:
@@ -365,31 +355,36 @@
                 {$sFields}
             FROM
                 {$this->_tableName} AS _" .
-                    StringFunctions::ToSingular( $this->_tableName ) . "
-            {$sJoins}
-            {$sWhere}
-            {$sOrder}
-            {$iLimit}
-            {$iOffset}"; // FIXME PostgreSQL Specific Syntax
+                    StringFunctions::toSingular($this->_tableName) . "
+            {$joinClause}
+            {$whereClause}
+            {$orderClause}
+            {$limitClause}
+            {$offsetClause}"; // FIXME PostgreSQL Specific Syntax
 
             // Execute and pray:
-            if( !( $this->_dataSet = $this->_database->Query( $sSQL ) ) )
+            if(!($this->_dataSet = $this->_database->query($sSQL)))
             {
-                throw new Exception( "Failed on Query. Error: " .
-                    $this->_database->GetLastError() . "\n Query: {$sSQL}" );
+                throw new Exception("Failed on Query: " .
+                    $this->_database->getLastError());
             }
 
             // Loop the data and create member variables
-            if( $this->_dataSet->Count() != 0 )
+            if($this->_dataSet->count() != 0)
             {
-                $this->_dataSet->Next();
+                $this->_dataSet->next();
 
-                $this->Load( $this->_dataSet->Current() );
+                $this->load($this->_dataSet->current());
             }
 
-            return( $this );
+            if(isset($queryClauses["count"]) && $queryClauses["count"] == true)
+            {
+                return $this->_dataSet->current()->count;
+            }
+            
+            return $this;
 
-        } // Find()
+        } // find()
 
 
         /**
@@ -403,11 +398,13 @@
          *       inner join.
          * @returns int Returns the number of database records that match the passed clauses
          */
-        public function FindCount( $aClauses = array() )
+        public function findCount( $clauses )
         {
-            return( $this->FindCount( $aClauses + array( "count" => true ) ) );
+            $result = $this->find( $clauses + array( "count" => true ) );
+            
+            return( $result );
 
-        } // FindCount()
+        } // findCount()
         
         
         /**
@@ -583,7 +580,7 @@
          *
          *       
          */                     
-        protected function FindRelationship( $sName )
+        protected function findRelationship( $sName )
         {
             $aForeignKeys = $this->_database->GetTableForeignKeys( $this->_tableName );
             
@@ -597,7 +594,7 @@
             
             return( null );
         
-        } // FindRelationship()
+        } // findRelationship()
         
         
         /**
@@ -620,7 +617,7 @@
             
             return( null );
         
-        } // FindRelationship2()
+        } // findRelationship2()
         
         
         /**
@@ -631,7 +628,7 @@
          * @argument mixed The data to load into the CRUD object
          * @returns void
          */
-        protected function Load( $oRecord )
+        protected function load( $oRecord )
         {
             if( !is_object( $oRecord ) && !is_array( $oRecord ) )
             {
@@ -934,16 +931,16 @@
             }
             else
             {
-                $bInsert = !$this->RecordExists();
+                $bInsert = !$this->recordExists();
             }
             
             if( $bInsert )
             {
-                return( $this->Insert() );
+                return $this->insert();
             }
             else
             {
-                return( $this->Update() );
+                return $this->update();
             }
         
         } // save()
@@ -952,7 +949,7 @@
         /**
          *
          */
-        public function SaveAll()
+        public function saveAll()
         {           
             $aForeignKeys = $this->_database->GetTableForeignKeys( $this->_tableName );
                     
@@ -1018,13 +1015,15 @@
             
             return( true );
         
-        } // SaveAll()
+        } // saveAll()
         
         
         /**
-         *
+         * Generates an insert query based on the data stored within this class
+         * 
+         * @returns bool True if the query was successful, false otherwise
          */
-        protected function Insert()
+        protected function insert()
         {
             $columnsList = "";
             $valuesList = "";
@@ -1065,10 +1064,10 @@
                 
                 // Create a list of values to insert into the above columns:
                 $valuesList .= (!empty($valuesList) ? ", " : "") . 
-                    $this->_database->FormatData($column[ "type" ], $sValue);
+                    $this->_database->formatData($column[ "type" ], $sValue);
             }
             
-            $sSQL = "INSERT INTO {$this->_tableName} (
+            $sql = "INSERT INTO {$this->_tableName} (
                 {$columnsList}
             ) VALUES (
                 {$valuesList}
@@ -1076,47 +1075,27 @@
             
             $resultData = null;
             
-            if(($resultData = $this->_database->Query($sSQL)) !== false)
+            if(($resultData = $this->_database->query($sql)) === null)
             {
-                throw new Exception("Failed on Query: {$sSQL} - " . $this->_database->GetLastError());
+                throw new Exception("Failed on Query" . $this->_database->GetLastError());
             }
+                        
+            // TODO clean this up. 
+            $resultData->next();
             
-            // TODO test RETURNING functionality
-            
-            if(!is_null($resultData))
+            if($resultData->valid())
             {
-                foreach($resultData as $key => $value)
+                $data = $resultData->current();
+                
+                foreach($data as $key => $value)
                 {
                     $this->_data[$key] = $value;
                 }
-                
-                return( true );
-            }
-            else
-            {
-                // Note: an assumption is made that if the primary key is not singular, then there all
-                // the data for the compound primary key should already be present -- meaning, we should 
-                // not have a serial value on the table for a compound primary key.
-                
-                // If we have a singular primary key:
-                if(count($primaryKeys) == 1)
-                {               
-                    // Get the current value of the serial for the primary key column:
-                    $iKey = $this->_database->SerialCurrVal($this->_tableName, reset($primaryKeys));
-                    
-                    // Store the primary key:
-                    $this->_data[ $primaryKeys[0] ] = $iKey;
-                    
-                    // return the primary key:
-                    return true;
-                }
-                
-                
-                // If we have a compound primary key, return true:
-                return true;
             }
             
-        } // Insert()
+            return true;
+            
+        } // insert()
         
         
         /**
@@ -1132,9 +1111,9 @@
             
             $resultData = null;
             
-            if(($data = $this->_database->query( $sql )) !== false)
+            if(($data = $this->_database->query( $sql )) === null)
             {
-                throw new Exception( "Failed on Query: " . $this->_database->GetLastError() );
+                throw new Exception( $this->_database->getLastError() );
             }
             
             if(!is_null($resultData))
@@ -1459,11 +1438,11 @@
          *
          * @returns string The name of the table associated with this CRUD object
          */
-        public function GetTableName()
+        public function getTableName()
         {
             return( $this->_tableName );
             
-        } // GetTableName() 
+        } // getTableName() 
         
         
         /**
