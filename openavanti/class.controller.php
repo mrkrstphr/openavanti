@@ -203,16 +203,16 @@
          *      value or an array of values. 
          * @returns void
          */
-        public function forwardAction( $sAction, $sController = null, $xArguments = null )
+        public function forwardAction($sAction, $sController = null, $xArguments = null)
         {
-            $this->SetDefaultView( $sController, $sAction );
+            $this->setDefaultView($sController, $sAction);
             
             $oController = &$this;
             
             if( !is_null( $sController ) )
             {
                 $sController = $sController . "Controller";
-                $oController = new $sController( $this->GetDispatcher() );
+                $oController = new $sController( $this->getDispatcher() );
             }
             
             if( !is_callable( array( $oController, $sAction ) ) )

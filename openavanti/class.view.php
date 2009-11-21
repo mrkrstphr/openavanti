@@ -39,10 +39,10 @@
         public $sView = "";
         
         // Toggles whether to render the layout:
-        public $bRenderLayout = true;
+        public $renderLayout = true;
         
         // Toggles whether to render the view:
-        public $bRenderView = true;
+        public $renderView = true;
         
         
         /**
@@ -145,7 +145,7 @@
          */
         public function renderPage()
         {
-            if( $this->bRenderLayout )
+            if( $this->renderLayout )
             {
                 if( !empty( $this->sLayout ) )
                 {
@@ -170,9 +170,9 @@
                     }
                 }
             }
-            else if( $this->bRenderView )
+            else if( $this->renderView )
             {
-                return $this->RenderContent();
+                return $this->renderContent();
             }
 
         } // renderPage()
@@ -186,9 +186,9 @@
          */
         public function renderContent()
         {
-            if( $this->bRenderView )
+            if( $this->renderView )
             {
-                if( ( $sView = FileFunctions::FileExistsInPath( $this->sView ) ) !== false )
+                if( ( $sView = FileFunctions::fileExistsInPath( $this->sView ) ) !== false )
                 {
                     require( $sView );
                 }
@@ -202,10 +202,58 @@
         
         
         /**
+         * Disables rendering of the layout. The view will still be rendered,
+         * unless it is also disabled.
          * 
-         * 
+         * @argument bool Optional; Should the layout be disabled? Default: true
+         * @returns void
          */
-        public function handleError( $sErrorCode )
+        public function disableLayout($disable = true)
+        {
+            $this->renderLayout = !$disable;
+            
+        } // disableLayout()
+        
+        
+        /**
+         * Disables rendering of the view. The layout will still be rendered,
+         * unless it is also disabled.
+         * 
+         * @argument bool Optional; Should the view be disabled? Default: true
+         * @returns void
+         */
+        public function disableView($disable = true)
+        {
+            $this->renderView = !$disable;
+            
+        } // disableView()
+        
+        
+        /**
+         * Disables rendering of the layout and view no other output will be
+         * displayed unless the code explicitly provides output.
+         * 
+         * @argument bool Optional; Should the layout and view be disabled? 
+         *      Default: true
+         * @returns void
+         */
+        public function disableAllRendering($disable = true)
+        {            
+            $this->renderLayout = !$disable;
+            $this->renderView = !$disable;
+            
+        } // disableAllRendering()
+        
+        
+        /**
+         * Handles internal errors that occur in processing by passing the
+         * error off to the dispatcher, which handles all errors throughout
+         * the HTTP request process.
+         * 
+         * @argument string The error code to handle
+         * @returns void
+         */
+        protected function handleError( $sErrorCode )
         {
             $this->oController->getDispatcher()->handleError( $sErrorCode );
             
