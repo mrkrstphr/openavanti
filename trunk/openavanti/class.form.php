@@ -71,7 +71,7 @@
          */
         public static function load( $oObject, &$aTarget = null )
         {
-            return( self::loadData( $oObject, $aTarget ) )
+            return( self::loadData( $oObject, $aTarget ) );
                         
         } // load()
         
