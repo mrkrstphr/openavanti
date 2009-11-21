@@ -84,8 +84,10 @@
             {
                 return null;
             }
+
+            $resultSet = new ResultSet($this, $resultResource);
             
-            return new ResultSet($this, $resultResource);
+            return $resultSet;
         
         } // query()
         
