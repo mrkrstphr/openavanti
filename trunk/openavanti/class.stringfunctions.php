@@ -22,7 +22,7 @@
      */
     class StringFunctions
     {
-        protected $_dictionary = array(
+        protected static $_dictionary = array(
             "person" => "people", "deer" => "deer", "beer" => "beer", 
             "goose" => "geese", "mouse" => "mice", "content" => "content"
         );
