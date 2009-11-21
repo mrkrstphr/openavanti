@@ -135,7 +135,7 @@
             
             $profile = self::$_profiles[$profileName];
             
-            if($bUnique)
+            if($unique)
             {
                 // Let's create a timestamped profile name to prevent reuse
                 // of this connection:
@@ -143,14 +143,14 @@
                 $profileName = md5(microtime());
             }
                 
-            if(!isset(self::$connectionStore[$profileName]))
+            if(!isset(self::$_connectionStore[$profileName]))
             {                
                 $databaseDriver = $profile["driver"] . "Database";
                 
-                self::$connectionStore[$profileName] = new $databaseDriver($profile);
+                self::$_connectionStore[$profileName] = new $databaseDriver($profile);
             }
             
-            return self::$connectionStore[$profileName];         
+            return self::$_connectionStore[$profileName];         
             
         } // getConnection()
         
@@ -201,7 +201,7 @@
          * @argument string The SQL query to execute
          * @returns ResultSet A ResultSet object containing the results of the database query
          */
-        abstract public function query($sql);
+        abstract public function &query($sql);
         
         
         /**
@@ -300,7 +300,7 @@
          * 
          * @returns resource A database connection resource.
          */
-        abstract public function getResource();
+        abstract public function &getResource();
         
 
         /**
