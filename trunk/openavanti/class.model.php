@@ -76,11 +76,11 @@
          *
          * @returns bool True if the object can be saved, false if not
          */ 
-        public function Save( $bSkipValidation = false )
+        public function Save()
         {       
             $bUpdate = parent::RecordExists();
         
-            if( $bUpdate && !$bSkipValidation )
+            if( $bUpdate )
             {
                 if( !$this->ValidateUpdate() ||
                      !$this->Validate() ||
@@ -90,7 +90,7 @@
                     return( false );
                 }
             }
-            else if( !$bSkipValidation )
+            else
             {
                 if( !$this->ValidateInsert() ||
                      !$this->Validate() ||
@@ -106,7 +106,7 @@
                 return( false );
             }
         
-            if( $bUpdate && !$bSkipValidation )
+            if( $bUpdate )
             {
                 if( !$this->OnAfterUpdate() || 
                      !$this->OnAfterSave() )
@@ -114,7 +114,7 @@
                     return( false );
                 }
             }
-            else if( !$bSkipValidation )
+            else
             {
                 if( !$this->OnAfterInsert() || 
                      !$this->OnAfterSave() )
