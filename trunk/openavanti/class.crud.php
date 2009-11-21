@@ -372,7 +372,7 @@
             // Loop the data and create member variables
             if($this->_dataSet->count() != 0)
             {
-                $this->_dataSet->next();
+                //$this->_dataSet->next();
 
                 $this->load($this->_dataSet->current());
             }
@@ -1079,15 +1079,10 @@
             {
                 throw new Exception("Failed on Query" . $this->_database->GetLastError());
             }
-                        
-            // TODO clean this up. 
-            $resultData->next();
             
             if($resultData->valid())
-            {
-                $data = $resultData->current();
-                
-                foreach($data as $key => $value)
+            {                
+                foreach($resultData->getRecord() as $key => $value)
                 {
                     $this->_data[$key] = $value;
                 }
@@ -1111,16 +1106,14 @@
             
             $resultData = null;
             
-            if(($data = $this->_database->query( $sql )) === null)
+            if(($resultData = $this->_database->query( $sql )) === null)
             {
                 throw new Exception( $this->_database->getLastError() );
             }
             
-            if(!is_null($resultData))
-            {
-                // TODO test new RETURNING functionality
-                
-                foreach($resultData as $key => $value)
+            if($resultData->valid())
+            {                
+                foreach($resultData->getRecord() as $key => $value)
                 {
                     $this->_data[$key] = $value;
                 }
@@ -1184,10 +1177,7 @@
                 $whereClause .= !empty( $whereClause ) ? " AND " : "";
                 $whereClause .= "{$key} = " . intval( $this->_data[ $key ] );
             }
-            
-            
-            // TODO implement returning functionality
-            
+
             $sSQL = "UPDATE 
                 {$this->_tableName}
             SET
@@ -1195,7 +1185,6 @@
             WHERE
                 {$whereClause}
             RETURNING *";    // FIXME PostgreSQL Specific Syntax
-            
 
             return( $sSQL );
             
