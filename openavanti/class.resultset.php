@@ -24,16 +24,15 @@
      */
     class ResultSet implements Iterator, Countable
     {
-        private $oDatabase = null;
-        private $rQueryResource = null;
-        private $oRecord = null;
+        private $_dbConnection = null;
+        private $_queryResource = null;
         
-        private $bValid = false;
+        private $_validRowSet = false;
         
-        private $iNumRows = 0;
+        private $_rowCount = 0;
         
-        private $iCurrentRow = -1;
-        private $aData = array();
+        private $_currentRow = 0;
+        private $_dataSet = null;
         
         
         /**
@@ -43,17 +42,27 @@
          * @argument Database An instance of a database connection
          * @argument Resource A reference to the database result returned by a query
          */
-        public function __construct( &$oDatabase, &$rQueryResource )
+        public function __construct(&$databaseConnection, &$queryResource)
         {
-            $this->oDatabase = &$oDatabase;
-            $this->rQueryResource = &$rQueryResource;
+            $this->_dbConnection = &$databaseConnection;
+            $this->_queryResource = &$queryResource;
             
-            if( !is_null( $this->rQueryResource ) )
+            if(!is_null($this->_queryResource))
             {
-                $this->iNumRows = $this->oDatabase->CountFromResult( $this->rQueryResource );
+                $this->_rowCount = $this->_dbConnection->countFromResult($this->_queryResource);
             }
             
-            $this->bValid = $this->Count() != 0;
+            $this->_validRowSet = $this->count() != 0;
+        
+        
+            if(!is_null($this->_queryResource))
+            {
+                $this->_dataSet = $this->_dbConnection->pullNextResult($this->_queryResource);
+            }
+            else
+            {
+                $this->_dataSet = null;
+            }
         
         } // __construct()
     
@@ -63,11 +72,11 @@
          *       
          * @returns StdClass The current data record, or null if none
          */
-        public function GetRecord()
+        public function getRecord()
         {
-            return( $this->Current() );
+            return $this->current();
         
-        } // GetRecord()
+        } // getRecord()
         
 
         /**
@@ -77,9 +86,9 @@
          */
         public function Count()
         {           
-            return( $this->iNumRows );
+            return $this->_rowCount;
             
-        } // Count()
+        } // count()
         
 
         /**
@@ -88,18 +97,18 @@
          *       
          * @returns StdClass The current data record for the current row, or false if there is no data
          */
-        public function Current()
+        public function current()
         {           
-            if( isset( $this->aData[ $this->iCurrentRow ] ) )
+            if(!is_null($this->_dataSet))
             {
-                return( $this->aData[ $this->iCurrentRow ] );
+                return $this->_dataSet;
             }
             else
             {
-                return( false );
+                return false;
             }
         
-        } // Current()
+        } // current()
         
 
         /**
@@ -108,11 +117,11 @@
          *       
          * @returns int The current row loaded into the ResultSet from the query resource        
          */
-        public function Key()
+        public function key()
         {
-            return( $this->iCurrentRow );
+            return $this->_currentRow;
         
-        } // Key()
+        } // key()
         
 
         /**
@@ -122,32 +131,29 @@
          *       
          * @returns void         
          */
-        public function Next()
+        public function next()
         {
             // Clean up first to prevent memory problems:
             
-            if( isset( $this->aData[ $this->iCurrentRow ] ) )
+            if(!is_null($this->_dataSet))
             {
-                unset( $this->aData[ $this->iCurrentRow ] );
+                $this->_dataSet = null;
             }
             
-            
-            $this->iCurrentRow++;
+            $this->_currentRow++;
 
-            if( !is_null( $this->rQueryResource ) )
+            if(!is_null($this->_queryResource))
             {
-                $this->aData[ $this->iCurrentRow ] = 
-                    $this->oDatabase->PullNextResult( $this->rQueryResource );
+                $this->_dataSet = $this->_dbConnection->pullNextResult($this->_queryResource);
             }
             else
             {
-                $this->aData[ $this->iCurrentRow ] = null;
+                $this->_dataSet = null;
             }
 
-            $this->bValid = !is_null( $this->aData[ $this->iCurrentRow ] ) &&
-                $this->aData[ $this->iCurrentRow ] !== false;
+            $this->_validRowSet = !is_null($this->_dataSet) && $this->_dataSet !== false;
         
-        } // Next()
+        } // next()
         
 
         /**
@@ -155,17 +161,17 @@
          *       
          * @returns void         
          */
-        public function Rewind()
+        public function rewind()
         {           
-            $this->oDatabase->ResetResult( $this->rQueryResource );
+            $this->_dbConnection->resetResult($this->_queryResource);
 
-            $this->iCurrentRow = -1;
+            $this->_currentRow = -1;
             
-            $this->Next();  
+            $this->next();
             
-            $this->bValid = $this->Count() != 0;
+            $this->_validRowSet = $this->count() != 0;
         
-        } // Rewind()
+        } // rewind()
         
 
         /**
@@ -175,12 +181,44 @@
          *       
          * @returns bool True if there is data currently loaded in the result set, false otherwise       
          */
-        public function Valid()
+        public function valid()
         {           
-            return( $this->bValid );
+            return $this->_validRowSet;
         
-        } // Valid()
+        } // valid()
         
+        
+        /**
+         * Returns whether or not the column exists in the current row
+         * 
+         * @returns bool True if the column exists in the current row, false
+         *      otherwise
+         */
+        public function __isset($column)
+        {
+            return isset($this->_dataSet->$column);
+            
+        } // __isset()
+        
+        
+        /**
+         * Gets the value of the specified column, if it exists, from the 
+         * current database table row, if the current row is valid.
+         * 
+         * @returns mixed The value of the requested column, or null if the
+         *      column is invalid or there is no current row
+         */
+        public function __get($column)
+        {
+            if(isset($this->_dataSet->$column))
+            {
+                return $this->_dataSet->$column;
+            }
+            
+            return null;
+            
+        } // __get()
+    
     } // ResultSet()
 
 ?>
