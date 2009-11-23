@@ -682,8 +682,7 @@
             }
 
             if($primaryKeys->Count() != 0)
-            {
-                $primaryKeys->Next();              
+            {             
                 $primaryKey = $primaryKeys->Current();
                 
                 $indexFields = explode(" ", $primaryKey->indkey);
@@ -837,7 +836,7 @@
                 $foreignFields = explode( ",", 
                     str_replace(array("{", "}"), "", $foreignKey->conkey));
                 
-                $this->getTableDefintion($foreignKey->typname);
+                $this->getTableDefinition($foreignKey->typname);
                 
                 $fields = $this->getTableColumns($foreignKey->typname);
                 
