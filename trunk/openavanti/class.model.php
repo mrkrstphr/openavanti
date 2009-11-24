@@ -24,30 +24,35 @@
      */
     class Model extends CRUD
     {
-    
+        protected $_tableName = "";
+        
         /**
-         * The Model's constructor - accepts the name of the table and an optional set of data
-         * to load into the parent CRUD object. Invokes CRUD::__construct() and passes these two
-         * parameters along.
+         * The Model's constructor - accepts an optional set of data to load into the parent CRUD 
+         * object. 
          * 
-         * @argument string The name of the table to work on
-         * @argument mixed An array or object of data to load into the CRUD object                                       
+         * @argument array|object|int Either an array or object of data to load into the Model, or
+         *      an integer value for the primary key to load from the database.                                       
          */
-        public function __construct( $sTableName, $oData = null )
+        public function __construct($data = null)
         {
-            if( is_array( $oData ) || is_object( $oData ) )
+            if(empty($this->_tableName))
             {
-                parent::__construct( $sTableName, $oData );
+                $this->_tableName = StringFunctions::ToPlural($this->_tableName);
             }
-            else if( is_numeric( $oData ) && strval( intval( $oData ) ) == strval( $oData ) )
+        
+            if(is_array($data) || is_object($data))
             {
-                parent::__construct( $sTableName );
+                parent::__construct($this->_tableName, $data);
+            }
+            else if(is_numeric($data) && strval(intval($data)) == strval($data))
+            {
+                parent::__construct($this->_tableName);
                 
-                $this->Find( (int)$oData );
+                $this->find((int)$data);
             }
             else
             {
-                parent::__construct( $sTableName );
+                parent::__construct($this->_tableName);
             }
             
         } // __construct()

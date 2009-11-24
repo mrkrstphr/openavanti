@@ -21,8 +21,8 @@
      */
     class CSV
     {
-        public $aHeaders = array(); 
-        public $aData = array();
+        public $_headers = array(); 
+        public $_data = array();
         
         
         /**
@@ -32,11 +32,11 @@
          * @argument string The name of the header to add to the list of column headers      
          * @returns void         
          */                     
-        public function AddHeader( $sHeader )
+        public function addHeader( $header )
         {
-            $this->aHeaders[] = $sHeader;
+            $this->_headers[] = $header;
             
-        } // AddHeader()
+        } // addHeader()
         
         
         /**
@@ -47,14 +47,14 @@
          * @argument array An array of headers to append to the current array of headers
          * @returns void
          */
-        public function AddHeaders( $aHeaders )
+        public function addHeaders( $headers )
         {
-            if( is_array( $aHeaders ) && !empty( $aHeaders ) )
+            if( is_array( $headers ) && !empty( $headers ) )
             {
-                $this->aHeaders += $aHeaders;
+                $this->_headers += $headers;
             }
             
-        } // AddHeaders()                           
+        } // addHeaders()                           
         
         
         
@@ -66,17 +66,17 @@
          * @argument array An array of CSV row data
          * @returns void
          */                     
-        public function AddData( $aData )
+        public function addData( $data )
         {
-            if( !empty( $this->aHeaders ) && count( $aData ) != count( $this->aHeaders ) )
+            if( !empty( $this->_headers ) && count( $data ) != count( $this->_headers ) )
             {
                 throw new Exception( "Data column count does not match header column " . 
                     "count in CSV data" );
             }
             
-            $this->aData[] = $aData;
+            $this->_data[] = $data;
             
-        } // AddData()
+        } // addData()
         
         
         /**
@@ -87,34 +87,34 @@
          */              
         public function __toString()
         {
-            $sData = "";
+            $csvOutput = "";
             
             // If headers are supplied, add them to the CSV string:
             
-            if( !empty( $this->aHeaders ) )
+            if( !empty( $this->_headers ) )
             {
-                $sData = implode( ",", $this->aHeaders ) . "\n";
+                $csvOutput = implode( ",", $this->_headers ) . "\n";
             }
             
             // Loop each row and convert it to a row of CSV data and add it to the CSV string:
             
-            foreach( $this->aData as $aData )
+            foreach( $this->_data as $data )
             {
-                $sDataRow = "";
+                $dataRow = "";
                 
-                foreach( $aData as $sDataElement )
+                foreach( $data as $dataElement )
                 {
-                    $sDataElement = str_replace( array( "\n", "\"" ), 
-                        array( " ", "\"\"" ), $sDataElement );
+                    $dataElement = str_replace(array("\n", "\""), 
+                        array(" ", "\"\""), $dataElement);
                     
-                    $sDataRow .= !empty( $sDataRow ) ? "," : "";
-                    $sDataRow .= "\"{$sDataElement}\"";
+                    $dataRow .= !empty($dataRow) ? "," : "";
+                    $dataRow .= "\"{$dataElement}\"";
                 }
                 
-                $sData .= "{$sDataRow}\n";
+                $csvOutput .= "{$dataRow}\n";
             }
             
-            return( $sData );
+            return $csvOutput;
         
         } // __toString()
     

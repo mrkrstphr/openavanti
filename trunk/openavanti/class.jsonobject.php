@@ -25,17 +25,7 @@
      */
     class JSONObject
     {
-        private $aAttributes = array();
-        
-        
-        /**
-         * Constructor. Currently does nothing.
-         *
-         */                         
-        public function __construct()
-        {
-        
-        } // __construct()
+        private $_attributes = array();
     
     
         /**
@@ -50,11 +40,11 @@
          *       number or another JSONObject object may be passed.      
          * @returns void
          */
-        public function AddAttribute( $sKey, $xValue )
+        public function addAttribute($key, $value)
         {
-            $this->aAttributes[ $sKey ] = $xValue;
+            $this->_attributes[$key] = $value;
             
-        } // AddAttribute()
+        } // addAttribute()
     
     
         /**
@@ -62,11 +52,11 @@
          *       
          * @returns array The array of elements stored in this object
          */
-        protected function GetAttributes()
+        protected function getAttributes()
         {
-            return( $this->aAttributes );
+            return $this->_attributes;
             
-        } // GetAttributes()
+        } // getAttributes()
         
         
         /**
@@ -81,47 +71,46 @@
          *       or ] for an array  
          * @returns string The JSON string for the provided elements
          */
-        protected static function ConvertJSONAttributes( $aAttributes, $sStartChar = '{', $sEndChar = '}' )
+        protected static function convertJSONAttributes($attributes, $startChar = '{', $endChar = '}')
         {
-            $sJSONAttributes = "";
+            $jsonAttributes = "";
             
-            foreach( $aAttributes as $sKey => $xValue )
+            foreach($attributes as $key => $value)
             {
-                $sJSONAttributes .= !empty( $sJSONAttributes ) ? ",\n" : "";
+                $jsonAttributes .= !empty($jsonAttributes) ? ",\n" : "";
                 
                 
-                $sJSONAttributes .= !is_numeric( $sKey ) ? 
-                    "\t'{$sKey}': " : "";
+                $jsonAttributes .= !is_numeric($key) ? "\t'{$key}': " : "";
                     
-                if( is_string( $xValue ) ) 
+                if(is_string($valu )) 
                 {
-                    $sJSONAttributes .= "'" . addslashes( $xValue ) . "'";
+                    $jsonAttributes .= "'" . addslashes($value) . "'";
                 }
-                else if( is_int( $xValue ) || is_float( $xValue ) )
+                else if(is_int($value) || is_float($value))
                 {
-                    $sJSONAttributes .= $xValue;
+                    $jsonAttributes .= $value;
                 }
-                else if( is_array( $xValue ) )
+                else if(is_array($value))
                 {
-                    $sJSONAttributes .= JSONObject::ConvertJSONAttributes( $xValue, '[', ']' ); 
+                    $jsonAttributes .= JSONObject::convertJSONAttributes($value, '[', ']'); 
                 }
-                else if( is_object( $xValue ) && get_class( $xValue ) == "JSONObject" )
+                else if(is_object($value) && get_class($value) == "JSONObject")
                 {
-                    $sJSONAttributes .=     JSONObject::ConvertJSONAttributes( $xValue->GetAttributes() );  
+                    $jsonAttributes .= JSONObject::convertJSONAttributes($value->getAttributes());  
                 }   
-                else if( is_null( $xValue ) )
+                else if(is_null($value))
                 {
-                    $sJSONAttributes .= "''";
+                    $jsonAttributes .= "''";
                 }
             }
             
-            $sJSON = !empty( $sJSONAttributes ) ? 
-                "{$sStartChar}\n{$sJSONAttributes}\n{$sEndChar}" : "{}";
+            $sJSON = !empty($jsonAttributes) ? 
+                "{$sStartChar}\n{$jsonAttributes}\n{$sEndChar}" : "{}";
             
         
-            return( $sJSON );
+            return $sJSON;
             
-        } // ConvertJSONAttributes()
+        } // convertJSONAttributes()
         
         
         /**
@@ -132,7 +121,7 @@
          */
         public function __toString()
         {
-            return( JSONObject::ConvertJSONAttributes( $this->aAttributes ) );
+            return JSONObject::convertJSONAttributes($this->_attributes);
         
         } // __toString()
     
