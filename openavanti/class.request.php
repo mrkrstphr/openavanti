@@ -32,9 +32,9 @@
         
         public $aArguments = array();
         
-        public $sRequestType = "";
+        public $_requestType = "";
         
-        public $bSecureConnection = false;
+        public $_secureConnection = false;
         
         
         /**
@@ -44,10 +44,10 @@
          */
         public function __construct()
         {
-            $this->sRequestType = $_SERVER[ "REQUEST_METHOD" ];
+            $this->_requestType = $_SERVER[ "REQUEST_METHOD" ];
             
-            $this->bSecureConnection = isset( $_SERVER[ "HTTPS" ] ) && 
-                !empty( $_SERVER[ "HTTPS" ] );
+            $this->_secureConnection = isset($_SERVER[ "HTTPS" ]) && 
+                !empty($_SERVER[ "HTTPS" ]);
         
         } // __construct()
         
@@ -59,11 +59,11 @@
          * @returns bool True if the current request is a secure connection, 
          *      false otherwise
          */                             
-        public function IsSecureConnection()
+        public function isSecureConnection()
         {
-            return( $this->bSecureConnection );
+            return $this->_secureConnection;
             
-        } // IsSecureConnection()
+        } // isSecureConnection()
         
         
         /**
@@ -73,11 +73,11 @@
          * @returns bool True if the current request is a POST request, false 
          *      otherwise
          */                             
-        public function IsPostRequest()
+        public function isPostRequest()
         {
-            return( strtolower( $sRequestType ) == "post" );
+            return strtolower($this->_requestType) == "post";
             
-        } // IsSecureConnection()
+        } // isPostRequest()
         
         
         /**
@@ -87,11 +87,11 @@
          * @returns bool True if the current request is a GET request, false 
          *      otherwise
          */                             
-        public function IsGetRequest()
+        public function isGetRequest()
         {
-            return( strtolower( $sRequestType ) == "get" );
+            return strtolower($this->_requestType) == "get";
             
-        } // IsSecureConnection()
+        } // isGetRequest()
         
         
         /**
@@ -99,11 +99,11 @@
          * 
          * @returns boolean True of the request is via AJAX, false otherwise 
          */
-        public static function IsAjaxRequest()
+        public static function isAjaxRequest()
         {
-            return( isset( $_SERVER[ "HTTP_X_REQUESTED_WITH" ] ) );
+            return isset($_SERVER["HTTP_X_REQUESTED_WITH"]);
             
-        } // IsAjaxRequest()
+        } // isAjaxRequest()
 
     } // Request()
 

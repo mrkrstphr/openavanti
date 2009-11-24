@@ -73,7 +73,7 @@
             
             if(is_int($data))
             {
-                $this->Find($data);
+                $this->find($data);
             }
             else if(is_array($data) || is_object($data))
             {
@@ -342,8 +342,6 @@
             {
                 $selectColumns = " DISTINCT {$sFields} ";
             }
-
-            // TODO test this functionality:
             
             if(isset($queryClauses["count"]) && $queryClauses["count"] === true)
             {
@@ -383,6 +381,18 @@
             return $this;
 
         } // find()
+
+
+        /**
+         * This method is an alias for CRUD::find() provided for convenience. See that method for 
+         * definition.
+         *
+         */
+        public function get($clauses)
+        {
+            return($this->find($clauses));
+            
+        } // get()
 
 
         /**

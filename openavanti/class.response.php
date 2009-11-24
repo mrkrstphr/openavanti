@@ -23,9 +23,9 @@
     class Response
     {
         // Stores whether or not the request resulted in a 404 error:
-        protected $b404Error = false;
+        protected $_is404Error = false;
         
-        protected $aHeaders = array();
+        protected $_headers = array();
         
         
         /**
@@ -42,7 +42,7 @@
          * 
          * 
          */
-        public function setHeader( $sHeader, $sValue )
+        public function setHeader($header, $value)
         {
             
         } // setHeader()
@@ -52,7 +52,7 @@
          * 
          * 
          */
-        public function setHeaders( array $aHeaders )
+        public function setHeaders(array $headers)
         {
             
         } // setHeaders()
@@ -62,7 +62,7 @@
          * 
          * 
          */
-        public function getHeader( $sHeader )
+        public function getHeader($header)
         {
             
         } // getHeader()
@@ -82,7 +82,7 @@
          * 
          * 
          */
-        public function clearHeader( $sHeader )
+        public function clearHeader($header)
         {
             
         } // clearHeader()
@@ -105,16 +105,16 @@
          * @argument int The HTTP status code
          * @returns bool True if the operation was successful, false on failure
          */
-        public function setHTTPStatus( $iCode )
+        public function setHTTPStatus($code)
         {
-            if( !headers_sent() )
+            if(!headers_sent())
             {
-                header( " ", true, $iCode );
+                header(" ", true, $code);
                 
-                return( true );
+                return true;
             }
             
-            return( false );
+            return false;
             
         } // setHTTPStatus()
         
@@ -129,11 +129,11 @@
          * @argument int The response code to send to the browser, default: 400
          * @returns void                         
          */                     
-        public function ajaxError( $sError, $iResponseCode = 400 )
+        public function ajaxError($errorString, $responseCode = 400)
         {
-            $this->SetHTTPStatus( $iResponseCode );
+            $this->setHTTPStatus($responseCode);
             
-            echo $sError;
+            echo $errorString;
             
         } // ajaxError()
         
@@ -145,7 +145,7 @@
          */                             
         public function is404Error()
         {
-            return $this->b404Error;
+            return $this->_is404Error;
             
         } // is404Error()
         
@@ -156,9 +156,9 @@
          * @argument bool True to trigger a 404 error, false to clear the 404 flag, default: true
          * @returns void
          */ 
-        public function set404Error( $bIs404Error = true )
+        public function set404Error( $is404Error = true )
         {
-            $this->b404Error = $bIs404Error;
+            $this->_is404Error = $is404Error;
             
         } // set404Error()
 
