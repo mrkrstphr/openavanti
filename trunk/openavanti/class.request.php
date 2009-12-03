@@ -9,9 +9,9 @@
  * @copyright       Copyright (c) 2007-2009, Kristopher Wilson
  * @license         http://www.openavanti.com/license
  * @link            http://www.openavanti.com
- * @version         1.2.0-beta
- *
+ * @version         1.3.0-beta
  */
+
 
     /**
      * The request object stores information about the web request and how it 
@@ -24,13 +24,13 @@
      */
     class Request
     {
-        public $sURI = null;
-        public $sRewrittenURI = null;
+        public $_uri = null;
+        public $_rewrittenUri = null;
         
-        public $sControllerName = null;
-        public $sAction = null;
+        public $_controllerName = null;
+        public $_actionName = null;
         
-        public $aArguments = array();
+        public $_arguments = array();
         
         public $_requestType = "";
         
@@ -44,10 +44,10 @@
          */
         public function __construct()
         {
-            $this->_requestType = $_SERVER[ "REQUEST_METHOD" ];
+            $this->_requestType = $_SERVER["REQUEST_METHOD"];
             
-            $this->_secureConnection = isset($_SERVER[ "HTTPS" ]) && 
-                !empty($_SERVER[ "HTTPS" ]);
+            $this->_secureConnection = isset($_SERVER["HTTPS"]) && 
+                !empty($_SERVER["HTTPS"]);
         
         } // __construct()
         
@@ -104,6 +104,68 @@
             return isset($_SERVER["HTTP_X_REQUESTED_WITH"]);
             
         } // isAjaxRequest()
+
+
+        /**
+         * Returns the requested URI as it was passed to the server
+         * 
+         * @returns string The requested URI
+         */
+        public function getUri()
+        {
+            return $this->_uri;
+            
+        } // getUri()
+        
+        
+        /**
+         * Returns the requested URI after any user rewrites are performed
+         * through the dispatching process
+         * 
+         * @returns string The requested URI after any user rewrites are 
+         *      performed
+         */
+        public function getRewrittenUri()
+        {
+            return $this->_rewrittenUri;
+            
+        } // getRewrittenUri()
+
+
+        /**
+         * Returns the controller component of the request from the URI
+         * 
+         * @returns string The controller part of the request
+         */
+        public function getController()
+        {
+            return $this->_controllerName;
+            
+        } // getController()
+        
+
+        /**
+         * Returns the action component of the request from the URI
+         * 
+         * @returns string The action part of the request
+         */
+        public function getAction()
+        {
+            return $this->_actionName;
+            
+        } // getAction()
+        
+
+        /**
+         * Returns all arguments of the request from the URI
+         * 
+         * @returns string The arguments of the request
+         */
+        public function getArguments()
+        {
+            return $this->_arguments;
+            
+        } // getAction()
 
     } // Request()
 
