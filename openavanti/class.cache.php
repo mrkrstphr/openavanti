@@ -80,7 +80,7 @@
             $this->_createdStamp = filectime($cacheFileName);
             $this->_modifiedStamp = filemtime($cacheFileName);
             
-            return( $this->cacheFile );
+            return( $this->_cacheFile );
         
         } // open()
         
