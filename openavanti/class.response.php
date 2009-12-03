@@ -9,9 +9,9 @@
  * @copyright       Copyright (c) 2007-2009, Kristopher Wilson
  * @license         http://www.openavanti.com/license
  * @link            http://www.openavanti.com
- * @version         1.2.0-beta
- *
+ * @version         1.3.0-beta
  */
+
 
     /**
      * 
@@ -29,73 +29,125 @@
         
         
         /**
+         * Adds a header to this object. Name and value will be combined, 
+         * separated by a colon. 
          * 
-         * 
+         * @argument string The name of the header
+         * @argument string The value of the header
+         * @argument bool Optional; Should this header replace a previous 
+         *      similar one? Default: false
+         * @returns void
          */
-        public function __construct()
+        public function setHeader($header, $value, $replace = false)
         {
-            
-        } // __construct()
-        
-        
-        /**
-         * 
-         * 
-         */
-        public function setHeader($header, $value)
-        {
+            $this->_headers[$header] = array(
+                "header" => $header, 
+                "value" => $value, 
+                "replace" => $replace
+            );
             
         } // setHeader()
         
         
         /**
+         * Adds an array of headers to the Request's headers. Each element of
+         * the array should be in the format of: 
          * 
+         *   array(
+         *       header => The name of the header
+         *       value => The value of the header
+         *       replace => optional: Should this header replace a previous 
+         *          similar one? Default: false
+         *   )
          * 
+         * @argument array An array of header data to add
+         * @returns void
          */
         public function setHeaders(array $headers)
         {
+            $this->_headers += $headers;
             
         } // setHeaders()
         
         
         /**
+         * Returns the specified header, if it exists
          * 
-         * 
+         * @argument string The header to retrieve
+         * @returns array The specified header
          */
         public function getHeader($header)
         {
+            if(isset($this->_headers[$header]))
+            {
+                return $this->_headers[$header];
+            }
+            
+            return null;
             
         } // getHeader()
         
         
         /**
+         * Returns all headers added to this object
          * 
-         * 
+         * @returns array The array of headers added to this object
          */
         public function getHeaders()
         {
+            return $this->_headers;
             
         } // getHeaders()
         
         
         /**
+         * Clears the specified header if it is stored in this object
          * 
-         * 
+         * @argument string The header to remove
+         * @returns void
          */
         public function clearHeader($header)
         {
+            if(isset($this->_headers[$header]))
+            {
+                unset($this->_headers[$header]);
+            }
             
         } // clearHeader()
         
         
         /**
+         * Clears all headers stored in this object
          * 
-         * 
+         * @returns void
          */
         public function clearHeaders()
         {
+            $this->_headers = array();
             
         } // clearHeaders()
+        
+        
+        /**
+         * Sends all headers added to the Response object
+         * 
+         * @returns bool True if headers were sent, false otherwise
+         */
+        public function sendHeaders()
+        {
+            if(headers_sent())
+            {
+                return false;
+            }
+            
+            foreach($this->_headers as $name => $header)
+            {
+                header($name . ": " . $header["value"], $header["replace"]);
+            }
+            
+            return true;
+            
+        } // sendHeaders()
         
         
         /**
@@ -156,7 +208,7 @@
          * @argument bool True to trigger a 404 error, false to clear the 404 flag, default: true
          * @returns void
          */ 
-        public function set404Error( $is404Error = true )
+        public function set404Error($is404Error = true)
         {
             $this->_is404Error = $is404Error;
             
