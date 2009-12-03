@@ -9,7 +9,7 @@
  * @copyright       Copyright (c) 2007-2009, Kristopher Wilson
  * @license         http://www.openavanti.com/license
  * @link            http://www.openavanti.com
- * @version         1.2.0-beta
+ * @version         1.3.0-beta
  */
  
  
@@ -23,10 +23,10 @@
     class Controller
     {
         // Stores a reference to the dispatcher that spawned this controller:
-        protected $oDispatcher = null;
+        protected $_dispatcher = null;
         
         // Stores a reference to the view file that will render the page:
-        protected $oView = null;
+        public $_view = null;
         
         
         /**
@@ -36,11 +36,11 @@
          * @final
          * @arguments Dispatcher The dispatcher class that loaded this controller
          */
-        public final function __construct( &$oDispatcher )
+        public final function __construct(&$dispatcher)
         {
-            $this->oDispatcher = &$oDispatcher;
+            $this->_dispatcher = &$dispatcher;
             
-            $this->oView = new View( $this );
+            $this->_view = new View($this);
             
             $this->setDefaultView();
             
@@ -77,20 +77,20 @@
          * @argument string Optional; The name of the action
          * @returns void
          */
-        protected function setDefaultView( $sController = null, $sAction = null )
+        protected function setDefaultView($controller = null, $action = null)
         {
-            if( empty( $sController ) )
+            if(empty($controller))
             {
-                $sController = substr( get_class( $this ), 0, 
-                    strlen( get_class( $this ) ) - strlen( "Controller" ) );
+                $controller = substr(get_class($this), 0, 
+                    strlen(get_class($this)) - strlen("Controller"));
             }
             
-            if( empty( $sAction ) )
+            if(empty($action))
             {
-                $sAction = $this->GetRequest()->sAction;
+                $action = $this->getRequest()->getAction();
             }
             
-            $this->oView->SetView( strtolower( $sController . "/" . $sAction . ".php" ) );
+            $this->_view->setView(strtolower($controller . "/" . $action . ".php"));
             
         } // setDefaultView()
         
@@ -119,7 +119,7 @@
          */
         public function &getDispatcher()
         {
-            return $this->oDispatcher;
+            return $this->_dispatcher;
         
         } // getDispatcher()
         
@@ -132,7 +132,7 @@
          */
         public function &getRequest()
         {
-            return $this->oDispatcher->getRequest();
+            return $this->_dispatcher->getRequest();
             
         } // getRequest()
         
@@ -145,7 +145,7 @@
          */
         public function &getResponse()
         {
-            return $this->oDispatcher->getResponse();
+            return $this->_dispatcher->getResponse();
             
         } // getResponse()
         
@@ -158,7 +158,7 @@
          */
         public function isAjaxRequest()
         {
-            return Dispatcher::IsAjaxRequest();
+            return Dispatcher::isAjaxRequest();
         
         } // isAjaxRequest()
         
@@ -176,11 +176,11 @@
          * @argument bool True to signal a permanent redirect, false to not set the HTTP response code       
          * @returns bool True if the redirect was sucessfull, false otherwise        
          */ 
-        public function redirectTo( $sURL, $bPermanentRedirect = true )
+        public function redirectTo($url, $permanentRedirect = true)
         {
-            if( !headers_sent() )
+            if(!headers_sent())
             {
-                header( "Location: {$sURL}", true, $bPermanentRedirect ? 301 : null );
+                header("Location: {$url}", true, $permanentRedirect ? 301 : null);
                 
                 return true;
             }
@@ -203,34 +203,33 @@
          *      value or an array of values. 
          * @returns void
          */
-        public function forwardAction($sAction, $sController = null, $xArguments = null)
+        public function forwardAction($action, $controllerName = null, $arguments = null)
         {
-            $this->setDefaultView($sController, $sAction);
+            $this->setDefaultView($controllerName, $action);
             
-            $oController = &$this;
+            $controller = &$this;
             
-            if( !is_null( $sController ) )
+            if(!is_null( $controllerName))
             {
-                $sController = $sController . "Controller";
-                $oController = new $sController( $this->getDispatcher() );
+                $controllerName = $controllerName . "Controller";
+                $controller = new $controllerName($this->getDispatcher());
             }
             
-            if( !is_callable( array( $oController, $sAction ) ) )
+            if(!is_callable(array($controller, $action)))
             {
                 return;
             }
             
-            if( is_array( $xArguments ) )
+            if(is_array($arguments))
             {
-                call_user_func_array( array( $oController, $sAction ), $xArguments );
+                call_user_func_array(array($controller, $action), $arguments);
             }
-            else if( is_scalar( $xArguments ) )
+            else if(is_scalar($arguments))
             {
-                $oController->$sAction( $xArguments );
+                $controller->$action($arguments);
             }
             
-            $this->oView->SetView( $oController->sView ); 
-            $this->oView->aData = $oController->aData;
+            $this->_view->setView($controller->_view); 
             
         } // forwardAction()
         
@@ -240,13 +239,13 @@
          * check to ensure that the file specified actually exists. It is up to the code that loads
          * the view file to do this (normally the Dispatcher class).                 
          *       
-         * @deprecated Use $this->oView->setView()
+         * @deprecated Use $this->_view->setView()
          * @argument string The file name of the view file that should be loaded.
          * @returns void
          */ 
-        public function setView( $sView )
+        public function setView($view)
         {
-            $this->oView->setView( $sView );
+            $this->_view->setView($view);
         
         } // setView()
         
@@ -258,7 +257,7 @@
          */ 
         public function &getView()
         {
-            return $this->oView;
+            return $this->_view;
         
         } // getView()
         
@@ -270,14 +269,14 @@
          * 
          * If the supplied variable already exists, it will be overwritten.                                  
          *
-         * @deprecated Use $this->oView->[name] = [value]
+         * @deprecated Use $this->_view->[name] = [value]
          * @argument string The name of the variable to set
          * @argument mixed The value of the variable to set                  
          * @returns void
          */ 
-        public function setData( $sName, $sValue )
+        public function setData($name, $value)
         {
-            $this->oView->$sName = $sValue;
+            $this->_view->$name = $value;
             
         } // setData()
         
@@ -292,9 +291,9 @@
          * @argument string The message to set in the flash session variable
          * @returns void
          */ 
-        public function setFlash( $sMessage, $sScope = "flash" )
+        public function setFlash($message, $scope = "flash")
         {
-            $_SESSION[ (string)$sScope ] = $sMessage;
+            $_SESSION[(string)$scope] = $message;
             
         } // setFlash()
         
@@ -306,14 +305,14 @@
          * @argument string The scope or name of the flash message to get; default = flash
          * @returns string The flash message, if any, stored in the session
          */ 
-        public function getFlash( $sScope = "flash" )
+        public function getFlash($scope = "flash")
         {
-            $sFlash = isset( $_SESSION[ (string)$sScope] ) ? 
-                $_SESSION[ (string)$sScope ] : "";
+            $flash = isset($_SESSION[(string)$scope]) ? 
+                $_SESSION[(string)$scope] : "";
             
-            unset( $_SESSION[ (string)$sScope ] );
+            unset($_SESSION[(string)$scope]);
             
-            return $sFlash;
+            return $flash;
             
         } // getFlash()
 

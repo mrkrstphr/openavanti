@@ -9,8 +9,7 @@
  * @copyright       Copyright (c) 2007-2009, Kristopher Wilson
  * @license         http://www.openavanti.com/license
  * @link            http://www.openavanti.com
- * @version         1.2.0-beta
- *
+ * @version         1.3.0-beta
  */
  
  
@@ -26,41 +25,23 @@
     class Dispatcher
     {
         // Stores a list of routes that determine how to map a URI:
-        protected $aRoutes = array();
-        
-        // Toggles whether to require view files: 
-        //protected $bRequireViewFiles = true;
+        protected $_routes = array();
         
         // Stores the name of the error controller that will handle 
         // dispatching errors:
-        protected $sErrorController = "ErrorController";
+        protected $_errorController = "ErrorController";
         
         // Stores a reference to the Request object for this request:
-        protected $oRequest = null;
+        protected $_request = null;
         
         // Stores a reference to the Response object for this transaction:
-        protected $oResponse = null;
+        protected $_response = null;
         
         // Stores a reference to the Controller that will handle this requet:
-        protected $oController = null;
+        protected $_controller = null;
         
         // Stores a reference to the View that will render the page:
-        protected $oView = null;
-                
-        
-        /**
-         * Allows the specification of a callback method to invoke upon a 404 error, instead of 
-         * requiring the 404 view file. If this callback is not callable, nothing will happen 
-         * on a 404 error.           
-         * 
-         * @argument callback The callback to invoke upon a 404 error        
-         * @returns void
-         */
-        public function set404Handler( $xCallback )
-        {
-            $this->x404Callback = $xCallback;
-            
-        } // set404Handler()
+        protected $_view = null;
 
 
         /**
@@ -72,11 +53,11 @@
          * @argument string The string to rewrite to
          * @returns void
          */
-        public function addRoute( $sPattern, $sReplacement )
+        public function addRoute($pattern, $replacement)
         {
-            $this->aRoutes[] = array(
-                "pattern" => $sPattern,
-                "replace" => $sReplacement
+            $this->_routes[] = array(
+                "pattern" => $pattern,
+                "replace" => $replacement
             );
         
         } // addRoute()
@@ -89,7 +70,7 @@
          */
         public function &getRequest()
         {
-            return $this->oRequest;
+            return $this->_request;
             
         } // getRequest()
     
@@ -101,7 +82,7 @@
          */
         public function &getResponse()
         {
-            return $this->oResponse;
+            return $this->_response;
             
         } // getRequest()
         
@@ -124,66 +105,55 @@
          * @argument string The current request URI
          * @returns void
          */
-        public function connect( $sRequest )
+        public function connect($requestUri)
         {
-            $this->oRequest = new Request();
-            $this->oRequest->sURI = $sRequest;
+            $this->_request = new Request();
+            $this->_request->_uri = $requestUri;
             
-            $this->oResponse = new Response();
+            $this->_response = new Response();
             
-            $sController = "";
-            $sAction = "";
-            $aArguments = array();
-            
-            // Load an empty controller. This may be replaced if we found a controller through a route.
-            // FIXME Why were we doing this?
-            
-            //$this->oController = new Controller( $this );
-            
-            //$this->oView = &$this->oController->GetView();
+            $controller = "";
+            $action = "";
+            $arguments = array();
             
             // Loop each stored route and attempt to find a match to the URI:
             
-            foreach( $this->aRoutes as $aRoute )
+            foreach($this->_routes as $route)
             {               
-                if( preg_match( $aRoute[ "pattern" ], $sRequest ) != 0 )
+                if(preg_match($route["pattern"], $requestUri) != 0)
                 {
-                    $sRequest = preg_replace( $aRoute[ "pattern" ], $aRoute[ "replace" ], $sRequest );
+                    $requestUri = preg_replace($route["pattern"], $route["replace"], $requestUri);
                 }
             }
             
-            if( substr( $sRequest, 0, 1 ) == "/" )
+            if(substr($requestUri, 0, 1) == "/")
             {
-                $sRequest = substr( $sRequest, 1 );
+                $requestUri = substr($requestUri, 1);
             }
             
-            $this->oRequest->sRewrittenURI = $sRequest;
+            $this->_request->_rewrittenUri = $requestUri;
             
             
             // Explode the request on /
-            $aRequest = explode( "/", $sRequest );
+            $request = explode("/", $requestUri);
             
-            // Store this as the last request:
-            // FIXME - what was the point of this?
-            //$_SESSION[ "last-request" ] = $aRequest;
+            $this->_request->_controllerName = count($request) > 0 ? 
+                str_replace("-", "_", array_shift($request)) . "Controller" : "";
             
-            $this->oRequest->sControllerName = count( $aRequest ) > 0 ? 
-                str_replace( "-", "_", array_shift( $aRequest ) ) . "Controller" : "";
-            
-            $this->oRequest->sAction = count( $aRequest ) > 0 ? 
-                str_replace( "-", "_", array_shift( $aRequest ) ) : "index";
+            $this->_request->_actionName = count($request) > 0 ? 
+                str_replace("-", "_", array_shift($request)) : "index";
                 
-            $this->oRequest->aArguments = !empty( $aRequest ) ? $aRequest : array();
+            $this->_request->_arguments = !empty($request) ? $request : array();
                 
             
             // If we've found a controller and the class exists:
-            if( !empty( $this->oRequest->sControllerName ) && 
-                class_exists( $this->oRequest->sControllerName, true ) )
+            if(!empty($this->_request->_controllerName) && 
+                class_exists($this->_request->_controllerName, true))
             {
                 // Replace our empty controller with the routed one:                
-                $this->oController = new $this->oRequest->sControllerName( $this );
+                $this->_controller = new $this->_request->_controllerName($this);
                 
-                $this->oView = $this->oController->GetView();
+                $this->_view = $this->_controller->getView();
                 
                 // Attempt to invoke an action on this controller:              
                 $this->invokeAction();
@@ -191,7 +161,7 @@
             else
             {
                 // If we can't find the controller, we must throw an error:
-                return( $this->handleError( ErrorHandler::CONTROLLER_NOT_FOUND ) );
+                return $this->handleError(ErrorHandler::CONTROLLER_NOT_FOUND);
             }
             
             // Continue on with the view loader method which will put the appropriate presentation
@@ -199,14 +169,14 @@
             
             try
             {
-                $this->oView->renderPage();
+                $this->_view->renderPage();
             }
-            catch( Exception $e )
+            catch(Exception $e)
             {
-                $this->handleError( $e->getMessage() );
+                $this->handleError($e->getMessage());
             }
             
-            return( $this->oRequest );
+            return $this->_request;
         
         } // connect()
         
@@ -221,22 +191,22 @@
         {
             // is_callable() is used over method_exists() in order to properly utilize __call()
             
-            if( !empty( $this->oRequest->sAction ) && 
-                is_callable( array( $this->oController, $this->oRequest->sAction ) ) )
+            if(!empty($this->_request->_actionName) && 
+                is_callable(array($this->_controller, $this->_request->_actionName)))
             {
                 // Call $oController->$sAction() with arguments $aArguments:
-                call_user_func_array( array( $this->oController, $this->oRequest->sAction ), 
-                    $this->oRequest->aArguments );
+                call_user_func_array(array($this->_controller, $this->_request->_actionName), 
+                    $this->_request->_arguments);
             }
-            else if( empty( $this->oRequest->sAction ) )
+            else if(empty($this->_request->_actionName))
             {
                 // Default to the index file:
-                $this->oController->index();
+                $this->_controller->index();
             }
             else
             {
                 // Action is not callable, throw an error:
-                return( $this->handleError( ErrorHandler::ACTION_NOT_FOUND ) );
+                return $this->handleError(ErrorHandler::ACTION_NOT_FOUND);
             }
         
         } // invokeAction()
@@ -248,16 +218,17 @@
          * 
          * @returns void
          */
-        public function handleError( $sErrorCode )
+        public function handleError($errorCode)
         {
-            if( !empty( $this->sErrorController ) && class_exists( $this->sErrorController, true ) )
+            if(!empty($this->_errorController) && 
+                class_exists($this->_errorController, true))
             {
-                $oController = new $this->sErrorController( $this );
-                $oController->error( $sErrorCode );
+                $oController = new $this->_errorController($this);
+                $oController->error($errorCode);
             }
             else
             {
-                throw new Exception( "No ErrorController configured; cannot handle error" );
+                throw new Exception("No ErrorController configured; cannot handle error");
             }
             
         } // handleError()
@@ -266,17 +237,17 @@
         /**
          * Called to handle a 404 error
          * 
-         * @deprecated Use handleError( ErrorHandler::FILE_NOT_FOUND );
+         * @deprecated Use handleError(ErrorHandler::FILE_NOT_FOUND);
          * @returns void
          */
         protected function invoke404Error()
         {
-            if( !headers_sent() )
+            if(!headers_sent())
             {
-                header( "HTTP/1.0 404 Not Found", true, 404 );
+                header("HTTP/1.0 404 Not Found", true, 404);
             }
             
-            $this->handleError( ErrorHandler::FILE_NOT_FOUND );
+            $this->handleError(ErrorHandler::FILE_NOT_FOUND);
         
         } // Invoke404Error()
         

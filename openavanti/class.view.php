@@ -9,7 +9,7 @@
  * @copyright       Copyright (c) 2007-2009, Kristopher Wilson
  * @license         http://www.openavanti.com/license
  * @link            http://www.openavanti.com
- * @version         1.2.0-beta
+ * @version         1.3.0-beta
  */
  
  
@@ -23,26 +23,26 @@
     class View
     {
         // Stores a reference to the controller that is preparing this view:
-        protected $oController = null;
+        protected $_controller = null;
         
         // Stores data used by the actual view file for redering:
-        public $aData = array();
+        public $_data = array();
         
         // Stores the default layout to use if no other is specified:
-        public static $sDefaultLayout = "";
+        public static $_defaultLayout = "";
         
         // Stores the layout to render, overriding any default specified:
-        public $sLayout = "";
+        public $_layout = "";
         
         // Stores the view file to render inside the layout through 
         // GetContent():
-        public $sView = "";
+        public $_view = "";
         
         // Toggles whether to render the layout:
-        public $renderLayout = true;
+        public $_renderLayout = true;
         
         // Toggles whether to render the view:
-        public $renderView = true;
+        public $_renderView = true;
         
         
         /**
@@ -54,11 +54,11 @@
          * @argument string Optional; the name of the view file to render
          * @returns void
          */
-        public final function __construct( &$oController, $sViewFileName = "" )
+        public final function __construct(&$controller, $viewFileName = "")
         {
-            $this->oController = &$oController;
+            $this->_controller = &$controller;
             
-            $this->sView = $sViewFileName;
+            $this->_view = $viewFileName;
 
             $this->init();
             
@@ -86,7 +86,7 @@
          */
         public function &getController()
         {
-            return $this->oController;
+            return $this->_controller;
         
         } // getController()
         
@@ -98,9 +98,9 @@
          *      rendered
          * @returns void
          */
-        public function setLayout( $sLayoutFile )
+        public function setLayout($layoutFile)
         {
-            $this->sLayout = $sLayoutFile;
+            $this->_layout = $layoutFile;
             
         } // setLayout()
         
@@ -112,9 +112,9 @@
          *      rendered by default if no other layout file is specified
          * @returns void
          */
-        public static function setDefaultLayout( $sLayoutFile )
+        public static function setDefaultLayout($layoutFile)
         {
-            self::$sDefaultLayout = $sLayoutFile;
+            self::$_defaultLayout = $layoutFile;
             
         } // setDefaultLayout()
         
@@ -129,9 +129,9 @@
          *      loaded.
          * @returns void
          */ 
-        public function setView( $sView )
+        public function setView($view)
         {
-            $this->sView = $sView;
+            $this->_view = $view;
         
         } // setView()
         
@@ -145,32 +145,32 @@
          */
         public function renderPage()
         {
-            if( $this->renderLayout )
+            if( $this->_renderLayout )
             {
-                if( !empty( $this->sLayout ) )
+                if(!empty($this->_layout))
                 {
-                    if( FileFunctions::fileExistsInPath( $this->sLayout ) )
+                    if(FileFunctions::fileExistsInPath($this->_layout))
                     {
-                        require( $this->sLayout );
+                        require($this->_layout);
                     }
                     else
                     {
-                        throw new Exception( ErrorHandler::VIEW_NOT_FOUND );
+                        throw new Exception(ErrorHandler::VIEW_NOT_FOUND);
                     }
-                }                
-                else if( !empty( self::$sDefaultLayout ) )
+                }
+                else if(!empty(self::$_defaultLayout))
                 {
-                    if( FileFunctions::fileExistsInPath( self::$sDefaultLayout ) )
+                    if(FileFunctions::fileExistsInPath(self::$_defaultLayout))
                     {
-                        require( self::$sDefaultLayout );
+                        require(self::$_defaultLayout);
                     }
                     else
                     {
-                        throw new Exception( ErrorHandler::VIEW_NOT_FOUND );
+                        throw new Exception(ErrorHandler::VIEW_NOT_FOUND);
                     }
                 }
             }
-            else if( $this->renderView )
+            else if($this->_renderView)
             {
                 return $this->renderContent();
             }
@@ -186,15 +186,15 @@
          */
         public function renderContent()
         {
-            if( $this->renderView )
+            if($this->_renderView)
             {
-                if( ( $sView = FileFunctions::fileExistsInPath( $this->sView ) ) !== false )
+                if(($view = FileFunctions::fileExistsInPath($this->_view)) !== false)
                 {
-                    require( $sView );
+                    require($view);
                 }
                 else
                 {
-                    throw new Exception( ErrorHandler::VIEW_NOT_FOUND );
+                    throw new Exception(ErrorHandler::VIEW_NOT_FOUND);
                 }
             }
             
@@ -210,7 +210,7 @@
          */
         public function disableLayout($disable = true)
         {
-            $this->renderLayout = !$disable;
+            $this->_renderLayout = !$disable;
             
         } // disableLayout()
         
@@ -224,7 +224,7 @@
          */
         public function disableView($disable = true)
         {
-            $this->renderView = !$disable;
+            $this->_renderView = !$disable;
             
         } // disableView()
         
@@ -253,25 +253,30 @@
          * @argument string The error code to handle
          * @returns void
          */
-        protected function handleError( $sErrorCode )
+        protected function handleError($errorCode)
         {
-            $this->oController->getDispatcher()->handleError( $sErrorCode );
+            $this->oController->getDispatcher()->handleError($errorCode);
             
         } // handleError()
         
         
         /**
          * Used by the view file to get a data variable, which are stored in 
-         * the aData array and are settable through __set(), usually by the
+         * the _data array and are settable through __set(), usually by the
          * Controller.
          * 
          * 
          * @argument string The name of the data variable being retrieved
          * @returns void
          */
-        public function __get( $sName )
+        public function __get($name)
         {
-            return $this->aData[ $sName ];
+            if(isset($this->_data[$name]))
+            {
+                return $this->_data[$name];
+            }
+            
+            return null;
             
         } // __get()
         
@@ -284,9 +289,9 @@
          * @argument string The value of the data variable being set
          * @returns void
          */
-        public function __set( $sName, $sValue )
+        public function __set($name, $value)
         {
-            $this->aData[ $sName ] = $sValue;
+            $this->_data[$name] = $value;
             
         } // __set()
         
@@ -295,9 +300,9 @@
          * 
          * 
          */
-        public function __isset( $sName )
+        public function __isset($name)
         {
-            return isset( $this->aData[ $sName ] );
+            return isset($this->_data[$name]);
 
         } // __isset()
 
