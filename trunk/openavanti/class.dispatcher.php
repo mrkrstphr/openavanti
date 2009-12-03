@@ -169,6 +169,7 @@
             
             try
             {
+                $this->_response->sendHeaders();
                 $this->_view->renderPage();
             }
             catch(Exception $e)
