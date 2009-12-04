@@ -33,13 +33,14 @@
          * @argument array|object|int Either an array or object of data to load into the Model, or
          *      an integer value for the primary key to load from the database.                                       
          */
-        public function __construct($data = null)
+        public final function __construct($data = null)
         {
             if(empty($this->_tableName))
             {
-                $this->_tableName = StringFunctions::ToPlural($this->_tableName);
+                $className = strtolower(get_class($this));
+                $this->_tableName = StringFunctions::toPlural($className);
             }
-        
+
             if(is_array($data) || is_object($data))
             {
                 parent::__construct($this->_tableName, $data);
