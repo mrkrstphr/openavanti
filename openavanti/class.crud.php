@@ -9,9 +9,9 @@
  * @copyright       Copyright (c) 2007-2009, Kristopher Wilson
  * @license         http://www.openavanti.com/license
  * @link            http://www.openavanti.com
- * @version         1.2.0-beta
- *
+ * @version         1.3.0-beta
  */
+ 
  
     /**
      * Database abstraction layer implementing CRUD procedures
@@ -301,7 +301,7 @@
                             $joinClause .= " AS " . $sAs . " ";
 
                             // Add the ON clause:
-                            $joinClause .= " ON _" . $sTableAlias . "." .
+                            $joinClause .= " ON _" . $tableAlias . "." .
                                 current($aRelationship["local"]) . " = " .
                                 $sAs . "." . current($aRelationship["foreign"]) . " ";
                         }
@@ -340,12 +340,12 @@
 
             if(isset($queryClauses["distinct"]) && $queryClauses["distinct"] === true)
             {
-                $selectColumns = " DISTINCT {$sFields} ";
+                $selectColumns = " DISTINCT {$selectColumns} ";
             }
             
             if(isset($queryClauses["count"]) && $queryClauses["count"] === true)
             {
-                $selectColumns = "COUNT({$sFields})";
+                $selectColumns = "COUNT({$selectColumns})";
             }
 
             // Concatenate all the pieces of the query together:
@@ -381,18 +381,6 @@
             return $this;
 
         } // find()
-
-
-        /**
-         * This method is an alias for CRUD::find() provided for convenience. See that method for 
-         * definition.
-         *
-         */
-        public function get($clauses)
-        {
-            return($this->find($clauses));
-            
-        } // get()
 
 
         /**
