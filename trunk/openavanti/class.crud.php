@@ -726,8 +726,8 @@
          *
          */                     
         public function __get($name)
-        {           
-            if(isset($this->_data[$name]))
+        {
+            if(array_key_exists($name, $this->_data))
             {
                 return $this->_data[$name];
             }
@@ -1397,29 +1397,29 @@
          *
          *
          */                     
-        protected function Cleanup()
+        protected function cleanup()
         {
-            $aRelationships = $this->_database->GetTableForeignKeys( $this->_tableName );
+            $relationships = $this->_database->getTableForeignKeys($this->_tableName);
             
-            foreach( $aRelationships as $aRelationship )
+            foreach($relationships as $relationship)
             {
-                $sRelationshipName = $aRelationship[ "name" ];
+                $relationshipName = $relationship["name"];
                 
-                if( array_key_exists( $sRelationshipName, $this->_data ) )
+                if(isset($this->_data[$relationshipName]))
                 {
-                    unset( $this->_data[ $sRelationshipName ] );
+                    unset($this->_data[$relationshipName]);
                 }
             }
             
-            $aColumns = $this->_database->GetTableColumns( $this->_tableName );
+            $columns = $this->_database->getTableColumns($this->_tableName);
             
             // Loop each column in the table and create a member variable for it:           
-            foreach( $aColumns as $aColumn )
+            foreach($columns as $column)
             {
-                $this->_data[ $aColumn[ "field" ] ] = null;
+                $this->_data[$column["field"]] = null;
             }
                 
-        } // Cleanup()
+        } // cleanup()
         
         
         
@@ -1430,7 +1430,7 @@
          */
         public function getTableName()
         {
-            return( $this->_tableName );
+            return $this->_tableName;
             
         } // getTableName() 
         
@@ -1445,14 +1445,14 @@
          *      call? If not, only the current record stored is returned. Default false.      
          * @returns string A well formed XML document as a string representation
          */
-        public function AsXMLString( $bIncludeReferences = false, $bProvideAll = false )
+        public function asXmlString($includeReferences = false, $provideAll = false)
         {
-            $oXML = $this->asXML( $bIncludeReferences, $bProvideAll );          
-            $sXML = XMLFunctions::PrettyPrint( $oXML->asXML() );
+            $xmlObj = $this->asXml($includeReferences, $provideAll);
+            $xml = XMLFunctions::PrettyPrint($xmlObj->asXML());
             
-            return( $sXML );
+            return $xml;
             
-        } // AsXMLString()
+        } // AsXmlString()
         
         
         /**
@@ -1466,41 +1466,45 @@
          *      call? If not, only the current record stored is returned. Default false.      
          * @returns SimpleXMLElement The data requested as a SimpleXMLElement object
          */
-        public function AsXML( $bIncludeReferences = false, $bProvideAll = false )
+        public function asXml($includeReferences = false, $provideAll = false)
         {
-            $oXML = null;
+            $xml = null;
             
-            if( $bProvideAll )
+            if($provideAll)
             {
-                $sName = $this->_tableName;
-                $sElementName = StringFunctions::ToSingular( $this->_tableName );
+                $name = $this->_tableName;
+                $elementName = StringFunctions::toSingular($this->_tableName);
                 
-                $oXML = new SimpleXMLElement( "<{$sName}></{$sName}>" );
+                $xml = new SimpleXMLElement("<{$name}></{$name}>");
                 
-                foreach( $this as $oObject )
+                foreach($this as $object)
                 {
-                    $oElement = $oXML->addChild( $sElementName );
-                    $this->AddColumns( $oElement, $oObject, $this->_tableName );
+                    $element = $xml->addChild($elementName);
+                    $this->addColumns($element, $object, $this->_tableName);
                     
-                    if( $bIncludeReferences )
+                    if($includeReferences)
                     {
-                        $this->AddReferences( $oElement, $oObject, $this->_tableName );
+                        $this->addReferences($element, $object, $this->_tableName);
                     }
                 }
             }
             else
             {
-                $sName = StringFunctions::ToSingular( $this->_tableName );
+                $name = StringFunctions::toSingular($this->_tableName);
                 
-                $oXML = new SimpleXMLElement( "<{$sName}></{$sName}>" );
+                $xml = new SimpleXMLElement("<{$name}></{$name}>");
                 
-                $this->AddColumns( $oXML, $this, $this->_tableName );
-                $this->AddReferences( $oXML, $this, $this->_tableName );
+                $this->addColumns($xml, $this, $this->_tableName);
+            
+                if($includeReferences)
+                {
+                    $this->addReferences($xml, $this, $this->_tableName);
+                }
             }
         
-            return( $oXML );
+            return $xml;
                 
-        } // AsXML()
+        } // asXml()
         
     
         /**
@@ -1512,16 +1516,16 @@
          * @argument string           
          * @returns SimpleXMLElement The data requested as a SimpleXMLElement object
           */
-        private function AddColumns( &$oElement, &$oObject, $tableName )
+        private function addColumns(&$element, &$object, $tableName)
         {
-            $aColumns = $this->_database->GetTableColumns( $tableName );
+            $columns = $this->_database->getTableColumns($tableName);
             
-            foreach( $aColumns as $aColumn )
+            foreach($columns as $column)
             {
-                $oElement->addChild( $aColumn[ "field" ], $oObject->{$aColumn[ "field" ]} );
+                $element->addChild($column["field"], $object->{$column["field"]});
             }
             
-        } // AddColumns()
+        } // addColumns()
         
 
         /**
@@ -1533,39 +1537,39 @@
          * @argument string           
          * @returns SimpleXMLElement The data requested as a SimpleXMLElement object
          */
-        private function AddReferences( &$oElement, &$oObject, $tableName )
+        private function addReferences(&$element, &$object, $tableName)
         {
-            $aTableReferences = $this->_database->GetTableForeignKeys( $tableName );
+            $tableReferences = $this->_database->getTableForeignKeys($tableName);
                 
-            foreach( $aTableReferences as $aReference )
+            foreach($tableReferences as $reference)
             {
-                $oData = $this->{$aReference[ "name" ]};
+                $data = $this->{$reference[ "name" ]};
                                 
-                if( !empty( $oData ) && !$oData->Empty() )
+                if(!empty($data) && !$data->Empty())
                 {
-                    if( $aReference[ "type" ] == "1-m" )
+                    if($reference["type"] == "1-m")
                     {
-                        $sChildReferenceName = StringFunctions::ToSingular( $aReference[ "name" ] );
+                        $childReferenceName = StringFunctions::toSingular($reference["name"]);
                         
-                        $oReference = $oElement->addChild( $aReference[ "name" ] );
+                        $referenceObj = $element->addChild($reference["name"]);
                         
-                        foreach( $oData as $oDataElement )
+                        foreach($data as $dataElement)
                         {
-                            $oChildReference = $oReference->addChild( $sChildReferenceName );
+                            $childReference = $referenceObj->addChild($childReferenceName);
                             
-                            $this->AddColumns( $oChildReference, $oDataElement, $aReference[ "table" ] );
+                            $this->addColumns($childReference, $dataElement, $reference["table"]);
                         }
                     }
                     else
                     {
-                        $oReference = $oElement->addChild( $aReference[ "name" ] );
-                        $this->AddColumns( $oReference, $oData, $aReference[ "table" ] );
+                        $referenceObj = $element->addChild($reference["name"]);
+                        $this->addColumns($referenceObj, $data, $reference["table"]);
                     }
                 }
                 
             }
         
-        } // AddReferences()
+        } // addReferences()
 
         
         /**
@@ -1576,71 +1580,68 @@
          * @argument bool Toggles whether references/relationships should be stored in the JSON string       
          * @returns string A JSON string representing the CRUD object
          */
-        public function AsJSON( $bIncludeReferences = false)
+        public function asJson($includeReferences = false)
         {
-            $oJSON = new JSONObject();
+            $json = new JSONObject();
             
-            $aColumns = $this->_database->GetTableColumns( $this->_tableName );
+            $columns = $this->_database->getTableColumns($this->_tableName);
             
-            foreach( $aColumns as $aColumn )
+            foreach($columns as $column)
             {
-                $oJSON->AddAttribute( $aColumn[ "field" ], $this->_data[ $aColumn[ "field" ] ] );
+                $json->addAttribute($column["field"], $this->_data[$column["field"]]);
             }
             
-            if( $bIncludeReferences )
+            if($includeReferences)
             {
-                $aTableReferences = $this->_database->GetTableForeignKeys( $this->_tableName );
+                $tableReferences = $this->_database->getTableForeignKeys($this->_tableName);
                     
-                foreach( $aTableReferences as $aReference )
+                foreach($tableReferences as $reference)
                 {
-                    $oData = $this->{$aReference[ "name" ]};
+                    $data = $this->{$reference["name"]};
                                     
-                    if( !empty( $oData ) && !$oData->Empty() )
+                    if(!empty($data) && !$data->Empty())
                     {
-                        $aReferenceColumns = $this->_database->GetTableColumns( $aReference[ "table" ] );
+                        $referenceColumns = $this->_database->getTableColumns($reference["table"]);
                             
-                        if( $aReference[ "type" ] == "1-m" )
+                        if($reference["type"] == "1-m")
                         {                       
-                            $aReferences = array();
+                            $references = array();
                             
-                            $sChildReferenceName = StringFunctions::ToSingular( $aReference[ "name" ] );
+                            $childReferenceName = StringFunctions::toSingular($reference["name"]);
                             
-                            //$oReference = $oElement->addChild( $aReference[ "name" ] );
-                            
-                            foreach( $oData as $oDataElement )
+                            foreach($data as $dataElement)
                             {
-                                $oReferenceJSON = new JSONObject();
+                                $referenceJSON = new JSONObject();
                             
-                                foreach( $aReferenceColumns as $aColumn )
+                                foreach($referenceColumns as $column)
                                 {
-                                    $oReferenceJSON->AddAttribute( $aColumn[ "field" ], $oData->{$aColumn[ "field" ]} );
+                                    $referenceJSON->addAttribute($column["field"], $data->{$column["field"]});
                                 }
                             
-                                $aReferences[] = $oReferenceJSON;
+                                $references[] = $referenceJSON;
                             }
                             
-                            
-                            $oJSON->AddAttribute( $aReference[ "name" ], $aReferences );                            
+                            $json->addAttribute($reference["name"], $references);                            
                         }
                         else
                         {
-                            $oReferenceJSON = new JSONObject();
+                            $referenceJSON = new JSONObject();
                             
-                            foreach( $aReferenceColumns as $aColumn )
+                            foreach($referenceColumns as $column)
                             {
-                                $oReferenceJSON->AddAttribute( $aColumn[ "field" ], $oData->{$aColumn[ "field" ]} );
+                                $referenceJSON->addAttribute($column["field"], $data->{$column["field"]});
                             }
                             
-                            $oJSON->AddAttribute( $aReference[ "name" ], $oReferenceJSON );
+                            $json->addAttribute($reference["name"], $referenceJSON);
                         }
                     }
                     
                 }
             }
             
-            return( $oJSON->__toString() );
+            return $json->__toString();
             
-        } // AsJSON()
+        } // asJson()
         
         
         /**
@@ -1651,7 +1652,7 @@
          */
         public function __toString()
         {
-            return( print_r( $this->_data, true ) );
+            return print_r($this->_data, true);
             
         } // __toString()
         
@@ -1669,24 +1670,24 @@
          *
          * @returns object The generated object, either CRUD or a subclass of CRUD
          */
-        private function InstantiateClass( $tableName, $xData = null )
+        private function &instantiateClass($tableName, $data = null)
         {           
-            $sModelName = StringFunctions::ToSingular( $tableName );
+            $modelName = StringFunctions::toSingular($tableName);
             
-            $oObject = null;
+            $object = null;
             
-            if( class_exists( $sModelName, true ) && is_subclass_of( $sModelName, "Model" ) )
+            if( class_exists($modelName, true) && is_subclass_of($modelName, "Model"))
             {
-                $oObject = new $sModelName( $xData );
+                $object = new $modelName($data);
             }
             else
             {
-                $oObject = new CRUD( $tableName, $xData );
+                $object = new CRUD($tableName, $data);
             }            
             
-            return( $oObject );
+            return $object;
             
-        } // InstantiateClass()
+        } // instantiateClass()
         
     } // CRUD()
 

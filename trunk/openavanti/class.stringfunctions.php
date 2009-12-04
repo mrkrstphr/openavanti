@@ -9,7 +9,7 @@
  * @copyright       Copyright (c) 2007-2009, Kristopher Wilson
  * @license         http://www.openavanti.com/license
  * @link            http://www.openavanti.com
- * @version         1.2.0-beta
+ * @version         1.3.0-beta
  *
  */
  
@@ -22,11 +22,49 @@
      */
     class StringFunctions
     {
+        protected static $_consonants = "bcdfghjklmnpqrstvwxyz";
+        protected static $_vowels = "aeiou";
+
         protected static $_dictionary = array(
-            "person" => "people", "deer" => "deer", "beer" => "beer", 
-            "goose" => "geese", "mouse" => "mice", "content" => "content"
+            "hero" => "heroes", "datum" => "data", "bacterium" => "bacteria", 
+            "criterion" => "criteria", "alumnus" => "alumni", "alumna" => "alumnae", 
+            "person" => "people", "deer" => "deer", "beer" => "beer", "goose" => "geese", 
+            "mouse" => "mice", "content" => "content", "template" => "templates", 
+            "man" => "men", "woman" => "women", "child" => "children", "calf" => "calves", 
+            "elf" => "elves", "half" => "halves", "hoof" => "hooves", "knife" => "knives", 
+            "leaf" => "leaves", "life" => "lives", "loaf" => "loaves",
+            "scarf" => "scarves", "self" => "selves", "sheaf" => "sheaves",
+            "shelf" => "shelves", "thief" => "thieves", "wife" => "wives", "wolf" => "wolves",
+            "fireman" => "firemen","foot" => "feet", "louse" => "lice", "man" => "men",
+            "tooth" => "teeth", "woman" => "women", "ox" => "oxen", "echo" => "echoes",
+            "embargo" => "embargoes", "potato" => "potatoes", "tomato" => "tomatoes",
+            "torpedo" => "torpedoes", "veto" => "vetoes", "cod" => "cod", "deer" => "deer",
+            "fish" => "fish", "offspring" => "offspring", "perch" => "perch",
+            "sheep" => "sheep", "trout" => "trout", "barracks" => "barracks", 
+            "crossroads" => "crossroads", "die" => "dice", "gallows" => "gallows",
+            "headquarters" => "headquarters", "means" => "means", "series" => "series",
+            "species" => "species", "alga" => "algae", "amoeba" => "amoebae",
+            "antenna" => "antennae", "formula" => "formulae", "larva" => "larvae",
+            "nebula" => "nebulae", "vertebra" => "vertebrae", "ialumnus" => "alumni",
+            "bacillus" => "bacilli", "cactus" => "cacti", "focus" => "foci",
+            "fungus" => "fungi", "nucleus" => "nuclei", "octopus" => "octopi",
+            "radius" => "radii", "stimulus" => "stimuli", "syllabus" => "syllabi",
+            "terminus" => "termini", "addendum" => "addenda", "biacterium" => "bacteria",
+            "curriculum" => "curricula", "datum" => "data", "erratum" => "errata",
+            "medium" => "media", "memorandum" => "memoranda", "ovum" => "ova",
+            "stratum" => "strata", "symposium" => "symposia", "apex" => "apices",
+            "appendix" => "appendices", "cervix" => "cervices", "index" => "indices",
+            "matrix" => "matrices", "vortex" => "vortices", "analysis" => "analyses",
+            "axis" => "axes", "basis" => "bases", "crisis" => "crises", "diagnosis" => "diagnoses",
+            "emphasis" => "emphases", "hypothesis" => "hypotheses", "neurosis" => "neuroses",
+            "oasis" => "oases", "parenthesis" => "parentheses", "synopsis" => "synopses",
+            "thesis" => "theses", "criterion" => "criteria", "phenomenon" => "phenomena",
+            "automaton" => "automata", "piano" => "pianos", "homo" => "homos",
+            "pro" => "pros", "calf" => "calves", "knife" => "knives",
+            "swine" => "swine", "bison" => "bison", "aircraft" => "aircraft",
         );
-        
+
+
         /**
          *
          *
@@ -47,7 +85,7 @@
          */
         public static function toSingular($inputString)
         {
-            $dictionary = array_reverse(self::$_dictionary);
+            $dictionary = array_flip(self::$_dictionary);
             
             if(isset($dictionary[strtolower($inputString)]))
             {
@@ -81,16 +119,31 @@
          */
         public static function toPlural($inputString)
         {       
-            if(isset(self::$_dictionary[strtolower($inputString)]))
+            $dictionary = self::$_dictionary;
+            
+            if(isset($dictionary[strtolower($inputString)]))
             {
-                return self::$_dictionary[strtolower($inputString)];
+                return $dictionary[strtolower($inputString)];
             }
         
             if(substr($inputString, strlen($inputString) - 1, 1) == "y")
             {
-                $inputString = substr($inputString, 0, strlen($inputString) - 1 ) . "ies";
+                $beforeTheY = substr($inputString, 0, strlen($inputString) - 2, 1);
+
+                if(str_pos(self::$_vowels, $beforeTheY) !== false)
+                {
+                    $inputString .= "s";
+                }
+                else
+                {
+                    $inputString = substr($inputString, 0, strlen($inputString) - 1 ) . "ies";
+                }
             }
             elseif(substr($inputString, strlen($inputString) - 1, 1) == "x")
+            {
+                $inputString .= "es";
+            }
+            elseif(substr($inputString, strlen($inputString) - 2, 2) == "ch")
             {
                 $inputString .= "es";
             }

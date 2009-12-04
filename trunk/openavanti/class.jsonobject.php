@@ -82,7 +82,7 @@
                 
                 $jsonAttributes .= !is_numeric($key) ? "\t'{$key}': " : "";
                     
-                if(is_string($valu )) 
+                if(is_string($value)) 
                 {
                     $jsonAttributes .= "'" . addslashes($value) . "'";
                 }
@@ -105,7 +105,7 @@
             }
             
             $sJSON = !empty($jsonAttributes) ? 
-                "{$sStartChar}\n{$jsonAttributes}\n{$sEndChar}" : "{}";
+                "{$startChar}\n{$jsonAttributes}\n{$endChar}" : "{}";
             
         
             return $sJSON;
