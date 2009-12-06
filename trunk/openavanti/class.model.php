@@ -24,8 +24,7 @@
      */
     class Model extends CRUD
     {
-        protected $_tableName = "";
-        
+
         /**
          * The Model's constructor - accepts an optional set of data to load into the parent CRUD 
          * object. 

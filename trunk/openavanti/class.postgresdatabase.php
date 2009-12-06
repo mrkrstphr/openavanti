@@ -277,7 +277,7 @@
          * @argument string The name of the database table column with the sequence as a default value
          * @returns integer An integer representation of the current value of the sequence
          */
-        public function serialCurrVal( $tableName, $columnName )
+        public function serialCurrVal($tableName, $columnName)
         {
             $sql = "SELECT
                 CURRVAL(

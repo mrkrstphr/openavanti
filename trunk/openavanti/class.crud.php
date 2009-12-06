@@ -26,14 +26,14 @@
         protected $_profileName = null;
         // specify the database schema to use:
         protected $_schemaName = null;
-        //
+        // the table name for this data element:
         protected $_tableName = null;
         
-        // 
+        // a reference to the database connection:
         protected $_database = null;
-        // 
+        // a reference to the result set for the last query:
         protected $_dataSet = null;
-        // 
+        // the data for the current object:
         protected $_data = array();
         
         
