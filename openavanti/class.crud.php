@@ -755,7 +755,7 @@
                     
                     $whereClause .= empty($whereClause) ? "" : " AND ";
                     $whereClause .= " {$key} = " . intval($this->_data[$related]);
-                    // FIX ME postgresql specific syntax
+                    // FIXME postgresql specific syntax
                 }
                             
                 $this->_data[$name] = $this->instantiateClass($relationship["table"]);
@@ -798,10 +798,17 @@
         public function __set($name, $value)
         {           
             $columns = $this->_database->getTableColumns($this->_tableName);
-        
+
             if(isset($columns[$name]))
             {
-                $this->_data[$name] = $value;
+                if(strpos($columns[$name][ "type" ], "bool" ) !== false)
+                {
+                    $this->_data[$name] = $value == "t" ? true : false;
+                }
+                else
+                {
+                    $this->_data[$name] = $value;
+                }
             }
             else if(!is_null($this->findRelationship($name)))
             {
@@ -1361,16 +1368,14 @@
                     $data = $this->_dataSet->current();
                     
                     // Turn any boolean fields into true booleans, instead of chars:
-                    // FIX ME this has unintended side-effects
-                    /*
+                    
                     foreach($data as $key => $value)
-                    {    
+                    {
                         if(strpos($definition[ "fields" ][$key][ "type" ], "bool" ) !== false)
                         {
                             $data->$key = $value == "t" ? true : false;
                         }
                     } 
-                    */
                     
                     // FIXME PostgreSQL Specific Syntax (boolean handling)
                         
