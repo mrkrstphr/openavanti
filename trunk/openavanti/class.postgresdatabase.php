@@ -1069,7 +1069,7 @@
             
             foreach($columns as $column)
             {
-                if($columnName == $column["field"])
+                if($columnName == $column["name"])
                 {
                     return $column[ "type" ];
                 }
