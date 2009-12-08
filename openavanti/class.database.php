@@ -269,6 +269,13 @@
          */
         abstract public function getLastError();
         
+        
+        /**
+         * 
+         * 
+         */
+        abstract public function getDefaultSchema();
+        
 
         /**
          * The SetCacheDirectory() method stores which directory should be used to load and store 
@@ -316,7 +323,8 @@
         
         /**
          * This method returns all tables for the database the class is currently connected to.
-         *       
+         * 
+         * @argument string Optional; The name of the schema to pull tables for
          * @returns array Returns an array of all tables in the form of table_name => table_name.
          */ 
         abstract public function getTables();
@@ -340,10 +348,11 @@
          * 
          * If schema caching is on, this method can pull data from a schema cache. 
          * 
+         * @argument string The name of the schema that contains the table
          * @argument string The name of the table for the requested schema
          * @returns array An array of schema information for the specified table     
          */     
-        abstract public function getTableDefinition($tableName);
+        abstract public function getTableDefinition($schemaName, $tableName);
         
 
         /**
@@ -353,12 +362,12 @@
          * required again, the database does not have to be consoluted.
          * 
          * If schema caching is on, this method can pull data from a schema cache. 
-         * 
+         *
+         * @argument string The name of the schema that contains the table
          * @argument string The name of the table for the requested columns
          * @returns array An array of columns that belong to the specified table
          */
-        abstract public function getTableColumns($tableName);
-        
+        abstract public function getTableColumns($schemaName, $tableName);
 
         /**
          * Returns an array of columns that belong to the primary key for the specified table.
@@ -368,10 +377,11 @@
          * 
          * If schema caching is on, this method can pull data from a schema cache. 
          * 
+         * @argument string The name of the schema that contains the table
          * @argument string The name of the table for the requested primary key
          * @returns array An array of columns that belong to the primary key for the specified table
          */
-        abstract public function getTablePrimaryKey($tableName);
+        abstract public function getTablePrimaryKey($schemaName, $tableName);
         
 
         /**
@@ -382,29 +392,32 @@
          * 
          * If schema caching is on, this method can pull data from a schema cache.
          * 
+         * @argument string The name of the schema that contains the table
          * @argument string The name of the table for the requested relationships
          * @returns array An array of relationships for the specified table
          */
-        abstract public function getTableForeignKeys($tableName);
+        abstract public function getTableForeignKeys($schemaName, $tableName);
         
 
         /**
          * Returns the data type of the specified column in the specified table.
          * 
+         * @argument string The name of the schema that contains the table
          * @argument string The name of the table that the desired column belongs to
          * @argument string The name of the column that is desired to know the type of
          * @returns string The data type of the column, if one is found, or null.
          */
-        abstract public function getColumnType($tableName, $fieldName);
+        abstract public function getColumnType($schemaName, $tableName, $fieldName);
         
 
         /**
          * Determines whether the specified table exists in the current database.
          * 
+         * @argument string The name of the schema that contains the table
          * @argument string The name of the table to determine existence
          * @returns bool True or false, depending on whether the table exists.                   
          */     
-        abstract public function tableExists($tableName);
+        abstract public function tableExists($schemaName, $tableName);
 
 
     
