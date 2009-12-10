@@ -143,11 +143,15 @@
             {
                 $inputString .= "es";
             }
+            elseif(substr($inputString, strlen($inputString) - 1, 1) == "s")
+            {
+                $inputString .= "es";
+            }
             elseif(substr($inputString, strlen($inputString) - 2, 2) == "ch")
             {
                 $inputString .= "es";
             }
-            else if(substr($inputString, strlen( $inputString) - 1, 1) != "s")
+            else
             {
                 $inputString .= "s";
             }
