@@ -145,7 +145,7 @@
          */
         public function renderPage()
         {
-            if( $this->_renderLayout )
+            if($this->_renderLayout)
             {
                 if(!empty($this->_layout))
                 {
