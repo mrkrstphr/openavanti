@@ -164,6 +164,13 @@
                 return $this->handleError(ErrorHandler::CONTROLLER_NOT_FOUND);
             }
             
+            // If this is an AJAX request, let's be assumptious and disable
+            // the layout:
+            if($this->_request->isAjaxRequest())
+            {
+                $this->_view->disableLayout();
+            }
+            
             // Continue on with the view loader method which will put the appropriate presentation
             // on the screen:
             
