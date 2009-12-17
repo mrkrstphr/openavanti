@@ -12,7 +12,9 @@
  * @version         1.2.0-beta
  *
  */
- 
+
+
+    namespace OpenAvanti\Db;
  
     /**
      * Contains a set of database results, but is database indepenent, and allows the traversing

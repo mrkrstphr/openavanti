@@ -12,6 +12,7 @@
  * @version         1.3.0-beta
  */
  
+    namespace OpenAvanti\Db;
  
     /**
      * Database abstraction layer implementing CRUD procedures

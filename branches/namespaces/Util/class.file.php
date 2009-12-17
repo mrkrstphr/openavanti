@@ -12,6 +12,8 @@
  * @version         1.2.0-beta
  *
  */
+
+    namespace OpenAvanti\Util;
  
     /**
      * A library for manipulating files, directories and paths
@@ -20,7 +22,7 @@
      * @author      Kristopher Wilson
      * @link        http://www.openavanti.com/docs/filefunctions
      */
-    class FileFunctions
+    class File
     {
 
         /**
@@ -324,6 +326,6 @@
             
         } // MoveRecursively()
 
-    } // FileFunctions()
+    } // File()
 
 ?>

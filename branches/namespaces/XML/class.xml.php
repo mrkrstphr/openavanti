@@ -13,6 +13,7 @@
  *
  */
  
+    namespace OpenAvanti\XML;
  
     /**
      * A library for manipulating XML objects and/or strings
@@ -21,7 +22,7 @@
      * @author      Kristopher Wilson
      * @link        http://www.openavanti.com/docs/xmlfunctions
      */
-    class XMLFunctions
+    class XML
     {
         
         /**
@@ -62,6 +63,6 @@
         } // prettyPrint()
     
     
-    } // XMLFunctions()
+    } // XML()
 
 ?>

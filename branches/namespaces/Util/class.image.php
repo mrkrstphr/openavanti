@@ -13,6 +13,7 @@
  *
  */
  
+    namespace OpenAvanti\Util;
  
     /**
      * A library for manipulating images
@@ -21,7 +22,7 @@
      * @author      Kristopher Wilson
      * @link            http://www.openavanti.com/docs/imagefunctions
      */
-    class ImageFunctions
+    class Image
     {
         
         /**
@@ -139,6 +140,6 @@
         } // generateThumb()
         
         
-    } // ImageFunctions()
+    } // Image()
 
 ?>

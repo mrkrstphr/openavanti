@@ -12,6 +12,7 @@
  *
  */
 
+    namespace OpenAvanti\Db;
 
     /**
      * Database interaction abstract class definition

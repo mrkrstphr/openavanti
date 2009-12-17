@@ -14,6 +14,8 @@
  */
 
 
+    namespace OpenAvanti\Db;
+
     /**
      * Database Interaction Class (PostgreSQL)
      *

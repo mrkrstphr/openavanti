@@ -13,6 +13,8 @@
  *
  */
 
+    namespace OpenAvanti\Db;
+    
     /**
      * The model class of the MVC architecture. Extends the CRUD database abstraction layer
      * to enhance it. This class should not be used directly. It should be extended with methods

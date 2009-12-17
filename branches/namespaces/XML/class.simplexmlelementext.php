@@ -13,6 +13,7 @@
  *
  */
  
+    namespace OpenAvanti\XML;
  
     /**
      * This class extends the SimpleXMLElement class in PHP and adds a few extra methods to aid

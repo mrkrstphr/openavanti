@@ -13,6 +13,7 @@
  *
  */
  
+    namespace OpenAvanti\Util;
  
     /**
      * A simple timer for various purposes

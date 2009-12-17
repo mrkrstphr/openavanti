@@ -12,6 +12,8 @@
  * 
  */
  
+    namespace OpenAvanti\Util;
+    
     /**
      * Simple object to aid in creating CSV documents
      *

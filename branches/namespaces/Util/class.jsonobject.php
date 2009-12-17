@@ -13,6 +13,8 @@
  *
  */
  
+    namespace OpenAvanti\Util;
+    
     /**
      * Based on properties added, this class is responsible for building a list of elements,
      * and then generating a JSON string from those elements. This is more powerful than
