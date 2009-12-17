@@ -8,8 +8,8 @@
  * @dependencies    SimpleXML
  * @copyright       Copyright (c) 2008, Kristopher Wilson
  * @license         http://www.openavanti.com/license
- * @link                http://www.openavanti.com
- * @version         0.6.4-alpha
+ * @link            http://www.openavanti.com
+ * @version         1.3.0-beta
  *
  */
  
@@ -32,12 +32,12 @@
          * @argument SimpleXMLElement The node to add as a child of this node
          * @returns void
          */
-        public function addChildNode( SimpleXMLElement $oChild ) 
+        public function addChildNode(SimpleXMLElement $child) 
         {
-            $oParentDOM = dom_import_simplexml( $this );
-            $oChildDOM = dom_import_simplexml( $oChild );
-            $oNewParentDOM = $oParentDOM->ownerDocument->importNode( $oChildDOM, true );
-            $oParentDOM->appendChild( $oNewParentDOM );
+            $parentDom = dom_import_simplexml($this);
+            $childDom = dom_import_simplexml($child);
+            $newParentDom = $parentDom->ownerDocument->importNode($childDom, true);
+            $parentDom->appendChild($newParentDom);
         
         } // addChildNode()
     
@@ -49,100 +49,143 @@
          */
         public function cloneNode()
         {
-            $oDomNode = dom_import_simplexml( $this );
-            $oNewNode = $oDomNode->cloneNode( true );
+            $domNode = dom_import_simplexml($this);
+            $newNode = $domNode->cloneNode(true);
             
-            return( simplexml_import_dom( $oNewNode, "SimpleXMLElementExt" ) );         
+            return simplexml_import_dom($newNode, "SimpleXMLElementExt"));         
             
         } // cloneNode()
         
         
-        public function removeChild( $oChild )
+        /**
+         * Removes a child from the DOM specified by $child
+         *
+         * @argument SimpleXMLElement
+         */
+        public function removeChild($child)
         {
-            $oParentDOM = dom_import_simplexml( $this );
-            $oChildDOM = dom_import_simplexml( $oChild );
+            $parentDom = dom_import_simplexml($this);
+            $childDom = dom_import_simplexml($child);
             
-            $oParentDOM->removeChild( $oChildDOM );
+            $parentDom->removeChild($childDom);
             
         } // removeChild()
         
         
-        public function removeAttributeNS( $sNS, $sAttribute )
+        /**
+         *
+         *
+         */
+        public function removeAttributeNS($ns, $attribute)
         {
-            $oDOM = dom_import_simplexml( $this );
+            $dom = dom_import_simplexml($this);
             
-            $oDOM->removeAttributeNS( $sNS, $sAttribute );
+            $dom->removeAttributeNS($ns, $attribute);
             
         } // removeAttributeNS()
         
         
-        public function removeAttribute( $sAttribute )
+        /**
+         * Removes an attribute from the node
+         *
+         * @argument string The attribute to remove from the node
+         * @returns void
+         */
+        public function removeAttribute($attribute)
         {
-            $oDOM = dom_import_simplexml( $this );
+            $dom = dom_import_simplexml($this);
             
-            $oDOM->removeAttribute( $sAttribute );
+            $dom->removeAttribute($attribute);
             
         } // removeAttribute()
         
         
-        public function addAttributeNS( $sNS, $sAttribute, $sValue )
+        /**
+         * Adds a namespaced attribute to an XML node
+         * 
+         * @argument string The name of the namespace to add the attribute to
+         * @argument string The name of the attribute to add to the node
+         * @argument string The value of the attribute to add to the node
+         * @returns void
+         */
+        public function addAttributeNS($ns, $attribute, $value)
         {
-            $oDOM = dom_import_simplexml( $this );
+            $dom = dom_import_simplexml($this);
             
-            $oDOM->setAttributeNS( $sNS, $sAttribute, $sValue );
+            $dom->setAttributeNS($ns, $attribute, $value);
             
         } // removeAttributeNS()
         
         
-        public function insertBefore( $oNewNode, $oRefNode )
+        /**
+         * Inserts a node before a specified node, making them siblings.
+         *
+         * @argument SimpleXMLElement The new node to insert
+         * @argument SimpleXMLElement The sibling node to insert before
+         * @returns void
+         */
+        public function insertBefore(SimpleXmlElement $newNode, SimpleXMLElement $refNode)
         {
-            $oDOM = dom_import_simplexml( $this );
+            $dom = dom_import_simplexml($this);
             
-            $oNewNodeDOM = dom_import_simplexml( $oNewNode );
-            $oRefNodeDOM = dom_import_simplexml( $oRefNode );            
+            $newNodeDom = dom_import_simplexml($newNode);
+            $refNodeDom = dom_import_simplexml($refNode);            
             
-            $oNewNodeDOM = $oDOM->ownerDocument->importNode( $oNewNodeDOM, true );
+            $newNodeDom = $dom->ownerDocument->importNode($newNodeDom, true);
             
-            $oDOM->insertBefore( $oNewNodeDOM, $oRefNodeDOM );
+            $dom->insertBefore($newNodeDom, $refNodeDom);
             
         } // insertBefore()
         
         
-        public function insertAfter( $oNewNode, $oRefNode )
+        /**
+         * Inserts a node after a specified node, making them siblings.
+         *
+         * @argument SimpleXMLElement The new node to insert
+         * @argument SimpleXMLElement The sibling node to insert after
+         * @returns void
+         */
+        public function insertAfter(SimpleXMLElement $newNode, SimpleXMLElement $refNode)
         {
-            $oDOM = dom_import_simplexml( $this );
+            $dom = dom_import_simplexml($this);
             
-            $oNewNodeDOM = dom_import_simplexml( $oNewNode );
-            $oRefNodeDOM = dom_import_simplexml( $oRefNode );
+            $newNodeDom = dom_import_simplexml($newNode);
+            $refNodeDom = dom_import_simplexml($refNode);
             
-            $oNewNodeDOM = $oDOM->ownerDocument->importNode( $oNewNodeDOM, true );
+            $newNodeDom = $dom->ownerDocument->importNode($newNodeDom, true);
             
-            $oDOM->insertBefore( $oNewNodeDOM, $oRefNodeDOM->nextSibling );
+            $dom->insertBefore($newNodeDOM, $refNodeDOM->nextSibling);
             
         } // insertAfter()
         
         
+        /**
+         * Returns whether this dom node has children.
+         *
+         * @returns bool True if this node has children, false otherwise
+         */
         public function hasChildNodes()
         {
-            $oDOM = dom_import_simplexml( $this );
+            $dom = dom_import_simplexml($this);
             
-            return( $oDOM->hasChildNodes() );
-        }
+            return $dom->hasChildNodes();
+        
+        } // hasChildNodes()
         
         
+        /**
+         * Returns the parent of this SimpleXMLElement
+         *
+         * @returns SimpleXMLElement
+         */
         public function getParent()
         {
-            $oParent = current( $this->xpath( ".." ) );
+            $parent = current($this->xpath(".."));
             
-            return( $oParent );
-            
-        }
+            return $parent;
         
-        
-        
-        
-        
+        } // getParent()
 
-    }; // SimpleXMLElementExt()
+    } // SimpleXMLElementExt()
 
 ?>

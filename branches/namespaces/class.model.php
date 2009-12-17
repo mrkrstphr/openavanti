@@ -9,7 +9,7 @@
  * @copyright       Copyright (c) 2008, Kristopher Wilson
  * @license         http://www.openavanti.com/license
  * @link            http://www.openavanti.com
- * @version         0.6.7-beta
+ * @version         1.2.0-beta
  *
  */
 
@@ -24,30 +24,35 @@
      */
     class Model extends CRUD
     {
-    
+
         /**
-         * The Model's constructor - accepts the name of the table and an optional set of data
-         * to load into the parent CRUD object. Invokes CRUD::__construct() and passes these two
-         * parameters along.
+         * The Model's constructor - accepts an optional set of data to load into the parent CRUD 
+         * object. 
          * 
-         * @argument string The name of the table to work on
-         * @argument mixed An array or object of data to load into the CRUD object                                       
+         * @argument array|object|int Either an array or object of data to load into the Model, or
+         *      an integer value for the primary key to load from the database.                                       
          */
-        public function __construct( $sTableName, $oData = null )
+        public final function __construct($data = null)
         {
-            if( is_array( $oData ) || is_object( $oData ) )
+            if(empty($this->_tableName))
             {
-                parent::__construct( $sTableName, $oData );
+                $className = strtolower(get_class($this));
+                $this->_tableName = StringFunctions::toPlural($className);
             }
-            else if( is_numeric( $oData ) && strval( intval( $oData ) ) == strval( $oData ) )
+
+            if(is_array($data) || is_object($data))
             {
-                parent::__construct( $sTableName );
+                parent::__construct($this->_tableName, $data);
+            }
+            else if(is_numeric($data) && strval(intval($data)) == strval($data))
+            {
+                parent::__construct($this->_tableName);
                 
-                $this->Find( (int)$oData );
+                $this->find((int)$data);
             }
             else
             {
-                parent::__construct( $sTableName );
+                parent::__construct($this->_tableName);
             }
             
         } // __construct()
@@ -68,11 +73,11 @@
          *
          * @returns bool True if the object can be saved, false if not
          */ 
-        public function Save( $bSkipValidation = false )
+        public function Save()
         {       
             $bUpdate = parent::RecordExists();
         
-            if( $bUpdate && !$bSkipValidation )
+            if( $bUpdate )
             {
                 if( !$this->ValidateUpdate() ||
                      !$this->Validate() ||
@@ -82,7 +87,7 @@
                     return( false );
                 }
             }
-            else if( !$bSkipValidation )
+            else
             {
                 if( !$this->ValidateInsert() ||
                      !$this->Validate() ||
@@ -98,7 +103,7 @@
                 return( false );
             }
         
-            if( $bUpdate && !$bSkipValidation )
+            if( $bUpdate )
             {
                 if( !$this->OnAfterUpdate() || 
                      !$this->OnAfterSave() )
@@ -106,7 +111,7 @@
                     return( false );
                 }
             }
-            else if( !$bSkipValidation )
+            else
             {
                 if( !$this->OnAfterInsert() || 
                      !$this->OnAfterSave() )
@@ -127,11 +132,11 @@
          *       
          * @returns bool True if the object can be saved, false if not
          */ 
-        public function SaveAll( $bSkipValidation )
+        public function SaveAll()
         {       
             $bUpdate = parent::RecordExists();
         
-            if( $bUpdate && !$bSkipValidation )
+            if( $bUpdate )
             {
                 if( !$this->ValidateUpdate() ||
                     !$this->Validate() ||
@@ -141,7 +146,7 @@
                     return( false );
                 }
             }
-            else if( !$bSkipValidation )
+            else
             {
                 if( !$this->ValidateInsert() ||
                     !$this->Validate() || 
@@ -157,7 +162,7 @@
                 return( false );
             }
         
-            if( $bUpdate && !$bSkipValidation )
+            if( $bUpdate )
             {
                 if( !$this->OnAfterUpdate() || 
                      !$this->OnAfterSave() )
@@ -165,7 +170,7 @@
                     return( false );
                 }
             }
-            else if( !$bSkipValidation )
+            else
             {
                 if( !$this->OnAfterInsert() || 
                      !$this->OnAfterSave() )

@@ -9,7 +9,7 @@
  * @copyright       Copyright (c) 2008, Kristopher Wilson
  * @license         http://www.openavanti.com/license
  * @link            http://www.openavanti.com
- * @version         0.6.7-beta
+ * @version         1.2.0-beta
  *
  */
  
@@ -30,13 +30,13 @@
          * @argument string The name of the file
          * @returns string The extension of the supplied file
          */
-        public static function GetFileExtension( $sFilename )
+        public static function getFileExtension( $fileName )
         {
-            $sExt = substr( $sFilename, strrpos( $sFilename, "." ) + 1 );
+            $fileExtension = substr($fileName, strrpos($fileName, ".") + 1);
                                                
-            return( $sExt );
+            return $fileExtension;
 
-        } // GetFileExtension()
+        } // getFileExtension()
         
         
         /**
@@ -46,26 +46,26 @@
          * @argument string The name of the file
          * @returns string The base name of the file without path or extension
          */
-        public static function GetFileBaseName( $sFileName )
+        public static function getFileBaseName($fileName)
         {
-            $iLastSlash = strrpos( $sFileName, "/" );
+            $lastSlashPos = strrpos($fileName, "/");
 
-            if( $iLastSlash !== false )
+            if($lastSlashPos !== false)
             {
-                $sFileName = substr( $sFileName, $iLastSlash + 1 );
+                $fileName = substr($fileName, $lastSlashPos + 1);
             }
             
-            $iLastPeriod = strrpos( $sFileName, "." );
+            $lastPeriodPos = strrpos($fileName, ".");
             
-            if( $iLastPeriod !== false )
+            if($lastPeriodPos !== false)
             {
-                $sFileName = substr( $sFileName, 0, $iLastPeriod );
+                $fileName = substr($fileName, 0, $lastPeriodPos);
             }
             
             
-            return( $sFileName );
+            return $fileName;
         
-        } // GetFileBaseName()
+        } // getFileBaseName()
         
         
         /**
@@ -76,24 +76,24 @@
          * @argument string The name of the file
          * @returns string The mime type of the supplied file
          */
-        public static function GetMimeType( $sFileName )
+        public static function getMimeType($fileName)
         {
-            if( !function_exists( "finfo_open" ) )
+            if(!function_exists("finfo_open"))
             {
-                return( null );
+                return null;
             }
             
-            $rFinfo = new finfo( FILEINFO_MIME );
+            $fileResource = new finfo(FILEINFO_MIME);
 
-            $sMimeType = $rFinfo->file( $sFileName );
+            $mimeType = $fileResource->file($fileName);
             
             // Strip off the charset, if one is appended. Return everything before a semicolon
-            $aMimeType = explode( ";", $sMimeType );
-            $sMimeType = $aMimeType[ 0 ];
+            $mimeTypeParts = explode(";", $mimeType);
+            $mimeType = $mimeTypeParts[0];
             
-            return( $sMimeType );
+            return $mimeType;
         
-        } // GetMimeType()
+        } // getMimeType()
         
         
         /**
@@ -103,15 +103,15 @@
          * @argument string The base file name to use as an example
          * @returns string The file name created from microtime
          */
-        public static function CreateFileNameFromTime( $sBase )
+        public static function createFileNameFromTime($baseName)
         {
-            $sExt = self::GetFileExtension( $sBase );
+            $fileExtension = self::getFileExtension($baseName);
             
-            $sFileName = microtime( true ) . "." . $sExt;
+            $fileName = microtime(true) . "." . $fileExtension;
         
-            return( $sFileName );
+            return $fileName;
         
-        } // CreateFileNameFromTime()
+        } // createFileNameFromTime()
         
         
         /**
@@ -121,15 +121,16 @@
          * @argument string 
          * @returns string The name of the randomly generated file name
          */                                   
-        public static function CreateRandomFileNameFromString( $sBase, $sString )
+        public static function createRandomFileNameFromString($basename, $inputString)
         {
-            $sExt = self::GetFileExtension( $sBase );
+            $fileExtension = self::GetFileExtension($basename);
             
-            $sFileName = substr( md5( microtime( true ) . $sString ), 18, 10 ) . "." . $sExt;
+            $fileName = substr(md5(microtime(true) . $inputString), 18, 10 ) . 
+                "." . $fileExtension;
         
-            return( $sFileName );
+            return $fileName;
             
-        } // CreateRandomFileNameFromString()
+        } // createRandomFileNameFromString()
         
         
         public static function CreateRandomFileNameFromString( $sBase, $sString )
@@ -153,20 +154,20 @@
          * @argument string The path to the directory to store the new file
          * @returns string The unique name of the file without the path.
          */
-        public static function HandleUploadedFile( $sTmpFile, $sUploadName, $sDirectory )
+        public static function handleUploadedFile($tmpFile, $uploadName, $directoryName)
         {
-            $sExt = self::GetFileExtension( $sUploadName );
+            $fileExtension = self::GetFileExtension($uploadName);
             
-            $sFileName = microtime( true ) . "." . $sExt;
+            $fileName = microtime(true) . "." . $fileExtension;
             
-            if( !copy( $sTmpFile, $sDirectory . "/" . $sFileName ) )
+            if(!copy($tmpFile, $directoryName . "/" . $fileName))
             {
-                return( false );
+                return false;
             }
             
-            return( $sFileName );
+            return $fileName;
         
-        } // HandleUploadedFile()
+        } // handleUploadedFile()
                                                                                     
 
         /**

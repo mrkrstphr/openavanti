@@ -9,7 +9,7 @@
  * @copyright       Copyright (c) 2008, Kristopher Wilson
  * @license         http://www.openavanti.com/license
  * @link            http://www.openavanti.com
- * @version         0.6.7-beta
+ * @version         1.2.0-beta
  *
  */
  
@@ -45,23 +45,23 @@
          * @argument string The XML string to format
          * @returns string A properly indented, pretty version of the passed XML
          */
-        public static function PrettyPrint( $sXML )
+        public static function prettyPrint($xml)
         {
-            if( !class_exists( "DOMDocument" ) )
+            if(!class_exists("DOMDocument"))
             {
-                throw new ExtensionNotInstalledException( "Class DomDocument does not exist" );
+                throw new ExtensionNotInstalledException("Class DomDocument does not exist");
             }
         
-            $oDOM = new DOMDocument( "1.0" );
-            $oDOM->formatOutput = true;
+            $dom = new DOMDocument("1.0");
+            $dom->formatOutput = true;
             
-            $oDOM->loadXML( $sXML );
+            $dom->loadXML($xml);
             
-            return( $oDOM->saveXML() );
+            return $dom->saveXML();
             
-        } // PrettyPrint()
+        } // prettyPrint()
     
     
-    }; // XMLFunctions()
+    } // XMLFunctions()
 
 ?>

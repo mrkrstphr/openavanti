@@ -8,7 +8,7 @@
  * @copyright       Copyright (c) 2008, Kristopher Wilson
  * @license         http://www.openavanti.com/license
  * @link            http://www.openavanti.com
- * @version         0.6.7-beta
+ * @version         1.2.0-beta
  *
  */
  
@@ -22,11 +22,11 @@
      */
     class Cache
     {
-        private $sFileName = null;
-        private $iCreatedTimestamp = null;
-        private $iModifiedTimestamp = null;
+        private $_fileName = null;
+        private $_createdStamp = null;
+        private $_modifiedStamp = null;
         
-        private $sCacheFile = null;
+        private $_cacheFile = null;
         
         
         /**
@@ -34,11 +34,11 @@
          * 
          * @argument string The absolute path to the cache file to load              
          */
-        public function __construct( $sCacheFileName = null )
+        public function __construct($cacheFileName = null)
         {
-            if( !is_null( $sCacheFileName ) )
+            if(!is_null($cacheFileName))
             {
-                $this->Open( $sCacheFileName );
+                $this->open($cacheFileName);
             }
             
         } // __construct()  
@@ -51,11 +51,11 @@
          * @argument string The absolute path to the cache file we're checking the existence of
          * @returns boolean True if the file exists, false if not
          */
-        public static function Exists( $sCacheFileName )
+        public static function exists($cacheFileName)
         {
-            return( file_exists( $sCacheFileName ) );
+            return(file_exists($cacheFileName));
             
-        } // Exists()
+        } // exists()
         
         
         /**
@@ -67,22 +67,22 @@
          * @returns string The contents of the cache file
          * @throws FileNotFoundException         
          */
-        public function Open( $sCacheFileName )
+        public function open($cacheFileName)
         {
-            if( !file_exists( $sCacheFileName ) )
+            if(!file_exists($cacheFileName))
             {
-                throw new FileNotFoundException( "Cache file {$sCacheFileName} does not exist" );
+                throw new FileNotFoundException("Cache file {$cacheFileName} does not exist");
             }
             
-            $this->sFileName = $sCacheFileName;
+            $this->_fileName = $cacheFileName;
             
-            $this->sCacheFile = file_get_contents( $sCacheFileName );
-            $this->iCreatedTimestamp = filectime( $sCacheFileName );
-            $this->iModifiedTimestamp = filemtime( $sCacheFileName );
+            $this->_cacheFile = file_get_contents($cacheFileName);
+            $this->_createdStamp = filectime($cacheFileName);
+            $this->_modifiedStamp = filemtime($cacheFileName);
             
-            return( $this->sCacheFile );
+            return( $this->_cacheFile );
         
-        } // Open()
+        } // open()
         
         
         /**
@@ -99,27 +99,27 @@
          * @throws FileNotFoundException
          * @throws Exception                 
          */
-        public function Save( $sCacheFileName, $sCacheContents )
+        public function save($cacheFile, $cacheContents)
         {
-            $sDirectory = dirname( $sCacheFileName );
+            $directoryName = dirname($cacheFile);
             
-            if( !file_exists( $sDirectory ) )
+            if(!file_exists($directoryName))
             {
-                throw new FileNotFoundException( "Directory path {$sDirectory} does not exist" );
+                throw new FileNotFoundException("Directory path {$directoryName} does not exist");
             }
             
-            if( @file_put_contents( $sCacheFileName, $sCacheContents ) === false )
+            if(@file_put_contents($cacheFile, $cacheContents) === false)
             {
-                throw new Exception( "Failed to write to file {$sCacheFileName}" );
+                throw new Exception("Failed to write to file {$cacheFile}");
             }
         
-            $this->sFileName = $sCacheFileName;
+            $this->_fileName = $cacheFile;
             
-            $this->sCacheFile = $sCacheContents;
-            $this->iCreatedTimestamp = filectime( $sCacheFileName );
-            $this->iModifiedTimestamp = filemtime( $sCacheFileName );
+            $this->_cacheFile = $cacheContents;
+            $this->_createdStamp = filectime($cacheFile);
+            $this->_modifiedStamp = filemtime($cacheFile);
             
-        } // Create()       
+        } // save()       
     
     
         /**
@@ -128,15 +128,15 @@
          *   
          * @returns void
          */
-        public function Close()
+        public function close()
         {
-            $this->sFileName = null;
+            $this->_fileName = null;
             
-            $this->sCacheFile = null;
-            $this->iCreatedTimestamp = null;
-            $this->iModifiedTimestamp = null;
+            $this->_cacheFile = null;
+            $this->_createdStamp = null;
+            $this->_modifiedStamp = null;
             
-        } // Close()
+        } // close()
     
     
         /**
@@ -144,11 +144,11 @@
          *   
          * @returns integer The timestamp for when the current file was created
          */
-        public function GetCreatedTime()
+        public function getCreatedTime()
         {
-            return( $this->iCreatedTimestamp );
+            return $this->_createdStamp;
         
-        } // GetCreatedTime()
+        } // getCreatedTime()
         
         
         /**
@@ -156,11 +156,11 @@
          *   
          * @returns integer The timestamp for when the current file was last modified
          */
-        public function GetModifiedTime()
+        public function getModifiedTime()
         {
-            return( $this->iModifiedTimestamp );
+            return $this->_modifiedStamp;
         
-        } // GetModifiedTime()
+        } // getModifiedTime()
         
         
         /**
@@ -170,7 +170,7 @@
          */
         public function __toString()
         {
-            return( $this->sCacheFile );
+            return $this->_cacheFile;
             
         } // __toString()
         

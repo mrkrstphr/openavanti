@@ -8,7 +8,7 @@
  * @copyright       Copyright (c) 2008, Kristopher Wilson
  * @license         http://www.openavanti.com/license
  * @link            http://www.openavanti.com
- * @version         0.6.7-beta
+ * @version         1.2.0-beta
  *
  */
  
@@ -63,7 +63,7 @@
          * @argument integer The number of pagination links shown at a given time
          * @returns array An array of pagination data            
          */
-        public static function Generate( $sLink, $iStart, $iPerPage, $iTotalResults, $iLinksShown )
+        public static function generate($sLink, $iStart, $iPerPage, $iTotalResults, $iLinksShown)
         {
             $aData = array();
             
@@ -152,9 +152,9 @@
                 );
             }
 
-            return( $aData );
+            return $aData;
 
-        } // Generate()
+        } // generate()
 
 
     } // Pagination()

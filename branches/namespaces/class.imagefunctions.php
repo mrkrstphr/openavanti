@@ -8,8 +8,8 @@
  * @dependencies    FileFunctions
  * @copyright       Copyright (c) 2008, Kristopher Wilson
  * @license         http://www.openavanti.com/license
- * @link                http://www.openavanti.com
- * @version         0.6.4-alpha
+ * @link            http://www.openavanti.com
+ * @version         1.2.0-beta
  *
  */
  
@@ -23,7 +23,18 @@
      */
     class ImageFunctions
     {
-    
+        
+        /**
+         *
+         *
+         */                     
+        private function __construct()
+        {
+            // this class cannot be instantiated
+            
+        } // __construct()
+        
+        
         /**
          * This method creates a thumbnail image of the supplied image, assuming it exists,
          * based on the supplied width and height. The generated thumbnail will not be
@@ -41,91 +52,91 @@
          * @argument array An array of width and height to limit the image to 0 => x, 1 => y
          * @returns bool True if the thumbnail is created, false otherwise
          */
-        public static function GenerateThumb( $sFileName, $sThumbName, $aSize )
+        public static function generateThumb($fileName, $thumbName, $maxDimensions)
         {
-            $iMaxWidth = $aSize[ 0 ];
-            $iMaxHeight = $aSize[ 1 ];
+            $maximumWidth = $maxDimensions[0];
+            $maximumHeight = $maxDimensions[1];
             
-            $sExtension = FileFunctions::GetFileExtension( $sFileName );
+            $fileExtension = FileFunctions::GetFileExtension($fileName);
             
-            if( !file_exists( $sFileName ) )
+            if(!file_exists($fileName))
             {   
-                return( false );
+                return false;
             }
         
-            $rImage = null;
+            $imageResource = null;
             
-            switch( strtolower( $sExtension ) )
+            switch(strtolower($fileExtension))
             {
                 case "jpg":
                 case "jpeg":
-                    $rImage = imagecreatefromjpeg( $sFileName );
+                    $imageResource = imagecreatefromjpeg($fileName);
                 break;
                 
                 case "gif":
-                    $rImage = imagecreatefromgif( $sFileName );
+                    $imageResource = imagecreatefromgif($fileName);
                 break;
                 
                 case "png":
-                    $rImage = imagecreatefrompng( $sFileName );
+                    $imageResource = imagecreatefrompng($fileName);
                 break;
                 
                 default:
-                    throw new Exception( "Invalid image type: {$sExtension}" );
+                    throw new Exception("Invalid image type: {$fileExtension}");
             }
         
-            $aImage = getimagesize( $sFileName );
+            $imageDetails = getimagesize($fileName);
         
-            list( $iWidth, $iHeight, $sType, $sAttr ) = $aImage;
+            list($imageWidth, $imageHeight, $sType, $sAttr) = $imageDetails;
         
-            $fXRatio = $iMaxWidth / $iWidth;
-            $fYRatio = $iMaxHeight / $iHeight;
+            $xRatio = $maximumWidth / $imageWidth;
+            $yRatio = $maximumHeight / $imageHeight;
 
 
-           if( ( $iWidth <= $iMaxWidth ) && ( $iHeight <= $iMaxHeight ) )
+           if(($imageWidth <= $maximumWidth) && ($imageHeight <= $maximumHeight))
            {
-              $iNewWidth = $iWidth;
-              $iNewHeight = $iHeight;
+              $newWidth = $imageWidth;
+              $newHeight = $imageHeight;
            }
-           else if( ( $fXRatio * $iHeight ) < $iMaxHeight )
+           else if(($xRatio * $imageHeight ) < $maximumHeight)
            {
-              $iNewHeight = ceil( $fXRatio * $iHeight );
-              $iNewWidth = $iMaxWidth;
+              $newHeight = ceil($xRatio * $imageHeight);
+              $newWidth = $maximumWidth;
            }
            else
            {
-              $iNewWidth = ceil( $fYRatio * $iWidth );
-              $iNewHeight = $iMaxHeight;
+              $newWidth = ceil($yRatio * $imageWidth);
+              $newHeight = $maximumHeight;
            }
 
-            $rImgThumb = imagecreatetruecolor( $iNewWidth, $iNewHeight );
+            $thumbResource = imagecreatetruecolor( $newWidth, $newHeight );
 
-            imagecopyresampled( $rImgThumb, $rImage, 0, 0, 0, 0, $iNewWidth,
-                $iNewHeight, imagesx( $rImage ), imagesy( $rImage ) );
+            imagecopyresampled( $thumbResource, $imageResource, 0, 0, 0, 0, $newWidth,
+                $newHeight, imagesx( $imageResource ), imagesy( $imageResource ) );
 
-            switch( strtolower( $sExtension ) )
+            switch(strtolower($fileExtension))
             {
                 case "jpg":
                 case "jpeg":
-                    imagejpeg( $rImgThumb, $sThumbName );
+                    imagejpeg($thumbResource, $thumbName);
                 break;
                 
                 case "gif":
-                    imagegif( $rImgThumb, $sThumbName );
+                    imagegif($thumbResource, $thumbName);
                 break;
                 
                 case "png":
-                    imagepng( $rImgThumb, $sThumbName );
+                    imagepng($thumbResource, $thumbName);
                 break;
             }
         
-            imagedestroy( $rImgThumb );
-            imagedestroy( $rImage );
+            imagedestroy($thumbResource);
+            imagedestroy($imageResource);
             
             
-            return( true );         
+            return true;         
             
-        } // GenerateThumb()
+        } // generateThumb()
         
         
     } // ImageFunctions()

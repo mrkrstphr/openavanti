@@ -8,7 +8,7 @@
  * @copyright       Copyright (c) 2008, Kristopher Wilson
  * @license         http://www.openavanti.com/license
  * @link            http://www.openavanti.com
- * @version         0.6.7-beta
+ * @version         1.2.0-beta
  *
  */
 
@@ -22,7 +22,7 @@
      */
     class Debug
     {
-        private static $cCallback = null;
+        private static $_callback = null;
         
         /**
          * Sets the callback function for debug logs.
@@ -30,11 +30,11 @@
          * @argument callback The callback function to invoke when logging debug statements      
          * @returns void
          */
-        public static function SetDebugHandler( $cCallback )
+        public static function setDebugHandler($callback)
         {
-            self::$cCallback = $cCallback;
+            self::$_callback = $callback;
             
-        } // SetDebugHandler()
+        } // setDebugHandler()
         
         
         /**
@@ -44,17 +44,17 @@
          * @argument string The debug message to send to the callback function       
          * @returns void
          */
-        public static function Log( $sMessage )
+        public static function log($message)
         {
-            if( !is_null( self::$cCallback ) )
+            if(!is_null(self::$_callback))
             {
-                if( is_callable( self::$cCallback ) )
+                if(is_callable(self::$_callback))
                 {                   
-                    call_user_func( self::$cCallback, $sMessage );
+                    call_user_func(self::$_callback, $message);
                 }
             }
                 
-        } // Log()
+        } // log()
     
     } // Debug()
 

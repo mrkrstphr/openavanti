@@ -9,7 +9,7 @@
  * @copyright       Copyright (c) 2008, Kristopher Wilson
  * @license         http://www.openavanti.com/license
  * @link            http://www.openavanti.com
- * @version         0.6.7-beta
+ * @version         1.3.0-beta
  *
  */
  
@@ -22,6 +22,59 @@
      */
     class StringFunctions
     {
+        protected static $_consonants = "bcdfghjklmnpqrstvwxyz";
+        protected static $_vowels = "aeiou";
+
+        protected static $_dictionary = array(
+            "hero" => "heroes", "datum" => "data", "bacterium" => "bacteria", 
+            "criterion" => "criteria", "alumnus" => "alumni", "alumna" => "alumnae", 
+            "person" => "people", "deer" => "deer", "beer" => "beer", "goose" => "geese", 
+            "mouse" => "mice", "content" => "content", "template" => "templates", 
+            "man" => "men", "woman" => "women", "child" => "children", "calf" => "calves", 
+            "elf" => "elves", "half" => "halves", "hoof" => "hooves", "knife" => "knives", 
+            "leaf" => "leaves", "life" => "lives", "loaf" => "loaves",
+            "scarf" => "scarves", "self" => "selves", "sheaf" => "sheaves",
+            "shelf" => "shelves", "thief" => "thieves", "wife" => "wives", "wolf" => "wolves",
+            "fireman" => "firemen","foot" => "feet", "louse" => "lice", "man" => "men",
+            "tooth" => "teeth", "woman" => "women", "ox" => "oxen", "echo" => "echoes",
+            "embargo" => "embargoes", "potato" => "potatoes", "tomato" => "tomatoes",
+            "torpedo" => "torpedoes", "veto" => "vetoes", "cod" => "cod", "deer" => "deer",
+            "fish" => "fish", "offspring" => "offspring", "perch" => "perch",
+            "sheep" => "sheep", "trout" => "trout", "barracks" => "barracks", 
+            "crossroads" => "crossroads", "die" => "dice", "gallows" => "gallows",
+            "headquarters" => "headquarters", "means" => "means", "series" => "series",
+            "species" => "species", "alga" => "algae", "amoeba" => "amoebae",
+            "antenna" => "antennae", "formula" => "formulae", "larva" => "larvae",
+            "nebula" => "nebulae", "vertebra" => "vertebrae", "ialumnus" => "alumni",
+            "bacillus" => "bacilli", "cactus" => "cacti", "focus" => "foci",
+            "fungus" => "fungi", "nucleus" => "nuclei", "octopus" => "octopi",
+            "radius" => "radii", "stimulus" => "stimuli", "syllabus" => "syllabi",
+            "terminus" => "termini", "addendum" => "addenda", "biacterium" => "bacteria",
+            "curriculum" => "curricula", "datum" => "data", "erratum" => "errata",
+            "medium" => "media", "memorandum" => "memoranda", "ovum" => "ova",
+            "stratum" => "strata", "symposium" => "symposia", "apex" => "apices",
+            "appendix" => "appendices", "cervix" => "cervices", "index" => "indices",
+            "matrix" => "matrices", "vortex" => "vortices", "analysis" => "analyses",
+            "axis" => "axes", "basis" => "bases", "crisis" => "crises", "diagnosis" => "diagnoses",
+            "emphasis" => "emphases", "hypothesis" => "hypotheses", "neurosis" => "neuroses",
+            "oasis" => "oases", "parenthesis" => "parentheses", "synopsis" => "synopses",
+            "thesis" => "theses", "criterion" => "criteria", "phenomenon" => "phenomena",
+            "automaton" => "automata", "piano" => "pianos", "homo" => "homos",
+            "pro" => "pros", "calf" => "calves", "knife" => "knives",
+            "swine" => "swine", "bison" => "bison", "aircraft" => "aircraft",
+        );
+
+
+        /**
+         *
+         *
+         */                     
+        private function __construct()
+        {
+            // this class cannot be instantiated
+            
+        } // __construct()
+
 
         /**
          * Attempts to turn a supplied string, preferably an English, singular word, into the
@@ -30,29 +83,31 @@
          * @argument string the singular word to attempt to make plural
          * @returns string the result of attempting to make the word plural
          */
-        public static function ToSingular( $sString )
+        public static function toSingular($inputString)
         {
-            if( strtolower( $sString ) == "people" )
+            $dictionary = array_flip(self::$_dictionary);
+            
+            if(isset($dictionary[strtolower($inputString)]))
             {
-                return( "person" );
+                return $dictionary[strtolower($inputString)];
             }
         
-            if( substr( $sString, strlen( $sString ) - 3, 3 ) == "ies" )
+            if(substr($inputString, strlen($inputString) - 3, 3) == "ies")
             {
-                $sString = substr( $sString, 0, strlen( $sString ) - 3 ) . "y";
+                $inputString = substr($inputString, 0, strlen($inputString) - 3) . "y";
             }
-            else if( substr( $sString, strlen( $sString ) - 2, 2 ) == "es" )
+            else if(substr($inputString, strlen($inputString) - 2, 2) == "es")
             {
-                $sString = substr( $sString, 0, strlen( $sString ) - 2 );
+                $inputString = substr($inputString, 0, strlen($inputString) - 2);
             }
-            else if( substr( $sString, strlen( $sString ) - 1, 1 ) == "s" )
+            else if(substr($inputString, strlen($inputString) - 1, 1) == "s")
             {
-                $sString = substr( $sString, 0, strlen( $sString ) - 1 );
+                $inputString = substr($inputString, 0, strlen($inputString) - 1);
             }
             
-            return( $sString );
+            return $inputString;
         
-        } // ToSingular()
+        } // toSingular()
         
         
         /**
@@ -62,54 +117,98 @@
          * @argument string the plural word to attempt to make singular
          * @returns string the result of attempting to make the word singular
          */
-        public static function ToPlural( $sString )
+        public static function toPlural($inputString)
         {       
-            if( strtolower( $sString ) == "person" )
+            $dictionary = self::$_dictionary;
+            
+            if(isset($dictionary[strtolower($inputString)]))
             {
-                return( "people" );
+                return $dictionary[strtolower($inputString)];
             }
         
-            if( substr( $sString, strlen( $sString ) - 1, 1 ) == "y" )
+            if(substr($inputString, strlen($inputString) - 1, 1) == "y")
             {
-                $sString = substr( $sString, 0, strlen( $sString ) - 1 ) . "ies";
+                $beforeTheY = substr($inputString, 0, strlen($inputString) - 2, 1);
+
+                if(str_pos(self::$_vowels, $beforeTheY) !== false)
+                {
+                    $inputString .= "s";
+                }
+                else
+                {
+                    $inputString = substr($inputString, 0, strlen($inputString) - 1 ) . "ies";
+                }
             }
-            else if( substr( $sString, strlen( $sString ) - 1, 1 ) != "s" )
+            elseif(substr($inputString, strlen($inputString) - 1, 1) == "x")
             {
-                $sString .= "s";
+                $inputString .= "es";
+            }
+            elseif(substr($inputString, strlen($inputString) - 1, 1) == "s")
+            {
+                $inputString .= "es";
+            }
+            elseif(substr($inputString, strlen($inputString) - 2, 2) == "ch")
+            {
+                $inputString .= "es";
+            }
+            else
+            {
+                $inputString .= "s";
             }
             
-            return( $sString );
+            return $inputString;
         
-        } // ToSingular()
-    
-    
+        } // toPlural()
+        
+        
         /**
-         * Takes a string of PHP code and uses highlight_string() to syntax highlight the code,
-         * then explodes n each line and returns the code wrapped in a div with an ordered list,
-         * each line of code being a line in the ordered list to provide line numbers. It is
-         * up to the user to style this returned HTML.                    
+         * Allows for adding custom words to the single/plural dictionary used by the toSingular()
+         * and toPlural() methods. Either two strings can be supplied as arguments, the singular
+         * and plural forms of the words, respectively, or one array can be given that contains
+         * an associative array of rules in the form of singular => plural.
          *
-         * @argument string The string of PHP code to format
-         * @returns string The formatted PHP code
+         * @argument string|array Either the singular form of the word, or an array of 
+         *      single => plural
+         * @argument string Optional; Either the plural form of the word or null if an array was
+         *      passed for the first argument
+         * @returns array A copy of the dictionary
          */
-        public static function FormatPHPCode( $sCode ) 
+        public static function addToDictionary($single, $plural = null)
         {
-            $sCode = highlight_string( trim( $sCode ), true );
-            $aCode = explode( "<br />", $sCode );
-            
-            $sCode = "";
-            
-            
-            foreach( $aCode as $sLine )
+            if(is_array($single))
             {
-                $sCode .= "\t\t<li><code>{$sLine}</code></li>\n";
+                // We could simply add or merge this array with the dictionary, but let's loop
+                // each element and make sure both the key and value are strings to try to prevent
+                // bad data:
+                
+                foreach($single as $key => $value)
+                {
+                    if(is_string($key) && is_string($value))
+                    {
+                        self::$_dictionary[strtolower(strval($key))] = strtolower(strval($value));  
+                    }
+                }
+            }
+            else if(!empty($plural) && is_string($plural))
+            {
+                self::$_dictionary[strtolower(strval($single))] = strtolower(strval($plural));
             }
             
-            $sCode = "<div>\n\t<ol>\n{$sCode}</ol>\n</div>";
+            return self::$_dictionary;
             
-            return( $sCode );
+        } // addToDictionary()
         
-        } // FormatPHPCode()
+        
+        /**
+         * Allows the retrieval of the full dictionary used by toSingular() and toPlural().
+         *
+         * @returns array A copy of the dictionary
+         */
+        public function getDictionary()
+        {
+            return self::$_dictionary;
+            
+        } // getDictionary()
         
         
         /**
@@ -120,12 +219,12 @@
          * @argument string The delimiter that we're searching for
          * @returns string The generated substring
          */
-        public static function AfterLastOccurrenceOf( $sString, $sDelim )
+        public static function afterLastOccurrenceOf($inputString, $deliminator)
         {
-            return( substr( $sString, strrpos( $sString, $sDelim ) + 1 ) );
+            return(substr($inputString, strrpos($inputString, $deliminator) + 1));
         
-        } // AfterLastOccurrenceOf()
+        } // afterLastOccurrenceOf()
     
-    }; // SringFunctions()
+    } // StringFunctions()
 
 ?>
