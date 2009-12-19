@@ -12,6 +12,7 @@
  * @version         1.3.0-beta
  */
  
+    namespace OpenAvanti\Controller;
  
     /**
      * Dispatcher to route URI request to appropriate controller / method, and loads view files

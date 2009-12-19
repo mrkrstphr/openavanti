@@ -13,6 +13,8 @@
  *
  */
 
+    namespace OpenAvanti;
+
     /**
      * Data validation class helper
      *

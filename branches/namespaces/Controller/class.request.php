@@ -12,6 +12,7 @@
  * @version         1.3.0-beta
  */
 
+    namespace OpenAvanti\Controller;
 
     /**
      * The request object stores information about the web request and how it 

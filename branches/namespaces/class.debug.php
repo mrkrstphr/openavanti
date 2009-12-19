@@ -12,6 +12,8 @@
  *
  */
 
+    namespace OpenAvanti;
+    
     /**
      * Provides a method for debugging and logging information by specifying a callback function
      * to use as a debug handler.    

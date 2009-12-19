@@ -12,6 +12,7 @@
  *
  */
  
+    namespace OpenAvanti;
  
     /**
      * A class to handle manipulation of cache files (or any file, really).
