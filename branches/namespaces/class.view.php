@@ -51,9 +51,9 @@
          * init()
          * 
          * @final
-         * @argument Dispatcher The dispatcher class that loaded this controller
-         * @argument string Optional; the name of the view file to render
-         * @returns void
+         * @param Dispatcher The dispatcher class that loaded this controller
+         * @param string Optional; the name of the view file to render
+         * @return void
          */
         public final function __construct(&$controller, $viewFileName = "")
         {
@@ -71,7 +71,7 @@
          * by the constructor. Subclasses cannot override the constructor due 
          * to the possibility of not passing the correct required parameters.
          * 
-         * @returns void
+         * @return void
          */
         public function init()
         {
@@ -83,7 +83,7 @@
         /**
          * Returns a copy of the Controller class that invoked this view
          * 
-         * @returns Dispatcher The Controller class
+         * @return Dispatcher The Controller class
          */
         public function &getController()
         {
@@ -95,9 +95,9 @@
         /**
          * Sets the layout file to use for this controller. 
          * 
-         * @argument string The file name of the layout file that should be 
+         * @param string The file name of the layout file that should be 
          *      rendered
-         * @returns void
+         * @return void
          */
         public function setLayout($layoutFile)
         {
@@ -109,9 +109,9 @@
         /**
          * 
          * @static 
-         * @argument String The file name of the layout that should be 
+         * @param String The file name of the layout that should be 
          *      rendered by default if no other layout file is specified
-         * @returns void
+         * @return void
          */
         public static function setDefaultLayout($layoutFile)
         {
@@ -126,9 +126,9 @@
          * actually exists. It is up to the code that loads the view file to 
          * do this (normally the Dispatcher class).                 
          *       
-         * @argument string The file name of the view file that should be 
+         * @param string The file name of the view file that should be 
          *      loaded.
-         * @returns void
+         * @return void
          */ 
         public function setView($view)
         {
@@ -142,7 +142,7 @@
          * The view file will be rendered when GetContent() is called by
          * the layout. 
          * 
-         * @returns void
+         * @return void
          */
         public function renderPage()
         {
@@ -183,7 +183,7 @@
          * Called from the layout file to render the action specific view file 
          * into the layout.
          * 
-         * @returns void
+         * @return void
          */
         public function renderContent()
         {
@@ -206,8 +206,8 @@
          * Disables rendering of the layout. The view will still be rendered,
          * unless it is also disabled.
          * 
-         * @argument bool Optional; Should the layout be disabled? Default: true
-         * @returns void
+         * @param bool Optional; Should the layout be disabled? Default: true
+         * @return void
          */
         public function disableLayout($disable = true)
         {
@@ -220,8 +220,8 @@
          * Disables rendering of the view. The layout will still be rendered,
          * unless it is also disabled.
          * 
-         * @argument bool Optional; Should the view be disabled? Default: true
-         * @returns void
+         * @param bool Optional; Should the view be disabled? Default: true
+         * @return void
          */
         public function disableView($disable = true)
         {
@@ -234,9 +234,9 @@
          * Disables rendering of the layout and view no other output will be
          * displayed unless the code explicitly provides output.
          * 
-         * @argument bool Optional; Should the layout and view be disabled? 
+         * @param bool Optional; Should the layout and view be disabled? 
          *      Default: true
-         * @returns void
+         * @return void
          */
         public function disableAllRendering($disable = true)
         {            
@@ -251,8 +251,8 @@
          * error off to the dispatcher, which handles all errors throughout
          * the HTTP request process.
          * 
-         * @argument string The error code to handle
-         * @returns void
+         * @param string The error code to handle
+         * @return void
          */
         protected function handleError($errorCode)
         {
@@ -267,8 +267,8 @@
          * Controller.
          * 
          * 
-         * @argument string The name of the data variable being retrieved
-         * @returns void
+         * @param string The name of the data variable being retrieved
+         * @return void
          */
         public function __get($name)
         {
@@ -286,9 +286,9 @@
          * Sets a view file data variable to be used by the view file, and is
          * usually called by the Controller.
          * 
-         * @argument string The name of the data variable being set
-         * @argument string The value of the data variable being set
-         * @returns void
+         * @param string The name of the data variable being set
+         * @param string The value of the data variable being set
+         * @return void
          */
         public function __set($name, $value)
         {

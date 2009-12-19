@@ -31,8 +31,8 @@
          * Adds a header to the list of CSV column headers. This method appends to the current list 
          * of headers by adding the single header.       
          *
-         * @argument string The name of the header to add to the list of column headers      
-         * @returns void         
+         * @param string The name of the header to add to the list of column headers      
+         * @return void         
          */                     
         public function addHeader( $header )
         {
@@ -46,8 +46,8 @@
          * current list of headers by adding the passed array of headers to the existing array of
          * headers already added.
          *                           
-         * @argument array An array of headers to append to the current array of headers
-         * @returns void
+         * @param array An array of headers to append to the current array of headers
+         * @return void
          */
         public function addHeaders( $headers )
         {
@@ -65,8 +65,8 @@
          * data does not match the number of columns in the headers (unless there are no headers),
          * this method will throw an exception.      
          * 
-         * @argument array An array of CSV row data
-         * @returns void
+         * @param array An array of CSV row data
+         * @return void
          */                     
         public function addData( $data )
         {
@@ -85,7 +85,7 @@
          * This method takes the headers and data stored in this object and creates a CSV
          * document from that data.      
          *       
-         * @returns string The headers and data supplied as a string formatted as a CSV document
+         * @return string The headers and data supplied as a string formatted as a CSV document
          */              
         public function __toString()
         {

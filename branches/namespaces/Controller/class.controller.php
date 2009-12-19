@@ -35,7 +35,7 @@
          * init() to do user intialization.
          * 
          * @final
-         * @arguments Dispatcher The dispatcher class that loaded this controller
+         * @params Dispatcher The dispatcher class that loaded this controller
          */
         public final function __construct(&$dispatcher)
         {
@@ -55,7 +55,7 @@
          * constructor. Subclasses cannot override the constructor due to the possibility of not
          * passing the correct required parameters.
          * 
-         * @returns void
+         * @return void
          */
         public function init()
         {
@@ -74,9 +74,9 @@
          * and action are pulled from the Request object to construct the 
          * view file name.
          * 
-         * @argument string Optional; The name of the controller
-         * @argument string Optional; The name of the action
-         * @returns void
+         * @param string Optional; The name of the controller
+         * @param string Optional; The name of the action
+         * @return void
          */
         protected function setDefaultView($controller = null, $action = null)
         {
@@ -101,7 +101,7 @@
          * controller that do not define a method. Since it is a requirement for this method to 
          * exist, it is defined in the parent controller class.                                                  
          * 
-         * @returns void 
+         * @return void 
          */
         public function index()
         {
@@ -115,7 +115,7 @@
          * Returns a copy of the Dispatcher class that handled the current request and loaded
          * this controller. 
          * 
-         * @returns Dispatcher The Dispatcher class that handled this request and loaded the 
+         * @return Dispatcher The Dispatcher class that handled this request and loaded the 
          *      controller
          */
         public function &getDispatcher()
@@ -129,7 +129,7 @@
          * Returns a copy of the Dispatcher's Request object which contains information about
          * the current request.
          *
-         * @returns Request The Request object containing information about the current request
+         * @return Request The Request object containing information about the current request
          */
         public function &getRequest()
         {
@@ -142,7 +142,7 @@
          * Returns a copy of the Dispatcher's Response object which contains information about
          * the HTTP response.
          *
-         * @returns Request The Response object containing information about the HTTP response
+         * @return Request The Response object containing information about the HTTP response
          */
         public function &getResponse()
         {
@@ -155,7 +155,7 @@
          * Determines whether or not the current HTTP request came via AJAX.                                             
          * 
          * @deprecated Use getRequest()->isAjaxRequest()
-         * @returns boolean True of the request is via AJAX, false otherwise 
+         * @return boolean True of the request is via AJAX, false otherwise 
          */
         public function isAjaxRequest()
         {
@@ -173,9 +173,9 @@
          * If headers have already been sent to the browser, this method will return false and will
          * not call the redirect. Otherwise this method will always return true.                                                     
          *
-         * @argument string The URL to redirect to 
-         * @argument bool True to signal a permanent redirect, false to not set the HTTP response code       
-         * @returns bool True if the redirect was sucessfull, false otherwise        
+         * @param string The URL to redirect to 
+         * @param bool True to signal a permanent redirect, false to not set the HTTP response code       
+         * @return bool True if the redirect was sucessfull, false otherwise        
          */ 
         public function redirectTo($url, $permanentRedirect = true)
         {
@@ -197,12 +197,12 @@
          * to this action, and the view and data setup by the new action will be copied to this
          * controller.
          * 
-         * @argument string The action to which processing should be forwarded
-         * @argument string The controller to which processing should be forwarded to, used in
+         * @param string The action to which processing should be forwarded
+         * @param string The controller to which processing should be forwarded to, used in
          *      conjunction with the specified action.
-         * @argument mixed The data to be forwarded as arguments to the action. Can be a scalar 
+         * @param mixed The data to be forwarded as arguments to the action. Can be a scalar 
          *      value or an array of values. 
-         * @returns void
+         * @return void
          */
         public function forwardAction($action, $controllerName = null, $arguments = null)
         {
@@ -241,8 +241,8 @@
          * the view file to do this (normally the Dispatcher class).                 
          *       
          * @deprecated Use $this->_view->setView()
-         * @argument string The file name of the view file that should be loaded.
-         * @returns void
+         * @param string The file name of the view file that should be loaded.
+         * @return void
          */ 
         public function setView($view)
         {
@@ -254,7 +254,7 @@
         /**
          * Returns a reference to the View object that will render the page
          * 
-         * @returns View A refernece to the View that will render the page
+         * @return View A refernece to the View that will render the page
          */ 
         public function &getView()
         {
@@ -271,9 +271,9 @@
          * If the supplied variable already exists, it will be overwritten.                                  
          *
          * @deprecated Use $this->_view->[name] = [value]
-         * @argument string The name of the variable to set
-         * @argument mixed The value of the variable to set                  
-         * @returns void
+         * @param string The name of the variable to set
+         * @param mixed The value of the variable to set                  
+         * @return void
          */ 
         public function setData($name, $value)
         {
@@ -288,9 +288,9 @@
          *
          * If a flash message is already set, it will be overwritten on subsequent calls.
          * 
-         * @argument string The scope or name of the flash message to set; default = flash
-         * @argument string The message to set in the flash session variable
-         * @returns void
+         * @param string The scope or name of the flash message to set; default = flash
+         * @param string The message to set in the flash session variable
+         * @return void
          */ 
         public function setFlash($message, $scope = "flash")
         {
@@ -303,8 +303,8 @@
          * Retrieves any flash message stored in the flash session variable, if any. See the
          * SetFlash() method.        
          *
-         * @argument string The scope or name of the flash message to get; default = flash
-         * @returns string The flash message, if any, stored in the session
+         * @param string The scope or name of the flash message to get; default = flash
+         * @return string The flash message, if any, stored in the session
          */ 
         public function getFlash($scope = "flash")
         {

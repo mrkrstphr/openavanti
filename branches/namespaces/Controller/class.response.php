@@ -33,11 +33,11 @@
          * Adds a header to this object. Name and value will be combined, 
          * separated by a colon. 
          * 
-         * @argument string The name of the header
-         * @argument string The value of the header
-         * @argument bool Optional; Should this header replace a previous 
+         * @param string The name of the header
+         * @param string The value of the header
+         * @param bool Optional; Should this header replace a previous 
          *      similar one? Default: false
-         * @returns void
+         * @return void
          */
         public function setHeader($header, $value, $replace = false)
         {
@@ -61,8 +61,8 @@
          *          similar one? Default: false
          *   )
          * 
-         * @argument array An array of header data to add
-         * @returns void
+         * @param array An array of header data to add
+         * @return void
          */
         public function setHeaders(array $headers)
         {
@@ -74,8 +74,8 @@
         /**
          * Returns the specified header, if it exists
          * 
-         * @argument string The header to retrieve
-         * @returns array The specified header
+         * @param string The header to retrieve
+         * @return array The specified header
          */
         public function getHeader($header)
         {
@@ -92,7 +92,7 @@
         /**
          * Returns all headers added to this object
          * 
-         * @returns array The array of headers added to this object
+         * @return array The array of headers added to this object
          */
         public function getHeaders()
         {
@@ -104,8 +104,8 @@
         /**
          * Clears the specified header if it is stored in this object
          * 
-         * @argument string The header to remove
-         * @returns void
+         * @param string The header to remove
+         * @return void
          */
         public function clearHeader($header)
         {
@@ -120,7 +120,7 @@
         /**
          * Clears all headers stored in this object
          * 
-         * @returns void
+         * @return void
          */
         public function clearHeaders()
         {
@@ -132,7 +132,7 @@
         /**
          * Sends all headers added to the Response object
          * 
-         * @returns bool True if headers were sent, false otherwise
+         * @return bool True if headers were sent, false otherwise
          */
         public function sendHeaders()
         {
@@ -155,8 +155,8 @@
          * Sets the HTTP status code header. This method will only work if no output or headers
          * have already been sent.
          *       
-         * @argument int The HTTP status code
-         * @returns bool True if the operation was successful, false on failure
+         * @param int The HTTP status code
+         * @return bool True if the operation was successful, false on failure
          */
         public function setHTTPStatus($code)
         {
@@ -178,9 +178,9 @@
          * echoes the supplied error message to the browser, which could be a simple string or
          * a JSON object.                
          *
-         * @argument string The error message to output
-         * @argument int The response code to send to the browser, default: 400
-         * @returns void                         
+         * @param string The error message to output
+         * @param int The response code to send to the browser, default: 400
+         * @return void                         
          */                     
         public function ajaxError($errorString, $responseCode = 400)
         {
@@ -194,7 +194,7 @@
         /**
          * Returns the internal 404 status to determine if a 404 error flag was triggered
          *
-         * @returns bool True if a 404 error was encountered, false otherwise
+         * @return bool True if a 404 error was encountered, false otherwise
          */                             
         public function is404Error()
         {
@@ -206,8 +206,8 @@
         /**
          * Sets or clears the internal 404 error status flag. 
          * 
-         * @argument bool True to trigger a 404 error, false to clear the 404 flag, default: true
-         * @returns void
+         * @param bool True to trigger a 404 error, false to clear the 404 flag, default: true
+         * @return void
          */ 
         public function set404Error($is404Error = true)
         {

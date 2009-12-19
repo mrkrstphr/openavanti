@@ -33,9 +33,9 @@
          * method will recursively iterate through a multidimensional array, or an object with 
          * member objects to load all data within the array or object.       
          * 
-         * @argument mixed An array or object of keys and values to load into the forms data array
-         * @argument array 
-         * @returns void
+         * @param mixed An array or object of keys and values to load into the forms data array
+         * @param array 
+         * @return void
          */
         public static function loadData( $oObject, &$aTarget = null )
         {
@@ -68,8 +68,8 @@
          * member objects to load all data within the array or object.       
          * 
          * @deprecated Use Form::loadData
-         * @argument mixed An array or object of keys and values to load into the forms data array
-         * @returns void
+         * @param mixed An array or object of keys and values to load into the forms data array
+         * @return void
          */
         public static function load( $oObject, &$aTarget = null )
         {
@@ -134,9 +134,9 @@
          * valid attributes for the element. Each element provided is added to the XHTML tag. The
          * "label" element of aAttributes specifies the text of the label.            
          * 
-         * @argument array An array of attributes for the HTML element
-         * @argument bool Controls whether or not to return the HTML, otherwise echo it, default false
-         * @returns void/string If bReturn is true, returns a string with the XHTML, otherwise void
+         * @param array An array of attributes for the HTML element
+         * @param bool Controls whether or not to return the HTML, otherwise echo it, default false
+         * @return void/string If bReturn is true, returns a string with the XHTML, otherwise void
          */
         public static function Label( $aAttributes, $bReturn = false )
         {
@@ -183,9 +183,9 @@
          * validated to be valid attributes for the element. Each element provided is added to the 
          * XHTML tag.         
          * 
-         * @argument array An array of attributes for the HTML element
-         * @argument bool Controls whether or not to return the HTML, otherwise echo it, default false
-         * @returns void/string If bReturn is true, returns a string with the XHTML, otherwise void
+         * @param array An array of attributes for the HTML element
+         * @param bool Controls whether or not to return the HTML, otherwise echo it, default false
+         * @return void/string If bReturn is true, returns a string with the XHTML, otherwise void
          */
         public static function Input( $aAttributes, $bReturn = false )
         {
@@ -246,9 +246,9 @@
          * The default (selected) attribute is controlled by aAttributes[ default ], which should
          * match a valid key in aAttributes[ options ]                         
          * 
-         * @argument array An array of attributes for the HTML element
-         * @argument bool Controls whether or not to return the HTML, otherwise echo it, default false
-         * @returns void/string If bReturn is true, returns a string with the XHTML, otherwise void
+         * @param array An array of attributes for the HTML element
+         * @param bool Controls whether or not to return the HTML, otherwise echo it, default false
+         * @return void/string If bReturn is true, returns a string with the XHTML, otherwise void
          */
         public static function Select( $aAttributes, $bReturn = false )
         {
@@ -312,9 +312,9 @@
          * validated to be valid attributes for the element. Each element provided is added to the 
          * XHTML tag.         
          * 
-         * @argument array An array of attributes for the HTML element
-         * @argument bool Controls whether or not to return the HTML, otherwise echo it, default false
-         * @returns void/string If bReturn is true, returns a string with the XHTML, otherwise void
+         * @param array An array of attributes for the HTML element
+         * @param bool Controls whether or not to return the HTML, otherwise echo it, default false
+         * @return void/string If bReturn is true, returns a string with the XHTML, otherwise void
          */
         public static function TextArea( $aAttributes, $bReturn = false )
         {       

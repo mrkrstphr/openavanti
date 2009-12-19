@@ -29,8 +29,8 @@
         /**
          * Sets the callback function for debug logs.
          *
-         * @argument callback The callback function to invoke when logging debug statements      
-         * @returns void
+         * @param callback The callback function to invoke when logging debug statements      
+         * @return void
          */
         public static function setDebugHandler($callback)
         {
@@ -43,8 +43,8 @@
          * If the debug callback funciton is set to a valid, callable function, this method passes
          * the debug message to that callback function.              
          *
-         * @argument string The debug message to send to the callback function       
-         * @returns void
+         * @param string The debug message to send to the callback function       
+         * @return void
          */
         public static function log($message)
         {

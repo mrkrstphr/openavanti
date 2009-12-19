@@ -33,7 +33,7 @@
         /**
          * The constructor for the cache class. Loads the supplied cache file, if one was specified.
          * 
-         * @argument string The absolute path to the cache file to load              
+         * @param string The absolute path to the cache file to load              
          */
         public function __construct($cacheFileName = null)
         {
@@ -49,8 +49,8 @@
          * Simply returns whether or not the supplied file path exists. There is no difference 
          * between calling this method and calling file_exists().
          * 
-         * @argument string The absolute path to the cache file we're checking the existence of
-         * @returns boolean True if the file exists, false if not
+         * @param string The absolute path to the cache file we're checking the existence of
+         * @return boolean True if the file exists, false if not
          */
         public static function exists($cacheFileName)
         {
@@ -64,8 +64,8 @@
          * thrown. If the file does exist, it's contents are loaded, as well as the created and
          * modified time for the file. This method returns the contents of the cache file.                       
          *               
-         * @argument string The name of the cache file to load       
-         * @returns string The contents of the cache file
+         * @param string The name of the cache file to load       
+         * @return string The contents of the cache file
          * @throws FileNotFoundException         
          */
         public function open($cacheFileName)
@@ -94,9 +94,9 @@
          * On a sucessful save, this method loads information about the cache file and stores
          * the cache contents. 
          *       
-         * @argument string The name of the file to save the cache contents to
-         * @argument string The content to be cached in the supplied file        
-         * @returns void
+         * @param string The name of the file to save the cache contents to
+         * @param string The content to be cached in the supplied file        
+         * @return void
          * @throws FileNotFoundException
          * @throws Exception                 
          */
@@ -127,7 +127,7 @@
          * This method actually does not close anything as we do not keep an active connection
          * to the file. Instead, this method simply clears all file variables and stored contents.       
          *   
-         * @returns void
+         * @return void
          */
         public function close()
         {
@@ -143,7 +143,7 @@
         /**
          * Returns the created time for the current cache file.
          *   
-         * @returns integer The timestamp for when the current file was created
+         * @return integer The timestamp for when the current file was created
          */
         public function getCreatedTime()
         {
@@ -155,7 +155,7 @@
         /**
          * Returns the last created time for the current cache file.
          *   
-         * @returns integer The timestamp for when the current file was last modified
+         * @return integer The timestamp for when the current file was last modified
          */
         public function getModifiedTime()
         {
@@ -167,7 +167,7 @@
         /**
          * The __toString() method returns the contents of the cache file
          *   
-         * @returns string The contents of the cache file
+         * @return string The contents of the cache file
          */
         public function __toString()
         {

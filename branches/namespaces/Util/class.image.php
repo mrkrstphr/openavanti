@@ -48,10 +48,10 @@
          * 3. If the ratio of the max width / current width is < current width, then
          *    an image is generated with a width of width * ratio and height of max height.                                                              
          * 
-         * @argument string The path and file name to the file to create a thumbnail from
-         * @argument string The path and file name of the thumbnail to create
-         * @argument array An array of width and height to limit the image to 0 => x, 1 => y
-         * @returns bool True if the thumbnail is created, false otherwise
+         * @param string The path and file name to the file to create a thumbnail from
+         * @param string The path and file name of the thumbnail to create
+         * @param array An array of width and height to limit the image to 0 => x, 1 => y
+         * @return bool True if the thumbnail is created, false otherwise
          */
         public static function generateThumb($fileName, $thumbName, $maxDimensions)
         {

@@ -56,13 +56,13 @@
          *    )
          * )                                                                      
          * 
-         * @argument string The URL for each pagination link, containing a %s to denote where to 
+         * @param string The URL for each pagination link, containing a %s to denote where to 
          *       place the page number for each page
-         * @argument integer The starting page number
-         * @argument integer The number of elements to show per page
-         * @argument integer The total number of elements to be paginated
-         * @argument integer The number of pagination links shown at a given time
-         * @returns array An array of pagination data            
+         * @param integer The starting page number
+         * @param integer The number of elements to show per page
+         * @param integer The total number of elements to be paginated
+         * @param integer The number of pagination links shown at a given time
+         * @return array An array of pagination data            
          */
         public static function generate($sLink, $iStart, $iPerPage, $iTotalResults, $iLinksShown)
         {

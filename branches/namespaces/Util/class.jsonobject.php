@@ -37,10 +37,10 @@
          * an array is passed, it may also contain any of the previously listed types. Passed arrays
          * and JSONObject objects will be recursively parsed.                        
          *       
-         * @argument string The key for this attribute of the JavaScript object
-         * @argument mixed The value for this attribute of the JavaScript object, either a string, 
+         * @param string The key for this attribute of the JavaScript object
+         * @param mixed The value for this attribute of the JavaScript object, either a string, 
          *       number or another JSONObject object may be passed.      
-         * @returns void
+         * @return void
          */
         public function addAttribute($key, $value)
         {
@@ -52,7 +52,7 @@
         /**
          * Protected method to return the elements in this JSONObject            
          *       
-         * @returns array The array of elements stored in this object
+         * @return array The array of elements stored in this object
          */
         protected function getAttributes()
         {
@@ -66,12 +66,12 @@
          * This method is called recursively when a value of array or JSONObject is found in the
          * provided attributes array                     
          * 
-         * @argument array The array of elements to parse into JSON
-         * @argument string The starting character of this JSON attribute, either { for an object 
+         * @param array The array of elements to parse into JSON
+         * @param string The starting character of this JSON attribute, either { for an object 
          *       or [ for an array               
-         * @argument string The ending character of this JSON attribute, either } for an object 
+         * @param string The ending character of this JSON attribute, either } for an object 
          *       or ] for an array  
-         * @returns string The JSON string for the provided elements
+         * @return string The JSON string for the provided elements
          */
         protected static function convertJSONAttributes($attributes, $startChar = '{', $endChar = '}')
         {
@@ -119,7 +119,7 @@
          * Converts the object into a string by parsing the attributes array. This method
          * calls the protected ConvertJSONAttributes method and returns its output                       
          * 
-         * @returns string The JSON string for the attributes stored in this class
+         * @return string The JSON string for the attributes stored in this class
          */
         public function __toString()
         {

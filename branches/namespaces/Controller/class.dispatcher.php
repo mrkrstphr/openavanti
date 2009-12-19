@@ -50,9 +50,9 @@
          * is simply run by running a preg_match against the URI, and rewriting it to the 
          * replacement on a valid match using preg_replace. 
          * 
-         * @argument string The pattern to match against
-         * @argument string The string to rewrite to
-         * @returns void
+         * @param string The pattern to match against
+         * @param string The string to rewrite to
+         * @return void
          */
         public function addRoute($pattern, $replacement)
         {
@@ -67,7 +67,7 @@
         /**
          * Returns the Request object for the current request
          * 
-         * @returns Request The current Request object
+         * @return Request The current Request object
          */
         public function &getRequest()
         {
@@ -79,7 +79,7 @@
         /**
          * Returns the Request object for the current request
          * 
-         * @returns Request The current Request object
+         * @return Request The current Request object
          */
         public function &getResponse()
         {
@@ -103,8 +103,8 @@
          * The data loaded via the controller's SetData() method is exploded and available for the
          * view file.                                    
          * 
-         * @argument string The current request URI
-         * @returns void
+         * @param string The current request URI
+         * @return void
          */
         public function connect($requestUri)
         {
@@ -194,7 +194,7 @@
          * Called from connect(), responsible for calling the method of the controller
          * routed from the URI
          * 
-         * @returns void
+         * @return void
          */
         protected function invokeAction()
         {
@@ -225,7 +225,7 @@
          * Handles errors occurring during the Dispatch process and passes them off to the 
          * defined ErrorController, or throws an exception if the controller does not exist.
          * 
-         * @returns void
+         * @return void
          */
         public function handleError($errorCode)
         {
@@ -247,7 +247,7 @@
          * Called to handle a 404 error
          * 
          * @deprecated Use handleError(ErrorHandler::FILE_NOT_FOUND);
-         * @returns void
+         * @return void
          */
         protected function invoke404Error()
         {

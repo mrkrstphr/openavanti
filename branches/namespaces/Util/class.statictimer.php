@@ -32,7 +32,7 @@
          * Starts the timer -- if a timer was already previously started, this action
          * will overwrite the start time                                                             
          * 
-         * @returns void 
+         * @return void 
          */
         public static function Start()
         {
@@ -46,7 +46,7 @@
          * started, this will return 0. This does not actually stop the timer. For timing a series 
          * of events, Stop() can be called multiple time to get increments in between various steps                                                                          
          * 
-         * @returns double The amount of time that has passed since starting 
+         * @return double The amount of time that has passed since starting 
          */
         public static function Stop()
         {
@@ -60,7 +60,7 @@
         /**
          * Internally used to update the supplied iVar with the current micro time.                                                                          
          * 
-         * @returns void
+         * @return void
          */
         protected static function Update( &$iVar )
         {           

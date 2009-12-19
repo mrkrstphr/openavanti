@@ -57,7 +57,7 @@
          * Returns true if the current request came via a secure connection, or 
          * false otherwise.
          *
-         * @returns bool True if the current request is a secure connection, 
+         * @return bool True if the current request is a secure connection, 
          *      false otherwise
          */                             
         public function isSecureConnection()
@@ -71,7 +71,7 @@
          * Returns true if the current request is a POST request, or false 
          * otherwise.
          *
-         * @returns bool True if the current request is a POST request, false 
+         * @return bool True if the current request is a POST request, false 
          *      otherwise
          */                             
         public function isPostRequest()
@@ -85,7 +85,7 @@
          * Returns true if the current request is a GET request, or false 
          * otherwise.
          *
-         * @returns bool True if the current request is a GET request, false 
+         * @return bool True if the current request is a GET request, false 
          *      otherwise
          */                             
         public function isGetRequest()
@@ -98,7 +98,7 @@
         /**
          * Determines whether or not the current HTTP request came via AJAX.                                             
          * 
-         * @returns boolean True of the request is via AJAX, false otherwise 
+         * @return boolean True of the request is via AJAX, false otherwise 
          */
         public static function isAjaxRequest()
         {
@@ -110,7 +110,7 @@
         /**
          * Returns the requested URI as it was passed to the server
          * 
-         * @returns string The requested URI
+         * @return string The requested URI
          */
         public function getUri()
         {
@@ -123,7 +123,7 @@
          * Returns the requested URI after any user rewrites are performed
          * through the dispatching process
          * 
-         * @returns string The requested URI after any user rewrites are 
+         * @return string The requested URI after any user rewrites are 
          *      performed
          */
         public function getRewrittenUri()
@@ -136,7 +136,7 @@
         /**
          * Returns the controller component of the request from the URI
          * 
-         * @returns string The controller part of the request
+         * @return string The controller part of the request
          */
         public function getController()
         {
@@ -148,7 +148,7 @@
         /**
          * Returns the action component of the request from the URI
          * 
-         * @returns string The action part of the request
+         * @return string The action part of the request
          */
         public function getAction()
         {
@@ -160,7 +160,7 @@
         /**
          * Returns all arguments of the request from the URI
          * 
-         * @returns string The arguments of the request
+         * @return string The arguments of the request
          */
         public function getArguments()
         {

@@ -43,8 +43,8 @@
          * This method requires the DOM extension and DOMDocument class. If this class does not
          * exist, PrettyPrint will throw an exception.                            
          *
-         * @argument string The XML string to format
-         * @returns string A properly indented, pretty version of the passed XML
+         * @param string The XML string to format
+         * @return string A properly indented, pretty version of the passed XML
          */
         public static function prettyPrint($xml)
         {

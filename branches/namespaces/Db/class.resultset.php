@@ -41,8 +41,8 @@
          * Stores the supplied database and query resource for later processing. Counts the number
          * of rows in the query resource and stores for later use.   
          * 
-         * @argument Database An instance of a database connection
-         * @argument Resource A reference to the database result returned by a query
+         * @param Database An instance of a database connection
+         * @param Resource A reference to the database result returned by a query
          */
         public function __construct(&$databaseConnection, &$queryResource)
         {
@@ -72,7 +72,7 @@
         /**
          * Returns a copy of the current record, if any, or null if no record is stored
          *       
-         * @returns StdClass The current data record, or null if none
+         * @return StdClass The current data record, or null if none
          */
         public function getRecord()
         {
@@ -84,7 +84,7 @@
         /**
          * Returns the number of rows returned by the query this result set originated from
          *       
-         * @returns int The number of rows in the query resource resulting from the query        
+         * @return int The number of rows in the query resource resulting from the query        
          */
         public function Count()
         {           
@@ -97,7 +97,7 @@
          * Returns the data record for the current row, if any, or false if there is not a current 
          * row
          *       
-         * @returns StdClass The current data record for the current row, or false if there is no data
+         * @return StdClass The current data record for the current row, or false if there is no data
          */
         public function current()
         {           
@@ -117,7 +117,7 @@
          * Returns the key for the current data. This is defined as the current row of data in 
          * the query result.         
          *       
-         * @returns int The current row loaded into the ResultSet from the query resource        
+         * @return int The current row loaded into the ResultSet from the query resource        
          */
         public function key()
         {
@@ -131,7 +131,7 @@
          * On success, the data is loaded into this object. On failure, the data is cleared and
          * operations such as current will return false.                 
          *       
-         * @returns void         
+         * @return void         
          */
         public function next()
         {
@@ -161,7 +161,7 @@
         /**
          * Returns the internal pointer of the query result to the first row of the data. 
          *       
-         * @returns void         
+         * @return void         
          */
         public function rewind()
         {           
@@ -181,7 +181,7 @@
          * returned by the query, or if the internal pointer is out of bounds (higher than the
          * number of results in the query), this method will return false.               
          *       
-         * @returns bool True if there is data currently loaded in the result set, false otherwise       
+         * @return bool True if there is data currently loaded in the result set, false otherwise       
          */
         public function valid()
         {           
@@ -193,7 +193,7 @@
         /**
          * Returns whether or not the column exists in the current row
          * 
-         * @returns bool True if the column exists in the current row, false
+         * @return bool True if the column exists in the current row, false
          *      otherwise
          */
         public function __isset($column)
@@ -207,7 +207,7 @@
          * Gets the value of the specified column, if it exists, from the 
          * current database table row, if the current row is valid.
          * 
-         * @returns mixed The value of the requested column, or null if the
+         * @return mixed The value of the requested column, or null if the
          *      column is invalid or there is no current row
          */
         public function __get($column)

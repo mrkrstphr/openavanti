@@ -30,8 +30,8 @@
          * Adds a child SimpleXMLElement node as a child of this node. This differs from the native
          * addChild() method in that it allows adding an XML node, not creating a tag.
          *
-         * @argument SimpleXMLElement The node to add as a child of this node
-         * @returns void
+         * @param SimpleXMLElement The node to add as a child of this node
+         * @return void
          */
         public function addChildNode(SimpleXMLElement $child) 
         {
@@ -46,7 +46,7 @@
         /**
          * Clones this node recursively and returns the cloned node.
          *
-         * @returns SimpleXMLElementExt A copy of the current node
+         * @return SimpleXMLElementExt A copy of the current node
          */
         public function cloneNode()
         {
@@ -61,7 +61,7 @@
         /**
          * Removes a child from the DOM specified by $child
          *
-         * @argument SimpleXMLElement
+         * @param SimpleXMLElement
          */
         public function removeChild($child)
         {
@@ -89,8 +89,8 @@
         /**
          * Removes an attribute from the node
          *
-         * @argument string The attribute to remove from the node
-         * @returns void
+         * @param string The attribute to remove from the node
+         * @return void
          */
         public function removeAttribute($attribute)
         {
@@ -104,10 +104,10 @@
         /**
          * Adds a namespaced attribute to an XML node
          * 
-         * @argument string The name of the namespace to add the attribute to
-         * @argument string The name of the attribute to add to the node
-         * @argument string The value of the attribute to add to the node
-         * @returns void
+         * @param string The name of the namespace to add the attribute to
+         * @param string The name of the attribute to add to the node
+         * @param string The value of the attribute to add to the node
+         * @return void
          */
         public function addAttributeNS($ns, $attribute, $value)
         {
@@ -121,9 +121,9 @@
         /**
          * Inserts a node before a specified node, making them siblings.
          *
-         * @argument SimpleXMLElement The new node to insert
-         * @argument SimpleXMLElement The sibling node to insert before
-         * @returns void
+         * @param SimpleXMLElement The new node to insert
+         * @param SimpleXMLElement The sibling node to insert before
+         * @return void
          */
         public function insertBefore(SimpleXmlElement $newNode, SimpleXMLElement $refNode)
         {
@@ -142,9 +142,9 @@
         /**
          * Inserts a node after a specified node, making them siblings.
          *
-         * @argument SimpleXMLElement The new node to insert
-         * @argument SimpleXMLElement The sibling node to insert after
-         * @returns void
+         * @param SimpleXMLElement The new node to insert
+         * @param SimpleXMLElement The sibling node to insert after
+         * @return void
          */
         public function insertAfter(SimpleXMLElement $newNode, SimpleXMLElement $refNode)
         {
@@ -163,7 +163,7 @@
         /**
          * Returns whether this dom node has children.
          *
-         * @returns bool True if this node has children, false otherwise
+         * @return bool True if this node has children, false otherwise
          */
         public function hasChildNodes()
         {
@@ -177,7 +177,7 @@
         /**
          * Returns the parent of this SimpleXMLElement
          *
-         * @returns SimpleXMLElement
+         * @return SimpleXMLElement
          */
         public function getParent()
         {
