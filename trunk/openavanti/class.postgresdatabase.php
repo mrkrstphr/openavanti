@@ -32,13 +32,13 @@
         private static $_cacheDirectory = "";
         private static $_cacheSchemas = false;
         
-
+        
         /**
          * The constructor sets up a new connection to the PostgreSQL database. This method is
          * protected, and can only be called from within the class, normally through the 
          * GetConnection() method. This helps support the singleton methodology.
          * 
-         * @argument array The database profile array containing connection information                              
+         * @param array The database profile array containing connection information                              
          */
         protected function __construct($profile)
         {
@@ -80,8 +80,9 @@
         /**
          * Queries the PostgreSQL database using the supplied SQL query.
          * 
-         * @argument string The PostgreSQL query to execute
-         * @returns string A ResultSet object containing the results of the database query                   
+         * @param string The PostgreSQL query to execute
+         * @returns string|false A ResultSet object containing the results of
+         *      the database query or false on failure
          */
         public function &query($sql)
         {
@@ -89,7 +90,7 @@
             
             if(!$resultResource)
             {
-                return null;
+                return $resultResource;
             }
 
             $resultSet = new ResultSet($this, $resultResource);
@@ -102,7 +103,7 @@
         /**
          * Pulls the next record from specified database resource and returns it as an object.
          *              
-         * @argument resource The database connection resource to pull the next record from
+         * @param resource The database connection resource to pull the next record from
          * @returns object The next record from the database, or null if there are no more records
          */      
         public function pullNextResult(&$resultResource)
@@ -123,7 +124,7 @@
          * Returns the number of results from the last query performed on the specified database
          * resource object.      
          *              
-         * @argument resource The database connection resource
+         * @param resource The database connection resource
          * @returns int The number of rows in the specified database resource
          */ 
         public function countFromResult(&$resultResource)
@@ -144,7 +145,7 @@
          * Attempts to return the internal pointer of the specified database resource to the
          * first row. 
          * 
-         * @argument resource The database connection resource to pull the next record from
+         * @param resource The database connection resource to pull the next record from
          * @returns bool True if the operation was successful, false otherwise                                   
          */
         public function resetResult(&$resultResource)
@@ -207,7 +208,7 @@
         /**
          * Advances the value of the supplied sequence and returns the new value.
          * 
-         * @argument string The name of the database sequence to advance and get the current value of
+         * @param string The name of the database sequence to advance and get the current value of
          * @returns integer An integer representation of the next value of the sequence
          */
         public function nextVal($sequenceName)
@@ -243,7 +244,7 @@
          * the current database transaction; meaning that you must call NextVal() or SerialNextVal() 
          * prior to using this method.
          *  
-         * @argument string The name of the database sequence to get the current value of
+         * @param string The name of the database sequence to get the current value of
          * @returns integer An integer representation of the current value of the sequence.
          */
         public function currVal($sequenceName)
@@ -281,9 +282,9 @@
          * the current database transaction; meaning that you must call NextVal() or SerialNextVal() 
          * prior to using this method.
          * 
-         * @argument string The name of the database table that holds the column with the sequence as 
+         * @param string The name of the database table that holds the column with the sequence as 
          *       a default value
-         * @argument string The name of the database table column with the sequence as a default value
+         * @param string The name of the database table column with the sequence as a default value
          * @returns integer An integer representation of the current value of the sequence
          */
         public function serialCurrVal($tableName, $columnName)
@@ -320,9 +321,9 @@
          * table and the name of the column. This will only work if a sequence is defined as the 
          * default value of a table column.
          * 
-         * @argument string The name of the database table that holds the column with the sequence as 
+         * @param string The name of the database table that holds the column with the sequence as 
          *       a default value
-         * @argument string The name of the database table column with the sequence as a default value
+         * @param string The name of the database table column with the sequence as a default value
          * @returns integer An integer representation of the next value of the sequence                  
          */
         public function serialNextVal($tableName, $columnName)
@@ -387,7 +388,7 @@
          * Schema caching is primarily used by the CRUD object, which analyzes database schemas to 
          * automate database operations. 
          * 
-         * @argument The absolute path to the directory in the system to store and read cached 
+         * @param The absolute path to the directory in the system to store and read cached 
          *       database schema files
          * @returns void                         
          */
@@ -411,7 +412,7 @@
          * Schema caching is primarily used by the CRUD object, which analyzes database schemas to 
          * automate database operations. 
          * 
-         * @argument boolean Toggles whether or not to cache discovered database schemas
+         * @param boolean Toggles whether or not to cache discovered database schemas
          * @returns void         
          */
         public function cacheSchemas($enabled)
@@ -441,8 +442,8 @@
          * 2. If the data type is of text, varchar, timestamp, or bool, this method returns that 
          *       value surrounded in single quotes.
          * 
-         * @argument string The data type of the supplied value
-         * @argument string The value to be formatted into a database-safe representation
+         * @param string The data type of the supplied value
+         * @param string The value to be formatted into a database-safe representation
          * @returns string A string of the formatted value supplied                          
          */
         public function formatData($dataType, $value)
@@ -512,7 +513,7 @@
         /**
          * This method returns all tables for the database the class is currently connected to.
          * 
-         * @argument string Optional; The name of the schema to pull tables for
+         * @param string Optional; The name of the schema to pull tables for
          * @returns array Returns an array of all tables in the form of table_name => table_name.
          */ 
         public function getTables($schemaName = null)
@@ -560,8 +561,8 @@
          * 
          * If schema caching is on, this method can pull data from a schema cache. 
          * 
-         * @argument string The name of the schema that contains the table
-         * @argument string The name of the table for the requested schema
+         * @param string The name of the schema that contains the table
+         * @param string The name of the table for the requested schema
          * @returns array An array of schema information for the specified table     
          */  
         public function getTableDefinition($schemaName, $tableName)
@@ -614,8 +615,8 @@
          * 
          * If schema caching is on, this method can pull data from a schema cache. 
          *
-         * @argument string The name of the schema that contains the table
-         * @argument string The name of the table for the requested columns
+         * @param string The name of the schema that contains the table
+         * @param string The name of the table for the requested columns
          * @returns array An array of columns that belong to the specified table
          */
         public function getTableColumns($schemaName, $tableName)
@@ -723,8 +724,8 @@
          * 
          * If schema caching is on, this method can pull data from a schema cache. 
          * 
-         * @argument string The name of the schema that contains the table
-         * @argument string The name of the table for the requested primary key
+         * @param string The name of the schema that contains the table
+         * @param string The name of the table for the requested primary key
          * @returns array An array of columns that belong to the primary key for the specified table
          */
         public function getTablePrimaryKey($schemaName, $tableName)
@@ -805,8 +806,8 @@
          * 
          * If schema caching is on, this method can pull data from a schema cache.
          * 
-         * @argument string The name of the schema that contains the table
-         * @argument string The name of the table for the requested relationships
+         * @param string The name of the schema that contains the table
+         * @param string The name of the table for the requested relationships
          * @returns array An array of relationships for the specified table
          */
         public function getTableForeignKeys($schemaName, $tableName)
@@ -1033,9 +1034,9 @@
          * This method determines if the specified tables primary key (or a single column from
          * a compound primary key) references another table.         
          *
-         * @argument string The name of the schema that contains the table
-         * @argument string The name of the table that the key exists on
-         * @argument string The column that is, or is part of, the primary key for the table                 
+         * @param string The name of the schema that contains the table
+         * @param string The name of the table that the key exists on
+         * @param string The column that is, or is part of, the primary key for the table                 
          * @returns boolean True if the primary key references another table, false otherwise                
          */
         public function isPrimaryKeyReference($schemaName, $tableName, $columnName)
@@ -1058,9 +1059,9 @@
         /**
          * Returns the data type of the specified column in the specified table. 
          * 
-         * @argument string The name of the schema that contains the table
-         * @argument string The name of the table that the desired column belongs to 
-         * @argument string The name of the column that is desired to know the type of 
+         * @param string The name of the schema that contains the table
+         * @param string The name of the table that the desired column belongs to 
+         * @param string The name of the column that is desired to know the type of 
          * @returns string The data type of the column, if one is found, or null.
          */
         public function getColumnType($schemaName, $tableName, $columnName)
@@ -1086,8 +1087,8 @@
          * This method first determines whether or not the table exists in the schemas array. If not, 
          * it attempts to find the table in the PostgreSQL catalog. 
          * 
-         * @argument string The name of the schema that contains the table
-         * @argument string The name of the table to determine existence
+         * @param string The name of the schema that contains the table
+         * @param string The name of the table to determine existence
          * @returns boolean True or false, depending on whether the table exists             
          */
         public function tableExists($schemaName, $tableName)
@@ -1143,9 +1144,9 @@
          * This method is primarily interally as, in the PostgreSQL catalog, table references, 
          * indexes, etc, are stored by column number in the catalog tables. 
          *
-         * @argument string The name of the schema that the table belongs to
-         * @argument string The name of the table that the column belongs to 
-         * @argument int The column number from the table (from the PostgreSQL catalog) 
+         * @param string The name of the schema that the table belongs to
+         * @param string The name of the table that the column belongs to 
+         * @param int The column number from the table (from the PostgreSQL catalog) 
          * @returns string The name of the column, if one is found, or null
          */
         protected function getColumnByNumber($schemaName, $tableName, $columnNumber)
@@ -1181,7 +1182,7 @@
         /**
          * Quotes a database element identifier
          *
-         * @argument string The element identifier to quote
+         * @param string The element identifier to quote
          * @returns string The quoted identifier
          */
         public function quoteIdentifier($identifier)
@@ -1196,12 +1197,12 @@
          * name. Accepts a separator, "." by default, and also, by default,
          * quotes the identifier using quoteIdentifier().
          *
-         * @argument string The name of the schema for the identifier (can
+         * @param string The name of the schema for the identifier (can
          *      be null)
-         * @argument string The name of the table for the identifier
-         * @argument string The separator to place between schema and table.
+         * @param string The name of the table for the identifier
+         * @param string The separator to place between schema and table.
          *      Default: .
-         * @argument bool Should the identifier be quoted. Default: true
+         * @param bool Should the identifier be quoted. Default: true
          * @returns string The identifier
          */
         public function getIdentifier($schemaName, $tableName, $separator = ".", $quote = true)
@@ -1232,6 +1233,27 @@
             return $identifier;
             
         } // getIdentifier()
+        
+        
+        /**
+         * Sets the PostgreSQL query search path. A list of schemas are
+         * provided, comma-separated, which define which schemas to evaulate
+         * when referencing objects (tables, sequences, etc) in queries.
+         *
+         * @param string $schemas Comma-separated list of schemas
+         * @returns void
+         */
+        public function setSearchPath($schemas)
+        {
+            $sql = "SET search_path = " . addslashes($schemas);
+            
+            if(!$this->query($sql))
+            {
+                throw new QueryFailedException("Failed to set search path: " .
+                    $this->getLastError());
+            }
+            
+        } // setSearchPath()
 
 
         /**
