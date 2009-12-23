@@ -20,7 +20,7 @@
      * @author      Kristopher Wilson
      * @link        http://www.openavanti.com/docs/crud
      */
-    class CRUD implements Iterator
+    class CRUD implements Iterator, Countable
     {
         // specify the database profile to use:
         protected $_profileName = null;
