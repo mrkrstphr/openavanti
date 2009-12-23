@@ -90,7 +90,7 @@
                 $action = $this->getRequest()->getAction();
             }
             
-            $this->_view->setView(strtolower($controller . "/" . $action . ".php"));
+            $this->_view->setViewScript(strtolower($controller . "/" . $action . View::$_viewFileExtension));
             
         } // setDefaultView()
         
@@ -229,7 +229,7 @@
                 $controller->$action($arguments);
             }
             
-            $this->_view->setView($controller->_view); 
+            $this->_view->setViewScript($controller->_view->getViewScript()); 
             
         } // forwardAction()
         
@@ -239,13 +239,13 @@
          * check to ensure that the file specified actually exists. It is up to the code that loads
          * the view file to do this (normally the Dispatcher class).                 
          *       
-         * @deprecated Use $this->_view->setView()
+         * @deprecated Use $this->_view->setViewScript()
          * @argument string The file name of the view file that should be loaded.
          * @returns void
          */ 
         public function setView($view)
         {
-            $this->_view->setView($view);
+            $this->_view->setViewScript($view);
         
         } // setView()
         

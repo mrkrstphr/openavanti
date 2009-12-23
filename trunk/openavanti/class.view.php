@@ -36,7 +36,9 @@
         
         // Stores the view file to render inside the layout through 
         // GetContent():
-        public $_view = "";
+        protected $_viewScript = "";
+        
+        public static $_viewFileExtension = ".php";
         
         // Toggles whether to render the layout:
         public $_renderLayout = true;
@@ -58,7 +60,7 @@
         {
             $this->_controller = &$controller;
             
-            $this->_view = $viewFileName;
+            $this->_viewScript = $viewFileName;
 
             $this->init();
             
@@ -120,6 +122,19 @@
         
         
         /**
+         *
+         * @static
+         * @param
+         * @return
+         */
+        public static function setViewFileExtension($extension)
+        {
+            self::$_viewFileExtension = $extension;
+            
+        } // setViewFileExtension()
+        
+        
+        /**
          * Sets the view file that should be loaded at the end of the request. 
          * This method does not check to ensure that the file specified 
          * actually exists. It is up to the code that loads the view file to 
@@ -129,11 +144,23 @@
          *      loaded.
          * @returns void
          */ 
-        public function setView($view)
+        public function setViewScript($view)
         {
-            $this->_view = $view;
+            $this->_viewScript = $view;
         
         } // setView()
+        
+        // TODO document
+        
+        /**
+         *
+         *
+         */
+        public function getViewScript()
+        {
+            return $this->_viewScript;
+        
+        } // getViewScript()
         
         
         /**
@@ -188,7 +215,7 @@
         {
             if($this->_renderView)
             {
-                if(($view = FileFunctions::fileExistsInPath($this->_view)) !== false)
+                if(($view = FileFunctions::fileExistsInPath($this->_viewScript)) !== false)
                 {
                     require($view);
                 }
