@@ -128,9 +128,9 @@
         
             if(substr($inputString, strlen($inputString) - 1, 1) == "y")
             {
-                $beforeTheY = substr($inputString, 0, strlen($inputString) - 2, 1);
+                $beforeTheY = substr($inputString, 0, strlen($inputString) - 1);
 
-                if(str_pos(self::$_vowels, $beforeTheY) !== false)
+                if(strpos(self::$_vowels, $beforeTheY) !== false)
                 {
                     $inputString .= "s";
                 }
