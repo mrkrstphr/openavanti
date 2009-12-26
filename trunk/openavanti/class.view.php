@@ -266,8 +266,8 @@
          */
         public function disableAllRendering($disable = true)
         {            
-            $this->renderLayout = !$disable;
-            $this->renderView = !$disable;
+            $this->disableLayout($disable);
+            $this->disableView($disable);
             
         } // disableAllRendering()
         
