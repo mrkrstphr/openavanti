@@ -28,7 +28,7 @@
          * The Model's constructor - accepts an optional set of data to load into the parent CRUD 
          * object. 
          * 
-         * @argument array|object|int Either an array or object of data to load into the Model, or
+         * @param array|object|int Either an array or object of data to load into the Model, or
          *      an integer value for the primary key to load from the database.                                       
          */
         public final function __construct($data = null)
@@ -70,12 +70,12 @@
          * are invoked, respectively, for UPDATE queries. The events OnAfterInsert() and OnAfterSave()
          * are invoked, respectively, for INSERT queries.                                
          *
-         * @returns bool True if the object can be saved, false if not
+         * @return bool True if the object can be saved, false if not
          */ 
-        public function Save()
-        {       
+        public function save()
+        {
             $isUpdate = parent::recordExists();
-        
+            
             if($isUpdate)
             {
                 $success = $this->validate();
@@ -107,7 +107,7 @@
                 }
             }   
             
-            if(!parent::Save())
+            if(!parent::save())
             {
                 return false;
             }
@@ -130,66 +130,74 @@
             // Everything returned true, so should we:
             return true;         
             
-        } // Save()
+        } // save()
         
         
-        /**                      
+        /**
          * This method does the same thing as Save(), but also saves all related data loaded into
          * the CRUD object as well. See CRUD::SaveAll() for more details         
          *       
-         * @returns bool True if the object can be saved, false if not
+         * @return bool True if the object can be saved, false if not
          */ 
-        public function SaveAll()
-        {       
-            $bUpdate = parent::RecordExists();
-        
-            if( $bUpdate )
+        public function saveAll()
+        {
+            $isUpdate = parent::recordExists();
+            
+            if($isUpdate)
             {
-                if( !$this->ValidateUpdate() ||
-                    !$this->Validate() ||
-                    !$this->OnBeforeUpdate() || 
-                    !$this->OnBeforeSave() )
+                $success = $this->validate();
+                $success = $this->validateUpdate() && $success;
+                
+                if(!$success)
                 {
-                    return( false );
+                    return false;
+                }
+                
+                if(!$this->onBeforeSave() || !$this->onBeforeUpdate())
+                {
+                    return false;
                 }
             }
             else
             {
-                if( !$this->ValidateInsert() ||
-                    !$this->Validate() || 
-                    !$this->OnBeforeInsert() || 
-                    !$this->OnBeforeSave() )
+                $success = $this->validate();
+                $success = $this->validateInsert() && $success;
+                
+                if(!$success)
                 {
-                    return( false );
+                    return false;
+                }
+                
+                if(!$this->onBeforeSave() || !$this->onBeforeInsert())
+                {
+                    return false;
                 }
             }   
             
-            if( !parent::SaveAll() )
+            if(!parent::saveAll())
             {
-                return( false );
+                return false;
             }
-        
-            if( $bUpdate )
+            
+            if($isUpdate)
             {
-                if( !$this->OnAfterUpdate() || 
-                     !$this->OnAfterSave() )
+                if(!$this->onAfterUpdate() || !$this->onAfterSave())
                 {
-                    return( false );
+                    return false;
                 }
             }
             else
             {
-                if( !$this->OnAfterInsert() || 
-                     !$this->OnAfterSave() )
+                if(!$this->onAfterInsert() || !$this->onAfterSave())
                 {
-                    return( false );
+                    return false;
                 }
             }
             
             // Everything returned true, so should we:
-            return( true );         
-        
-        } // SaveAll()
+            return true;         
+            
+        } // saveAll()
         
         
         /**
@@ -197,74 +205,74 @@
          * CRUD::Destroy(), and to invoke the event OnAfterDestroy() afterwards. If either 
          * event returns false, execution of this method will stop and false will be returned.               
          *
-         * @returns bool True if the object can be destroyed, false if not
+         * @return bool True if the object can be destroyed, false if not
          */ 
-        public function Destroy()
+        public function destroy()
         {
-            // Run the OnBeforeDestroy() event. If it fails, return false
-            if( !$this->OnBeforeDestroy() )
+            // Run the onBeforeDestroy() event. If it fails, return false
+            if(!$this->onBeforeDestroy())
             {
-                return( false );
+                return false;
             }
             
             // Invoke CRUD's Destroy() method. If it fails, return false
-            if( !parent::Destroy() )
+            if(!parent::destroy())
             {
-                return( false );
+                return false;
             }
         
             // Run the OnAfterDestroy() event. If it fails, return false
-            if( !$this->OnAfterDestroy() )
+            if(!$this->onAfterDestroy())
             {
-                return( false );
+                return false;
             }           
             
             // Everything returned true, so should we:
-            return( true );
+            return true;
         
-        } // Destroy()
+        } // destroy()
         
         
         /**
          * Triggered before a call to CRUD::Save(), for both INSERT and UPDATE actions. If this method
          * returns false, Model::Save() will be halted and false returned.
          *
-         * @returns bool True if the object can be saved, false if not
+         * @return bool True if the object can be saved, false if not
          */              
-        protected function OnBeforeSave()
+        protected function onBeforeSave()
         {
             // Default return true if this method is not extended:
-            return( true );
+            return true;
         
-        } // OnBeforeSave()
+        } // onBeforeSave()
         
         
         /**
          * Triggered before a call to CRUD::Save(), for INSERT statements only. If this method
          * returns false, Model::Save() will be halted and false returned.
          *
-         * @returns bool True if the object can be saved, false if not
+         * @return bool True if the object can be saved, false if not
          */ 
-        protected function OnBeforeInsert()
+        protected function onBeforeInsert()
         {
             // Default return true if this method is not extended:
-            return( true );
+            return true;
         
-        } // OnBeforeInsert()
+        } // onBeforeInsert()
         
         
         /**
          * Triggered before a call to CRUD::Save(), for UPDATE statements only. If this method
          * returns false, Model::Save() will be halted and false returned.
          *
-         * @returns bool True if the object can be saved, false if not
+         * @return bool True if the object can be saved, false if not
          */ 
-        protected function OnBeforeUpdate()
+        protected function onBeforeUpdate()
         {
             // Default return true if this method is not extended:
-            return( true );
+            return true;
          
-        } // OnBeforeUpdate()
+        } // onBeforeUpdate()
     
         
         /**
@@ -272,14 +280,14 @@
          * this method returns false, Model::Save() will return false. It is up to the user at this
          * point to take the necessary actions, such as Rolling back the database transaction.       
          *
-         * @returns bool True if the object can be saved, false if not
+         * @return bool True if the object can be saved, false if not
          */
-        protected function OnAfterSave()
+        protected function onAfterSave()
         {
             // Default return true if this method is not extended:
-            return( true );
+            return true;
         
-        } // OnBeforeSave()
+        } // onBeforeSave()
         
         
         /**
@@ -287,14 +295,14 @@
          * returns false, Model::Save() will return false. It is up to the user at this point to 
          * take the necessary actions, such as Rolling back the database transaction.        
          *
-         * @returns bool True if the object can be saved, false if not
+         * @return bool True if the object can be saved, false if not
          */
-        protected function OnAfterInsert()
+        protected function onAfterInsert()
         {
             // Default return true if this method is not extended:
-            return( true );     
+            return true;     
         
-        } // OnAfterInsert()
+        } // onAfterInsert()
         
         
         /**
@@ -302,28 +310,28 @@
          * returns false, Model::Save() will return false. It is up to the user at this point to 
          * take the necessary actions, such as rolling back the database transaction.        
          *
-         * @returns bool True if the object can be saved, false if not
+         * @return bool True if the object can be saved, false if not
          */
-        protected function OnAfterUpdate()
+        protected function onAfterUpdate()
         {
             // Default return true if this method is not extended:
-            return( true );     
+            return true;     
         
-        } // OnAfterUpdate()
+        } // onAfterUpdate()
         
         
         /**
          * Triggered before a call to CRUD::Destroy(). If this method returns false, Model::Destroy() 
          * will be halted and false returned.
          *
-         * @returns bool True if the object can be destroyed, false if not
+         * @return bool True if the object can be destroyed, false if not
          */
-        protected function OnBeforeDestroy()
+        protected function onBeforeDestroy()
         {
             // Default return true if this method is not extended:
-            return( true );
+            return true;
         
-        } // OnBeforeDestroy()
+        } // onBeforeDestroy()
         
         
         /**
@@ -331,56 +339,56 @@
          * will return false. It is up to the user at this point to take the necessary actions, such
          * as rolling back the database transaction.         
          *
-         * @returns bool True if the object can be destroyed, false if not
+         * @return bool True if the object can be destroyed, false if not
          */
-        protected function OnAfterDestroy()
+        protected function onAfterDestroy()
         {
             // Default return true if this method is not extended:
-            return( true );
+            return true;
         
-        } // OnBeforeDestroy()
+        } // onBeforeDestroy()
         
         
         /**
          * Triggered before a call to CRUD::Save(), for both INSERT and UPDATE actions. If this method
          * returns false, Model::Save() will be halted and false returned.
          *
-         * @returns bool True if the object can be saved, false if not
+         * @return bool True if the object can be saved, false if not
          */ 
-        protected function Validate()
+        protected function validate()
         {
             // Default return true if this method is not extended:
-            return( true );
+            return true;
             
-        } // Validate()
+        } // validate()
         
 
         /**
          * Triggered before a call to CRUD::Save(), for INSERT only. If this method returns false, 
          * Model::Save() will be halted and false returned.
          *
-         * @returns bool True if the object can be saved, false if not
+         * @return bool True if the object can be saved, false if not
          */ 
-        protected function ValidateInsert()
+        protected function validateInsert()
         {
             // Default return true if this method is not extended:
-            return( true );
+            return true;
             
-        } // ValidateInsert()
+        } // validateInsert()
         
         
         /**
          * Triggered before a call to CRUD::Save(), for UPDATE only. If this method returns false, 
          * Model::Save() will be halted and false returned.
          *
-         * @returns bool True if the object can be saved, false if not
+         * @return bool True if the object can be saved, false if not
          */ 
-        protected function ValidateUpdate()
+        protected function validateUpdate()
         {
             // Default return true if this method is not extended:
-            return( true );
+            return true;
         
-        } // ValidateUpdate()
+        } // validateUpdate()
     
     } // Model()
 
