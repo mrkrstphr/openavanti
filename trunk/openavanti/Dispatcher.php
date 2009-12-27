@@ -136,8 +136,15 @@
             // Explode the request on /
             $request = explode("/", $requestUri);
             
-            $this->_request->_controllerName = count($request) > 0 ? 
-                str_replace("-", "_", array_shift($request)) . "Controller" : "";
+            // normalize the controller -
+            // example action_items should become ActionItemsController
+            
+            $controllerName = count($request) > 0 ? array_shift($request) : "";
+            
+            $controllerName = ucwords(str_replace(array("-", "_"), " ", $controllerName));
+            $controllerName = str_replace(" ", "", $controllerName);
+            
+            $this->_request->_controllerName = $controllerName . "Controller";
             
             $this->_request->_actionName = count($request) > 0 ? 
                 str_replace("-", "_", array_shift($request)) : "index";
