@@ -5,13 +5,12 @@
  * OpenAvanti is an open source, object oriented framework for PHP 5+
  *
  * @author          Kristopher Wilson
- * @dependencies    Database, CRUD
- * @copyright       Copyright (c) 2007-2009, Kristopher Wilson
+ * @copyright       Copyright (c) 2007-2010, Kristopher Wilson
  * @license         http://www.openavanti.com/license
  * @link            http://www.openavanti.com
- * @version         1.2.0-beta
- *
+ * @version         1.3.0-beta
  */
+
 
     /**
      * The model class of the MVC architecture. Extends the CRUD database abstraction layer
@@ -75,54 +74,62 @@
          */ 
         public function Save()
         {       
-            $bUpdate = parent::RecordExists();
+            $isUpdate = parent::recordExists();
         
-            if( $bUpdate )
+            if($isUpdate)
             {
-                if( !$this->ValidateUpdate() ||
-                     !$this->Validate() ||
-                     !$this->OnBeforeUpdate() || 
-                     !$this->OnBeforeSave() )
+                $success = $this->validate();
+                $success = $this->validateUpdate() && $success;
+                
+                if(!$success)
                 {
-                    return( false );
+                    return false;
+                }
+                
+                if(!$this->onBeforeSave() || !$this->onBeforeUpdate())
+                {
+                    return false;
                 }
             }
             else
             {
-                if( !$this->ValidateInsert() ||
-                     !$this->Validate() ||
-                     !$this->OnBeforeInsert() || 
-                     !$this->OnBeforeSave() )
+                $success = $this->validate();
+                $success = $this->validateInsert() && $success;
+                
+                if(!$success)
                 {
-                    return( false );
+                    return false;
+                }
+                
+                if(!$this->onBeforeSave() || !$this->onBeforeInsert())
+                {
+                    return false;
                 }
             }   
             
-            if( !parent::Save() )
+            if(!parent::Save())
             {
-                return( false );
+                return false;
             }
-        
-            if( $bUpdate )
+            
+            if($isUpdate)
             {
-                if( !$this->OnAfterUpdate() || 
-                     !$this->OnAfterSave() )
+                if(!$this->onAfterUpdate() || !$this->onAfterSave())
                 {
-                    return( false );
+                    return false;
                 }
             }
             else
             {
-                if( !$this->OnAfterInsert() || 
-                     !$this->OnAfterSave() )
+                if(!$this->onAfterInsert() || !$this->onAfterSave())
                 {
-                    return( false );
+                    return false;
                 }
             }
             
             // Everything returned true, so should we:
-            return( true );         
-        
+            return true;         
+            
         } // Save()
         
         
