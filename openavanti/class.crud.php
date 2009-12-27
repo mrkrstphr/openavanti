@@ -5,7 +5,6 @@
  * OpenAvanti is an open source, object oriented framework for PHP 5+
  *
  * @author          Kristopher Wilson
- * @dependencies    Database, StringFunctions
  * @copyright       Copyright (c) 2007-2009, Kristopher Wilson
  * @license         http://www.openavanti.com/license
  * @link            http://www.openavanti.com
@@ -1090,7 +1089,7 @@
                 }
                 // FIXME (possible) PostgreSQL Specific Syntax (above; date formats)
                 // FIXME Assumption that the developer wants dates in GMT
-
+                
                 // If the primary key is singular, do not provide a value for it:               
                 if(in_array($column["name"], $primaryKeys) && count($primaryKeys) == 1 && 
                     !$this->_database->isPrimaryKeyReference($this->_schemaName, $this->_tableName, reset($primaryKeys)))
@@ -1116,8 +1115,13 @@
                     $this->_database->formatData($column[ "type" ], $sValue);
             }
             
+            if(empty($columnsList) || empty($valuesList))
+            {
+                return false;
+            }
+            
             $tableIdentifier = $this->_database->getIdentifier($this->_schemaName, $this->_tableName);
-
+            
             $sql = "INSERT INTO {$tableIdentifier} (
                 {$columnsList}
             ) VALUES (
@@ -1126,7 +1130,7 @@
             
             $resultData = null;
             
-            if(($resultData = $this->_database->query($sql)) === null)
+            if(($resultData = $this->_database->query($sql)) === false)
             {
                 throw new Exception($this->_database->getLastError());
             }
