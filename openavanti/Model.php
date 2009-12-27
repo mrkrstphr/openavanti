@@ -35,7 +35,10 @@
         {
             if(empty($this->_tableName))
             {
+                $className = get_class($this);
+                $tableName = ltrim(strtolower(preg_replace("/([A-Z])/", "_\$1", $className)), "_");
                 $className = strtolower(get_class($this));
+                
                 $this->_tableName = StringFunctions::toPlural($className);
             }
 

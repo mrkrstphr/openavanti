@@ -81,7 +81,7 @@
          */ 
         final public static function setDefaultProfile($profileName)
         {
-            if(!isset(self::$_profiles[ $profileName]))
+            if(!isset(self::$_profiles[$profileName]))
             {
                 throw new DatabaseConnectionException("Unknown database profile: {$profileName}");
             }
@@ -179,7 +179,7 @@
                 throw new Exception("No database name specified in database profile");
             }
             
-            $driver = $profile["driver"];
+            $driver = ucwords($profile["driver"]);
             
             if(!class_exists("{$driver}Database", true))
             {
