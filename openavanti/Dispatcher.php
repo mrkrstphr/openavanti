@@ -41,6 +41,16 @@
         
         // Stores a reference to the View that will render the page:
         protected $_view = null;
+        
+        /**
+         *
+         */
+        protected $_preDispatchCallbacks = array();
+        
+        /**
+         *
+         */
+        protected $_postDispatchCallbacks = array();
 
 
         /**
@@ -150,7 +160,8 @@
                 str_replace("-", "_", array_shift($request)) : "index";
                 
             $this->_request->_arguments = !empty($request) ? $request : array();
-                
+            
+            $this->preDispatch();
             
             // If we've found a controller and the class exists:
             if(!empty($this->_request->_controllerName) && 
@@ -170,8 +181,11 @@
                 return $this->handleError(ErrorHandler::CONTROLLER_NOT_FOUND);
             }
             
+            $this->postDispatch();
+            
             // If this is an AJAX request, let's be assumptious and disable
             // the layout:
+            // TODO move this logic to the view
             if($this->_request->isAjaxRequest())
             {
                 $this->_view->disableLayout();
@@ -193,6 +207,78 @@
             return $this->_request;
         
         } // connect()
+        
+        
+        /**
+         * Registers a preDispatch callback with this dispatcher. Callbacks
+         * are called in the order they are registered.
+         *
+         * @param callback $callback The callback to invoke 
+         * @return void
+         */
+        public function registerPreDispatchMethod($callback)
+        {
+            $this->_preDispatchCallbacks[] = $callback;
+            
+        } // registerPreDispatchMethod()
+        
+        
+        /**
+         * Registers a postDispatch callback with this dispatcher. Callbacks
+         * are called in the order they are registered.
+         *
+         * @param callback $callback The callback to invoke
+         * @return void
+         */
+        public function registerPostDispatchMethod($callback)
+        {
+            $this->_postDispatchCallbacks[] = $callback;
+            
+        } // registerPreDispatchMethod()
+        
+        
+        /**
+         * The preDispatch loop which calls each registered preDispatch
+         * callback in the order they were registered. Passed to the callback
+         * is a reference to this dispatcher.
+         *
+         * @return void
+         */
+        public function preDispatch()
+        {
+            foreach($this->_preDispatchCallbacks as $callback)
+            {
+                $dispatcher = &$this;
+                
+                if(is_callable($callback))
+                {
+                    call_user_func_array($callback, array($dispatcher));
+                }
+            }
+            
+        } // preDispatch()
+        
+        
+        /**
+         * The postDispatch loop which calls each registered postDispatch
+         * callback in the order they were registered. Passed to the callback
+         * is a reference to this dispatcher.
+         *
+         * @return void
+         */
+        public function postDispatch()
+        {
+            foreach($this->_postDispatchCallbacks as $callback)
+            {
+                $dispatcher = &$this;
+                
+                if(is_callable($callback))
+                {
+                    call_user_func_array($callback, array($dispatcher));
+                }
+            }
+            
+        } // postDispatch()
         
         
         /**
