@@ -22,380 +22,274 @@
      */
     class Form 
     {
-        public static $aFields = array();
-
-
+        /**
+         * Stores all the elements assigned to this form
+         */
+        public $_elements = array();
+        
+        /**
+         * Stores the loaded or submitted data for this form
+         */
+        public $_data = array();
+        
+        
+        /**
+         * Sets up the form class and calls the init() method for user initialization.
+         *
+         * @param array $initialData Optional array of data to load into the form class
+         */
+        final public function __construct($initialData = null)
+        {
+            if(!empty($initialData))
+            {
+                $this->loadData($initialData);
+            }
+            
+            $this->init();
+            
+        } // __construct()
+        
+        
+        /**
+         * Provides a mechanism for user initialization outside of the constructor. 
+         * 
+         * @return void
+         */
+        public function init()
+        {
+            // nothing here in the base class!
+            
+        } // init()
+        
+        
         /**
          * Loads the specified array or object into the classes aFields array. These values are 
          * later used by the field generation helpers for setting the value of the form field. This 
          * method will recursively iterate through a multidimensional array, or an object with 
          * member objects to load all data within the array or object.       
          * 
-         * @argument mixed An array or object of keys and values to load into the forms data array
-         * @argument array 
-         * @returns void
+         * @param mixed An array or object of keys and values to load into the forms data array
+         * @param array 
+         * @return void
          */
-        public static function loadData( $oObject, &$aTarget = null )
+        public function loadData($data, &$target = null)
         {
-            is_null( $aTarget ) ? $aTarget = &self::$aFields : $aTarget = $aTarget;
-        
-            foreach( $oObject as $sKey => $sValue )
+            is_null($target) ? $target = &$this->_data : $target = $target;
+            
+            foreach($data as $key => $value)
             {
-                if( !is_object( $sValue ) && !is_array( $sValue ) )
+                if(is_scalar($value))
                 {
-                    $aTarget[ $sKey ] = $sValue;
+                    $target[$key] = $value;
                 }
-                else
+                elseif(is_object($value) || is_array($value))
                 {
-                    if( !isset( $aTarget[ $sKey ] ) )
+                    if(!isset($target[$key]))
                     {
-                        $aTarget[ $sKey ] = array();
+                        $target[$key] = array();
                     }
                     
-                    self::Load( $sValue, $aTarget[ $sKey ] );
+                    $this->loadData($value, $target[$key]);
                 }
             }
-                        
+            
         } // loadData()
         
-
-        /**
-         * Loads the specified array or object into the classes aFields array. These values are 
-         * later used by the field generation helpers for setting the value of the form field. This 
-         * method will recursively iterate through a multidimensional array, or an object with 
-         * member objects to load all data within the array or object.       
-         * 
-         * @deprecated Use Form::loadData
-         * @argument mixed An array or object of keys and values to load into the forms data array
-         * @returns void
-         */
-        public static function load( $oObject, &$aTarget = null )
-        {
-            return( self::loadData( $oObject, $aTarget ) );
-                        
-        } // load()
-        
         
         /**
+         * Loads data from the POST request, sanitizes it and stores it in this
+         * form object.
          *
-         *
-         *
+         * @return array The loaded data
          */
-        public static function loadSanitizedPost()
+        public function loadSanitizedPost()
         {
-            $aData = $_POST;
+            $data = $_POST;
             
             // TODO sanitize the data
             
-            self::$aFields += $aData;
+            $this->_data += $data;
             
-            return( self::$aFields );
-
+            return $this->_data;
+        
         } // loadSanitizedPost()
         
         
         /**
+         * Loads data from the GET request, sanitizes it and stores it in this
+         * form object.
          *
-         *
-         *
+         * @return array The loaded data
          */
-        public static function loadSanitizedGet()
+        public function loadSanitizedGet()
         {
-            $aData = $_GET;
+            $data = $_GET;
             
             // TODO sanitize the data
             
-            self::$aFields += $aData;
+            $this->_data += $data;
             
-            return( self::$aFields );
-
+            return $this->_data;
+        
         } // loadSanitizedGet()
         
         
         /**
+         * Loads data from the request (POST + GET), sanitizes it and stores it
+         * in this form object.
          *
-         *
-         *
+         * @return array The loaded data
          */
-        public static function loadSanitizedRequest()
+        public function loadSanitizedRequest()
         {
-            self::loadSanitizedGet();
-            self::loadSanitizedPost();
+            $this->loadSanitizedGet();
+            $this->loadSanitizedPost();
             
-            return( self::$aFields );
+            return $this->_data;
             
         } // loadSanitizedRequest()
         
         
         /**
-         * Generate a label for the form. Note that the supplied attributes are not validated to be
-         * valid attributes for the element. Each element provided is added to the XHTML tag. The
-         * "label" element of aAttributes specifies the text of the label.            
-         * 
-         * @argument array An array of attributes for the HTML element
-         * @argument bool Controls whether or not to return the HTML, otherwise echo it, default false
-         * @returns void/string If bReturn is true, returns a string with the XHTML, otherwise void
+         * Adds a new form element to this form class.
+         *
+         * @param FormElement $element The FormElement to add to this form
+         * @return void
          */
-        public static function Label( $aAttributes, $bReturn = false )
+        public function addElement(FormElement $element)
         {
-            if( !isset( $aAttributes[ "label" ] ) )
-            {
-                return;
-            }
+            $this->_elements[$element->getName()] = $element;
             
-            $sLabel = $aAttributes[ "label" ];
-            unset( $aAttributes[ "label" ] );
-                
-                
-            if( class_exists( "Validation" ) && isset( $aAttributes[ "for" ] ) && 
-                Validation::FieldHasErrors( $aAttributes[ "for" ] ) )
-            {
-                $aAttributes[ "class" ] = isset( $aAttributes[ "class" ] ) ? 
-                    $aAttributes[ "class" ] . " error" : "error";   
-            }
-            
-            $sInput = "<label ";
-            
-            foreach( $aAttributes as $sKey => $sValue )
-            {
-                $sInput .= "{$sKey}=\"{$sValue}\" ";
-            }
-            
-            $sInput .= ">{$sLabel}</label>";
-            
-            
-            if( $bReturn )
-            {
-                return( $sInput );
-            }
-            else
-            {
-                echo $sInput;
-            }
-            
-        } // Label()
+        } // addElement()
         
         
         /**
-         * Generate an input element for the form. Note that the supplied attributes are not 
-         * validated to be valid attributes for the element. Each element provided is added to the 
-         * XHTML tag.         
-         * 
-         * @argument array An array of attributes for the HTML element
-         * @argument bool Controls whether or not to return the HTML, otherwise echo it, default false
-         * @returns void/string If bReturn is true, returns a string with the XHTML, otherwise void
+         * Returns the requested form element, or null if not found
+         *
+         * @param string $name The name of the form element to retrieve
          */
-        public static function Input( $aAttributes, $bReturn = false )
+        public function get($name)
         {
-            if( !isset( $aAttributes[ "type" ] ) )
+            return $this->getElement($name);
+            
+        } // get()
+        
+        
+        /**
+         * Returns the requested form element, or null if not found
+         *
+         * @param string $name The name of the form element to retrieve
+         */
+        public function &getElement($name)
+        {
+            $element = null;
+            
+            if(isset($this->_elements[$name]))
             {
-                return;
+                $element = $this->_elements[$name];   
             }
             
-            if( strtolower( $aAttributes[ "type" ] ) == "checkbox" ||
-                strtolower( $aAttributes[ "type" ] ) == "radio" )
+            return $element;
+        
+        } // getElement()
+        
+        
+        /**
+         * Provides a mechanism for easily generating form fields and adding
+         * them to the form class
+         *
+         * @param string $name The name of the element to add, which should
+         *      match the name of a valid FormElement class
+         * @param string $arguments Arguments to pass to the constructor of
+         *      the FormElement
+         * @return FormElement The generated form element
+         */
+        public function __call($name, $arguments)
+        {
+            $element = null;
+            
+            if($this->elementExists($name))
             {
-                $sValue = self::TranslatePathForValue( $aAttributes[ "name" ] );
+                $elementName = "{$name}Element";
                 
-                if( isset( $aAttributes[ "value" ] ) && $aAttributes[ "value" ] == $sValue )
+                $element = new $elementName($arguments);
+                
+                return $element;
+            }
+            
+            throw new Exception("Unknown form element {$name}");
+            
+        } // __callStatic()
+        
+        
+        /**
+         * Determines if a form element class exists and is properly subclassed
+         *
+         * @param string The suffix of the element class
+         * @return boolean True if the element class exists and is valid,
+         *      false otherwise
+         */
+        protected function elementExists($elementType)
+        {
+            $elementName = "{$name}Element";
+            
+            if(class_exists($elementName, true))
+            {
+                if(is_subclass_of($elementName, "FormElement"))
                 {
-                    $aAttributes[ "checked" ] = "checked";
+                    return true;
                 }
             }
-            else if( strtolower( $aAttributes[ "type" ] ) != "password" )
-            {
-                $sValue = self::TranslatePathForValue( $aAttributes[ "name" ] );
-
-                $aAttributes[ "value" ] = $sValue !== false ? $sValue : 
-                    ( isset( $aAttributes[ "value" ] ) ? $aAttributes[ "value" ] : "" );
-            }
-        
-            $sInput = "<input ";
             
-            foreach( $aAttributes as $sKey => $sValue )
-            {
-                $sValue = htmlentities( $sValue );
-                $sInput .= "{$sKey}=\"{$sValue}\" ";
-            }
+            return false;
             
-            $sInput .= " />";
-            
-            
-            if( $bReturn )
-            {
-                return( $sInput );
-            }
-            else
-            {
-                echo $sInput;
-            }
-            
-        } // Input()
-        
-        
-        /**
-         * Generate a select element for the form. Note that the supplied attributes are not 
-         * validated to be valid attributes for the element. Each element provided is added to the 
-         * XHTML tag.
-         * 
-         * The options are specified by aAttributes[ options ] as an array of key => values to
-         * display in the select         
-         *               
-         * The default (selected) attribute is controlled by aAttributes[ default ], which should
-         * match a valid key in aAttributes[ options ]                         
-         * 
-         * @argument array An array of attributes for the HTML element
-         * @argument bool Controls whether or not to return the HTML, otherwise echo it, default false
-         * @returns void/string If bReturn is true, returns a string with the XHTML, otherwise void
-         */
-        public static function Select( $aAttributes, $bReturn = false )
-        {
-            if( !isset( $aAttributes[ "options" ] ) || !is_array( $aAttributes[ "options" ] ) )
-            {
-                return;
-            }
-            
-            $sDefault = "";
-            
-            $sValue = self::TranslatePathForValue( $aAttributes[ "name" ] );
-            
-            if( $sValue !== false )
-            {
-                $sDefault = $sValue;
-            }
-            else if( isset( $aAttributes[ "default" ] ) )
-            {
-                $sDefault = $aAttributes[ "default" ];
-                unset( $aAttributes[ "default" ] );
-            }
-        
-            $sSelect = "<select ";
-            
-            foreach( $aAttributes as $sKey => $sValue )
-            {
-                if( $sKey == "options" )
-                {
-                    continue;
-                }
-                
-                $sSelect .= "{$sKey}=\"{$sValue}\" ";
-            }
-            
-            $sSelect .= ">\n";
-            
-            foreach( $aAttributes[ "options" ] as $sKey => $sValue )
-            {
-                $sSelected = $sKey == $sDefault ? 
-                    " selected=\"selected\" " : "";
-                    
-                $sSelect .= "\t<option value=\"{$sKey}\"{$sSelected}>{$sValue}</option>\n";
-            }
-            
-            $sSelect .= "\n</select>\n";
-            
-            if( $bReturn )
-            {
-                return( $sSelect );
-            }
-            else
-            {
-                echo $sSelect;
-            }
-        
-        } // Select()
-        
-        
-        /**
-         * Generate a textarea element for the form. Note that the supplied attributes are not 
-         * validated to be valid attributes for the element. Each element provided is added to the 
-         * XHTML tag.         
-         * 
-         * @argument array An array of attributes for the HTML element
-         * @argument bool Controls whether or not to return the HTML, otherwise echo it, default false
-         * @returns void/string If bReturn is true, returns a string with the XHTML, otherwise void
-         */
-        public static function TextArea( $aAttributes, $bReturn = false )
-        {       
-            $sInput = "<textarea ";
-            
-            foreach( $aAttributes as $sKey => $sValue )
-            {
-                $sInput .= "{$sKey}=\"{$sValue}\" ";
-            }
-            
-            $sInput .= ">";
-
-            $sValue = self::TranslatePathForValue( $aAttributes[ "name" ] );
-            $sInput .= $sValue !== false ? $sValue : "";
-            
-            $sInput .= "</textarea>";
-            
-            
-            if( $bReturn )
-            {
-                return( $sInput );
-            }
-            else
-            {
-                echo $sInput;
-            }
-            
-        } // TextArea()
+        } // elementExists()
         
         
         /**
          *
-         */             
-        private static function TranslatePathForValue( $sName )
+         */
+        private function translatePathForValue($name)
         {
-            $sValue = false;
+            $value = false;
             
-            $sPath = str_replace( "[", "/", $sName );
-            $sPath = str_replace( "]", "", $sPath );
+            $path = str_replace("[", "/", $name);
+            $path = str_replace("]", "", $path);
             
-            $aKeys = explode( "/", $sPath );
+            $keys = explode("/", $path);
             
-            $aData = self::$aFields;
+            $data = $this->_data;
             
-            foreach( $aKeys as $sKey )
+            foreach($keys as $key)
             {
-                if( isset( $aData[ $sKey ] ) )
+                if(isset($data[$key]))
                 {
-                    $aData = $aData[ $sKey ];
+                    $data = $data[$key];
                 }
                 else
                 {
-                    return( false );
+                    return false;
                 }
             }
             
-            if( !is_array( $aData ) )
+            if(!is_array($data))
             {
-                $sValue = $aData;
-            }
-
-            if( $sValue === true )
-            {
-                $sValue = "t";
-            }
-            else if( $sValue === false )
-            {
-                $sValue = "f";
+                $value = $data;
             }
             
-            if( $sValue === true )
+            if($value === true)
             {
-                $sValue = "t";
+                $value = "t";
             }
-            else if( $sValue === false )
+            else if($value === false)
             {
-                $sValue = "f";
+                $value = "f";
             }
             
-            return( $sValue );
+            return $value;
+            
+        } // translatePathForValue()
         
-        } // TranslatePathForValue()
-
     } // Form()
 
 ?>
