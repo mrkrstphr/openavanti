@@ -19,7 +19,7 @@
      * @author      Kristopher Wilson
      * @link        http://www.openavanti.com/docs/form
      */
-    class TextAreaElement extends FormElement
+    class TextAreaElement extends LabeledFormElement
     {
         /**
          * Generate a textarea element for the form. Note that the supplied attributes are not 

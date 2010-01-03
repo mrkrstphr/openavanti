@@ -19,7 +19,7 @@
      * @author      Kristopher Wilson
      * @link        http://www.openavanti.com/docs/form
      */
-    abstract InputElement extends FormElement
+    abstract class InputElement extends LabeledFormElement
     {
         /**
          * Generate an input element for the form. Note that the supplied attributes are not 
@@ -40,54 +40,6 @@
         } // render()
         
         
-        /*
-        public static function Input( $aAttributes, $bReturn = false )
-        {
-            if( !isset( $aAttributes[ "type" ] ) )
-            {
-                return;
-            }
-            
-            if( strtolower( $aAttributes[ "type" ] ) == "checkbox" ||
-                strtolower( $aAttributes[ "type" ] ) == "radio" )
-            {
-                $sValue = self::TranslatePathForValue( $aAttributes[ "name" ] );
-                
-                if( isset( $aAttributes[ "value" ] ) && $aAttributes[ "value" ] == $sValue )
-                {
-                    $aAttributes[ "checked" ] = "checked";
-                }
-            }
-            else if( strtolower( $aAttributes[ "type" ] ) != "password" )
-            {
-                $sValue = self::TranslatePathForValue( $aAttributes[ "name" ] );
-
-                $aAttributes[ "value" ] = $sValue !== false ? $sValue : 
-                    ( isset( $aAttributes[ "value" ] ) ? $aAttributes[ "value" ] : "" );
-            }
-        
-            $sInput = "<input ";
-            
-            foreach( $aAttributes as $sKey => $sValue )
-            {
-                $sValue = htmlentities( $sValue );
-                $sInput .= "{$sKey}=\"{$sValue}\" ";
-            }
-            
-            $sInput .= " />";
-            
-            
-            if( $bReturn )
-            {
-                return( $sInput );
-            }
-            else
-            {
-                echo $sInput;
-            }
-            
-        } // Input()
-        */
     } // InputElement()
 
 ?>

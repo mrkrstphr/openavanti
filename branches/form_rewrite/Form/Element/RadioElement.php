@@ -28,7 +28,7 @@
          */
         public function init()
         {
-            $this->_data["" ] = "radio";
+            $this->_attributes["type"] = "radio";
             
         } // init()
 

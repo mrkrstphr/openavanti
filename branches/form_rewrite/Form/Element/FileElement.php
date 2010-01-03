@@ -28,7 +28,7 @@
          */
         public function init()
         {
-            $this->_data["file" ] = "text";
+            $this->_attributes["file" ] = "text";
             
         } // init()
 

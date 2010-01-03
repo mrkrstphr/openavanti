@@ -29,7 +29,7 @@
         /**
          *
          */
-        protected $_options = array();
+        protected $_attributes = array();
         
         /**
          *
@@ -41,10 +41,10 @@
          *
          *
          */
-        final public function __construct($name, $options)
+        public function __construct($name, $attributes)
         {
             $this->_name = $name;
-            $this->_options = $options;
+            $this->_attributes = $attributes;
             
             $this->init();
             
@@ -73,40 +73,60 @@
         
         /**
          *
+         */
+        public function getValue()
+        {
+            return $this->_value;
+        
+        } // getValue()
+        
+        
+        /**
          *
          */
-        public function setOption($name, $value)
+        public function setValue($value)
         {
-            $this->_options[$name] = $value;
+            $this->_value = $value;
             
-        } // setOption()
+        } // setValue()
         
         
         /**
          *
          *
          */
-        public function getOptions()
+        public function setAttribute($name, $value)
         {
-            return $this->_options;
+            $this->_attributes[$name] = $value;
             
-        } // getOptions()
+        } // setAttribute()
         
         
         /**
          *
          *
          */
-        public function getOption($option)
+        public function getAttributes()
         {
-            if(isset($this->_options[$option]))
+            return $this->_attributes;
+            
+        } // getAttributes()
+        
+        
+        /**
+         *
+         *
+         */
+        public function getAttribute($attribute)
+        {
+            if(isset($this->_attributes[$attribute]))
             {
-                return $this->_options[$option];
+                return $this->_attributes[$attribute];
             }
             
             return null;
             
-        } // getOption()
+        } // getAttribute()
         
         
         /**
@@ -115,17 +135,17 @@
          */
         protected function generateAttributeString()
         {
-            $options = "";
+            $attributes = "";
             
-            foreach($this->_options as $key => $value)
+            foreach($this->_attributes as $key => $value)
             {
                 if(!is_scalar($value)) continue;
                 
-                $options = !empty($options) ? " " : "";
-                $options = "{$key}=\"{$value}\"";
+                $attributes .= !empty($attributes) ? " " : "";
+                $attributes .= "{$key}=\"{$value}\"";
             }
             
-            return $options;
+            return $attributes;
             
         } // generateAttributesString()
         
@@ -134,7 +154,7 @@
          *
          *
          */
-        public function render();
+        abstract public function render();
         
         
         /**

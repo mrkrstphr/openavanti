@@ -93,6 +93,8 @@
                 }
             }
             
+            $this->propagateFormValues();
+            
         } // loadData()
         
         
@@ -109,6 +111,8 @@
             // TODO sanitize the data
             
             $this->_data += $data;
+            
+            $this->propagateFormValues();
             
             return $this->_data;
         
@@ -129,6 +133,8 @@
             
             $this->_data += $data;
             
+            $this->propagateFormValues();
+            
             return $this->_data;
         
         } // loadSanitizedGet()
@@ -145,9 +151,28 @@
             $this->loadSanitizedGet();
             $this->loadSanitizedPost();
             
+            $this->propagateFormValues();
+            
             return $this->_data;
             
         } // loadSanitizedRequest()
+        
+        
+        /**
+         *
+         *
+         */
+        protected function propagateFormValues()
+        {
+            foreach($this->_elements as $name => &$element)
+            {
+                if(isset($this->_data[$name]))
+                {
+                    $element->setValue($this->_data[$name]);
+                }
+            }
+            
+        } // propagateFormValues()
         
         
         /**
@@ -156,9 +181,11 @@
          * @param FormElement $element The FormElement to add to this form
          * @return void
          */
-        public function addElement(FormElement $element)
+        public function &addElement(FormElement $element)
         {
             $this->_elements[$element->getName()] = $element;
+            
+            return $element;
             
         } // addElement()
         
@@ -168,7 +195,7 @@
          *
          * @param string $name The name of the form element to retrieve
          */
-        public function get($name)
+        public function __get($name)
         {
             return $this->getElement($name);
             
@@ -179,6 +206,7 @@
          * Returns the requested form element, or null if not found
          *
          * @param string $name The name of the form element to retrieve
+         * @return FormELement The requested form element
          */
         public function &getElement($name)
         {
@@ -192,6 +220,24 @@
             return $element;
         
         } // getElement()
+        
+        
+        /**
+         *
+         *
+         * @param string $name The name of the form element value to retrieve
+         * @return string The value of the form field
+         */
+        public function getValue($name)
+        {
+            if(isset($this->_data[$name]))
+            {
+                return $this->_data[$name];
+            }
+            
+            return null;
+        
+        } // getValue()
         
         
         /**

@@ -19,9 +19,11 @@
      * @author      Kristopher Wilson
      * @link        http://www.openavanti.com/docs/form
      */
-    class SelectElement extends FormElement
+    class SelectElement extends LabeledFormElement
     {
         protected $_default = "";
+        protected $_addBlankWhenEmpty = false;
+        protected $_autoBlankLabel = "";
         
         /**
          *
@@ -29,9 +31,9 @@
          */
         public function init()
         {
-            if(!isset($this->_options['options']))
+            if(!isset($this->_attributes['options']))
             {
-                $this->_options['options'] = array();    
+                $this->_attributes['options'] = array();    
             }
             
         } // init()
@@ -57,7 +59,13 @@
             $html = "<select name=\"{$this->_name}\" id=\"{$this->_name}\" " .
                 $this->generateAttributeString() . ">\n";
             
-            foreach($this->_options['options'] as $key => $value)
+            if($this->_addBlankWhenEmpty == true)
+            {
+                $blank = array('' => $this->_autoBlankLabel);
+                $this->_attributes['options'] = $blank + $this->_attributes['options'];
+            }
+            
+            foreach($this->_attributes['options'] as $key => $value)
             {
                 $selected = $key == $this->_value || $key == $this->_default ?
                     " selected=\"selected\"" : "";
@@ -71,6 +79,28 @@
             return $html;
             
         } // render()
+        
+        
+        /**
+         *
+         *
+         */
+        public function addBlankWhenEmpty($addBlank = true)
+        {
+            $this->_addBlankWhenEmpty = $addBlank;
+            
+        } // addBlankWhenEmpty()
+        
+        
+        /**
+         *
+         *
+         */
+        public function setAutoBlankLabel($label)
+        {
+            $this->_autoBlankLabel = $label;
+            
+        } // setAutoBlankLabel()
         
     } // SelectElement()
 

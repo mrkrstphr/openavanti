@@ -19,8 +19,11 @@
      * @author      Kristopher Wilson
      * @link        http://www.openavanti.com/docs/form
      */
-    class LabelElement extends FormElement
+    abstract class LabeledFormElement extends FormElement
     {
+        /**
+         *
+         */
         protected $_label = null;
         
         
@@ -28,11 +31,11 @@
          *
          *
          */
-        public function __construct($name, $label)
+        public function __construct($name, $label, $attributes)
         {
-            parent::__construct($name, array());
+            $this->label = new LabelElement($name, $label);
             
-            $this->_label = $label;
+            parent::__construct($name, $attributes);
             
         } // __construct()
         
@@ -41,24 +44,26 @@
          *
          *
          */
-        public function render()
+        public function &getLabel()
         {
-            $label = "";
+            return $this->_label;
             
-            if(class_exists("Validation") && isset($this->_name) && 
-                Validation::fieldHasErrors($this->_name))
+        } // getLabel()
+        
+        
+        /**
+         *
+         *
+         */
+        public function __get($name)
+        {
+            if($name == "label")
             {
-                $this->_attributes["class"] = isset($this->_attributes["class"]) ? 
-                    $this->_attributes["class"] . " error" : "error";
+                return $this->getLabel();
             }
             
-            $atts = $this->generateAttributeString();
-            $label = "<label for=\"{$this->_name}\" {$atts}>{$this->_label}</label>";
-            
-            return $label;
-            
-        } // render()
-        
-    } // LabelElement()
+        } // __get()
+
+    } // LabeledFormElement()
 
 ?>

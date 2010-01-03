@@ -28,7 +28,7 @@
          */
         public function init()
         {
-            $this->_data["type" ] = "text";
+            $this->_attributes["type"] = "text";
             
         } // init()
         
