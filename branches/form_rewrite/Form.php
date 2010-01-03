@@ -179,11 +179,13 @@
          */
         protected function propagateFormValues()
         {
-            foreach($this->_elements as $name => &$element)
+            foreach($this->_elements as &$element)
             {
-                if(isset($this->_data[$name]))
+                $value = $this->translatePathForValue($element->getName());
+                
+                if(!empty($value))
                 {
-                    $element->setValue($this->_data[$name]);
+                    $element->setValue($value);
                 }
             }
             
