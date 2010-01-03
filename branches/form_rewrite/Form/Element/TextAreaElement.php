@@ -32,7 +32,7 @@
          */
         public function render()
         {
-            $html = "<textarea name=\"{$this->_name}\" id=\"{$this->_name}\" " .
+            $html = "<textarea name=\"{$this->_name}\" id=\"{$this->_id}\" " .
                 $this->generateAttributeString() . ">" . $this->_value . "</textarea>";
             
             return $html;

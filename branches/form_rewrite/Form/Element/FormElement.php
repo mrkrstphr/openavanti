@@ -24,7 +24,13 @@
         /**
          *
          */
-        protected $_name = array();
+        protected $_name = null;
+        
+        /**
+         *
+         *
+         */
+        protected $_id = null;
         
         /**
          *
@@ -44,6 +50,10 @@
         public function __construct($name, $attributes)
         {
             $this->_name = $name;
+            
+            $this->_id = str_replace(array("[", "]"), array("_", ""), $name);
+            
+            
             $this->_attributes = $attributes;
             
             $this->init();
@@ -69,6 +79,16 @@
             return $this->_name;
             
         } // getName()
+        
+        
+        /**
+         *
+         */
+        public function getId()
+        {
+            return $this->_id;
+            
+        } // getId()
         
         
         /**

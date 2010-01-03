@@ -56,7 +56,7 @@
          */
         public function render()
         {
-            $html = "<select name=\"{$this->_name}\" id=\"{$this->_name}\" " .
+            $html = "<select name=\"{$this->_name}\" id=\"{$this->_id}\" " .
                 $this->generateAttributeString() . ">\n";
             
             if($this->_addBlankWhenEmpty == true)

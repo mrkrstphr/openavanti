@@ -23,6 +23,16 @@
     class Form 
     {
         /**
+         *
+         */
+        const AutoReferenceStringID = "id";
+        
+        /**
+         *
+         */
+        const AutoReferenceStringName = "name";
+        
+        /**
          * Stores all the elements assigned to this form
          */
         public $_elements = array();
@@ -31,6 +41,11 @@
          * Stores the loaded or submitted data for this form
          */
         public $_data = array();
+        
+        /**
+         *
+         */
+        private $_autoReferenceString = "id";
         
         
         /**
@@ -183,7 +198,7 @@
          */
         public function &addElement(FormElement $element)
         {
-            $this->_elements[$element->getName()] = $element;
+            $this->_elements[] = $element;
             
             return $element;
             
@@ -191,35 +206,101 @@
         
         
         /**
-         * Returns the requested form element, or null if not found
          *
-         * @param string $name The name of the form element to retrieve
+         *
          */
-        public function __get($name)
+        public function autoReferenceString($reference)
         {
-            return $this->getElement($name);
+            if(!in_array($string, array(self::AutoReferenceID, self::AutoReferenceName)))
+            {
+                throw new Exception("Unknown reference string provided: {$reference}");
+            }
             
-        } // get()
+            $this->_autoReferenceString = $reference;
+            
+        } // autoReferenceString()
         
         
         /**
-         * Returns the requested form element, or null if not found
+         * Returns the requested form element, or null if not found. By default,
+         * this method searches for the element by ID. This can be changed
+         * to search by name by using the autoReferenceString method and
+         * passing Form::AutoReferenceName. 
          *
-         * @param string $name The name of the form element to retrieve
-         * @return FormELement The requested form element
+         * @param string $reference The name of the form element to retrieve
+         * @return FormElement The requested form element
          */
-        public function &getElement($name)
+        public function __get($reference)
+        {
+            return $this->getElement($reference);
+            
+        } // __get()
+        
+        
+        /**
+         * Returns the requested form element, or null if not found. By default,
+         * this method searches for the element by ID. This can be changed
+         * to search by name by using the autoReferenceString method and
+         * passing Form::AutoReferenceName. 
+         *
+         * @param string $reference The reference for the form element to
+         *      retrieve
+         * @return FormElement The requested form element
+         */
+        public function &getElement($reference)
+        {
+            if($this->_autoReferenceString == self::AutoReferenceStringID)
+            {
+                return $this->getElementById($reference);
+            }
+            else
+            {
+                return $this->getElement($reference);
+            }
+        
+        } // getElement()
+        
+        
+        /**
+         *
+         *
+         */
+        public function &getElementByName($name)
         {
             $element = null;
             
-            if(isset($this->_elements[$name]))
+            foreach($this->_elements as $testElement)
             {
-                $element = $this->_elements[$name];   
+                if($testElement->getName() == $name)
+                {
+                    $element = &$testElement;
+                }
             }
             
             return $element;
         
-        } // getElement()
+        } // getElementByName()
+        
+        
+        /**
+         *
+         *
+         */
+        public function &getElementById($id)
+        {
+            $element = null;
+            
+            foreach($this->_elements as &$testElement)
+            {
+                if($testElement->getId() == $id)
+                {
+                    $element = &$testElement;
+                }
+            }
+            
+            return $element;
+        
+        } // getElementById()
         
         
         /**

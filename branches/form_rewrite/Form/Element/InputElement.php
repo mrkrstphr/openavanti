@@ -32,7 +32,7 @@
          */
         public function render()
         {
-            $html = "<input name=\"{$this->_name}\" id=\"{$this->_name}\" " .
+            $html = "<input name=\"{$this->_name}\" id=\"{$this->_id}\" " .
                 $this->generateAttributeString() . " value=\"{$this->_value}\" />";
             
             return $html;

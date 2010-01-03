@@ -28,7 +28,7 @@
          */
         public function init()
         {
-            $this->_attributes["checkbox" ] = "text";
+            $this->_attributes["checkbox"] = "text";
             
         } // init()
 

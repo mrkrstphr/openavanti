@@ -28,7 +28,7 @@
          */
         public function init()
         {
-            $this->_attributes["type" ] = "password";
+            $this->_attributes["type"] = "password";
             
         } // init()
 
