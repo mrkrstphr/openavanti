@@ -31,7 +31,7 @@
          *
          *
          */
-        public function __construct($name, $label, $attributes)
+        public function __construct($name, $label = null, $attributes = array())
         {
             $this->label = new LabelElement($name, $label);
             
