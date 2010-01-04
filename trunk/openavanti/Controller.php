@@ -25,7 +25,7 @@
         protected $_dispatcher = null;
         
         // Stores a reference to the view file that will render the page:
-        public $_view = null;
+        public $view = null;
         
         
         /**
@@ -39,7 +39,7 @@
         {
             $this->_dispatcher = &$dispatcher;
             
-            $this->_view = new View($this);
+            $this->view = new View($this);
             
             $this->setDefaultView();
             
@@ -89,7 +89,7 @@
                 $action = $this->getRequest()->getAction();
             }
             
-            $this->_view->setViewScript(strtolower($controller . "/" . $action . View::$_viewFileExtension));
+            $this->view->setViewScript(strtolower($controller . "/" . $action . View::$_viewFileExtension));
             
         } // setDefaultView()
         
@@ -232,7 +232,7 @@
                 $controller->$action();
             }
             
-            $this->_view->setViewScript($controller->_view->getViewScript()); 
+            $this->view->setViewScript($controller->view->getViewScript()); 
             
         } // forwardAction()
         
@@ -242,13 +242,13 @@
          * check to ensure that the file specified actually exists. It is up to the code that loads
          * the view file to do this (normally the Dispatcher class).                 
          *       
-         * @deprecated Use $this->_view->setViewScript()
+         * @deprecated Use $this->view->setViewScript()
          * @argument string The file name of the view file that should be loaded.
          * @returns void
          */ 
         public function setView($view)
         {
-            $this->_view->setViewScript($view);
+            $this->view->setViewScript($view);
         
         } // setView()
         
@@ -260,7 +260,7 @@
          */ 
         public function &getView()
         {
-            return $this->_view;
+            return $this->view;
         
         } // getView()
         
@@ -272,14 +272,14 @@
          * 
          * If the supplied variable already exists, it will be overwritten.                                  
          *
-         * @deprecated Use $this->_view->[name] = [value]
+         * @deprecated Use $this->view->[name] = [value]
          * @argument string The name of the variable to set
          * @argument mixed The value of the variable to set                  
          * @returns void
          */ 
         public function setData($name, $value)
         {
-            $this->_view->$name = $value;
+            $this->view->$name = $value;
             
         } // setData()
         
