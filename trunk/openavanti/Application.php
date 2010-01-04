@@ -36,6 +36,11 @@
         /**
          *
          */
+        protected $_formPath = "";
+        
+        /**
+         *
+         */
         protected $_layoutPath = "";
         
         /**
@@ -73,6 +78,7 @@
             
             $this->_controllerPath = realpath("{$documentRoot}/../application/controllers");
             $this->_modelPath = realpath("{$documentRoot}/../application/models");
+            $this->_formPath = realpath("{$documentRoot}/../application/forms");
             $this->_libraryPath = realpath("{$documentRoot}/../application/library/openavanti");
             $this->_layoutPath = realpath("{$documentRoot}/../application/layouts");
             $this->_viewPath = realpath("{$documentRoot}/../application/views");
@@ -285,7 +291,10 @@
             $paths = array(
                 $this->_controllerPath,
                 $this->_modelPath,
-                $this->_libraryPath
+                $this->_formPath,
+                $this->_libraryPath,
+                $this->_libraryPath . '/Form',
+                $this->_libraryPath . '/Form/Element'
             );
             
             $paths = array_merge($paths, $this->_additionalAutoloadPaths);
