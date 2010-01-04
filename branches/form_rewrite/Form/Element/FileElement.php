@@ -13,7 +13,7 @@
 
 
     /**
-     * 
+     * FormField for a file <input /> element.
      *
      * @category    Forms
      * @author      Kristopher Wilson
@@ -23,12 +23,13 @@
     {
         
         /**
+         * Sets the type attribute to file. 
          *
-         *
+         * @returns void
          */
         public function init()
         {
-            $this->_attributes["file"] = "text";
+            $this->_attributes["type"] = "file";
             
         } // init()
 

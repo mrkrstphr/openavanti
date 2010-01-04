@@ -13,7 +13,7 @@
 
 
     /**
-     * 
+     * FormField for a hidden <input /> element.
      *
      * @category    Forms
      * @author      Kristopher Wilson
@@ -23,8 +23,9 @@
     {
         
         /**
+         * Sets the type attribute to hidden. 
          *
-         *
+         * @returns void
          */
         public function init()
         {

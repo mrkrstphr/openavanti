@@ -23,12 +23,12 @@
     class Form 
     {
         /**
-         *
+         * Used to set auto references to use the id of the form element
          */
         const AutoReferenceStringID = "id";
         
         /**
-         *
+         * Used to set auto references to use the name of the form element
          */
         const AutoReferenceStringName = "name";
         
@@ -174,8 +174,9 @@
         
         
         /**
-         *
-         *
+         * Loops each form element and attempts to populate it with a value,
+         * either user supplied, or from GET or POST. This method is called by
+         * the load() methods to propagate form values to the form elements.
          */
         protected function propagateFormValues()
         {
@@ -196,7 +197,6 @@
          * Adds a new form element to this form class.
          *
          * @param FormElement $element The FormElement to add to this form
-         * @return void
          */
         public function &addElement(FormElement $element)
         {
@@ -208,8 +208,11 @@
         
         
         /**
+         * Sets the auto reference string to either id or name, which controls
+         * which attribute __get() and getElement() use to find an element
          *
-         *
+         * @param string $reference Either of the AutoReference constants
+         * @return Form This object to use in chaining
          */
         public function autoReferenceString($reference)
         {
@@ -264,8 +267,10 @@
         
         
         /**
+         * Finds and returns an element by the name attribute
          *
-         *
+         * @param string $name The name of the attribute
+         * @return FormElement The element being sought
          */
         public function &getElementByName($name)
         {
@@ -285,8 +290,10 @@
         
         
         /**
+         * Finds and returns an element by the id attribute
          *
-         *
+         * @param string $id The id of the attribute
+         * @return FormElement The element being sought
          */
         public function &getElementById($id)
         {
@@ -303,24 +310,6 @@
             return $element;
         
         } // getElementById()
-        
-        
-        /**
-         *
-         *
-         * @param string $name The name of the form element value to retrieve
-         * @return string The value of the form field
-         */
-        public function getValue($name)
-        {
-            if(isset($this->_data[$name]))
-            {
-                return $this->_data[$name];
-            }
-            
-            return null;
-        
-        } // getValue()
         
         
         /**
@@ -376,7 +365,11 @@
         
         
         /**
+         * This internal method is used to find the value of a form field, by
+         * name, working with array elements to resolve them.
          *
+         * @param string $name The name attribute of the form field
+         * @return string The value of the form field
          */
         private function translatePathForValue($name)
         {

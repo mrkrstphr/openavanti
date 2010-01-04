@@ -13,7 +13,7 @@
 
 
     /**
-     * 
+     * FormField for a <select> element.
      *
      * @category    Forms
      * @author      Kristopher Wilson
@@ -21,13 +21,26 @@
      */
     class SelectElement extends LabeledFormElement
     {
+        /**
+         * @var string Stores the default selected option 
+         */
         protected $_default = "";
+        
+        /**
+         * @var bool Should a blank option be added when no value is selected?
+         */
         protected $_addBlankWhenEmpty = false;
+        
+        /**
+         * @var string When $_addBlankWhenEmpty is true, controls the label of
+         *      the blank option
+         */
         protected $_autoBlankLabel = "";
         
         /**
+         * Ensures that the options are stored within the attributes array
          *
-         *
+         * @returns void
          */
         public function init()
         {
@@ -40,19 +53,11 @@
         
         
         /**
-         * Generate a select element for the form. Note that the supplied attributes are not 
-         * validated to be valid attributes for the element. Each element provided is added to the 
-         * XHTML tag.
-         * 
-         * The options are specified by aAttributes[ options ] as an array of key => values to
-         * display in the select         
-         *               
-         * The default (selected) attribute is controlled by aAttributes[ default ], which should
-         * match a valid key in aAttributes[ options ]                         
-         * 
-         * @param array An array of attributes for the HTML element
-         * @param bool Controls whether or not to return the HTML, otherwise echo it, default false
-         * @return void/string If bReturn is true, returns a string with the XHTML, otherwise void
+         * Renders the <select> form element as HTML and returns the HTML
+         * string. Options are specified by an 'options' array stored in the
+         * attributes array when constructing.
+         *
+         * @return string The HTML of the rendered select element
          */
         public function render()
         {
@@ -82,23 +87,38 @@
         
         
         /**
+         * Allows for adding a blank <option> to the <select> when no selection
+         * is made. The benefit of this is to force the user to make a
+         * selection, rather than overlooking the field and leaving the default.
          *
+         * The label for this option can be specified using setAutoBlankLabel()
          *
+         * @param bool $addBlank True if a blank option should be added, false
+         *      otherwise. Default: true
+         * @return SelectElement This object, to allow for chaning
          */
         public function addBlankWhenEmpty($addBlank = true)
         {
             $this->_addBlankWhenEmpty = $addBlank;
             
+            return $this;
+            
         } // addBlankWhenEmpty()
         
         
         /**
+         * Controls the label of the blank <option> automatically added when
+         * no <option> is selected. This behavior is controlled by the
+         * addBlankWhenEmpty() method.
          *
-         *
+         * @param string $label The label to use on the blank element
+         * @return SelectElement This object, to allow for chaning
          */
         public function setAutoBlankLabel($label)
         {
             $this->_autoBlankLabel = $label;
+            
+            return $this;
             
         } // setAutoBlankLabel()
         

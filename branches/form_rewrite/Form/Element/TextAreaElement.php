@@ -13,7 +13,8 @@
 
 
     /**
-     * 
+    /**
+     * FormField for a <textarea> element.
      *
      * @category    Forms
      * @author      Kristopher Wilson
@@ -21,14 +22,12 @@
      */
     class TextAreaElement extends LabeledFormElement
     {
+        
         /**
-         * Generate a textarea element for the form. Note that the supplied attributes are not 
-         * validated to be valid attributes for the element. Each element provided is added to the 
-         * XHTML tag.         
+         * Renders the <textarea> form element as HTML and returns the HTML
+         * string.
          * 
-         * @param array An array of attributes for the HTML element
-         * @param bool Controls whether or not to return the HTML, otherwise echo it, default false
-         * @return void/string If bReturn is true, returns a string with the XHTML, otherwise void
+         * @return string The HTML of the rendered textarea element
          */
         public function render()
         {
@@ -38,7 +37,6 @@
             return $html;
             
         } // render()
-        
         
     } // TextAreaElement()
 

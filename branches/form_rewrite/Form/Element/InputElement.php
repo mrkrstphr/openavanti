@@ -13,7 +13,10 @@
 
 
     /**
-     * 
+     * An abstract implementation of LabeledFormElement that encapsulates any
+     * <input /> element. This class is meant to be inherited by the various
+     * different types of <input /> elements. This implementation takes care of
+     * the default rendering of any <input /> element.
      *
      * @category    Forms
      * @author      Kristopher Wilson
@@ -22,13 +25,9 @@
     abstract class InputElement extends LabeledFormElement
     {
         /**
-         * Generate an input element for the form. Note that the supplied attributes are not 
-         * validated to be valid attributes for the element. Each element provided is added to the 
-         * XHTML tag.         
-         * 
-         * @param array An array of attributes for the HTML element
-         * @param bool Controls whether or not to return the HTML, otherwise echo it, default false
-         * @return void/string If bReturn is true, returns a string with the XHTML, otherwise void
+         * Renders the form element as HTML and returns the HTML string
+         *
+         * @return string The HTML of the rendered form element
          */
         public function render()
         {
@@ -38,7 +37,6 @@
             return $html;
             
         } // render()
-        
         
     } // InputElement()
 

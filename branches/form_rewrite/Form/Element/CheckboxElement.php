@@ -13,7 +13,7 @@
 
 
     /**
-     * 
+     * FormField for a checkbox <input /> element.
      *
      * @category    Forms
      * @author      Kristopher Wilson
@@ -23,12 +23,13 @@
     {
         
         /**
+         * Sets the type attribute to text. 
          *
-         *
+         * @returns void
          */
         public function init()
         {
-            $this->_attributes["checkbox"] = "text";
+            $this->_attributes["type"] = "checkbox";
             
         } // init()
 

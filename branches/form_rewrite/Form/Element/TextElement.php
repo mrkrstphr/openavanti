@@ -13,7 +13,7 @@
 
 
     /**
-     * 
+     * FormField for a text <input /> element.
      *
      * @category    Forms
      * @author      Kristopher Wilson
@@ -23,8 +23,9 @@
     {
         
         /**
+         * Sets the type attribute to text. 
          *
-         *
+         * @returns void
          */
         public function init()
         {
