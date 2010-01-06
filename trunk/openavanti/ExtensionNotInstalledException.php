@@ -12,15 +12,15 @@
  */
  
 
-    /**
-     * This exception extends the PHP Exception class and should be thrown when a required PHP 
-     * extension is not installed.
-     * 
-     * See http://www.php.net/Exception for more information.
-     */         
-    class ExtensionNotInstalledException extends Exception
-    {
-    
-    } // DatabaseConnectionException()
-    
+/**
+ * This exception extends the PHP Exception class and should be thrown when a required PHP 
+ * extension is not installed.
+ * 
+ * See http://www.php.net/Exception for more information.
+ */         
+class ExtensionNotInstalledException extends Exception
+{
+
+} // DatabaseConnectionException()
+
 ?>
