@@ -507,6 +507,53 @@
         
         } // getDatabases()
         
+
+        /**
+         *
+         *
+         */
+        public function parseIdentifier($identifier, $defaultSchema = 'public')
+        {
+            $tableName = "";
+            $schemaName = "";
+
+            if(is_array($identifier))
+            {
+                list($schemaName, $tableName) = $identifier;
+            }
+            else if(strpos($identifier, ".") !== false)
+            {
+                // Caution: In PostgreSQL, table names can have periods. This can lead to errors. 
+                // If using a table name with a period, the developer should pass an array as
+                // an identifier instead of a string:
+            
+                list($schemaName, $tableName) = explode(".", $identifier, 2);
+            }
+            else
+            {
+                $tableName = $identifier;
+            }
+            
+            // If no schemaName is specified, we assume the schema is public. Since we're
+            // attempting to get the columns of a specific table, if no schemaName is
+            // specified, we assume the schema is public. Otherwise, if two tables with the
+            // same name exist in two different schemas, it's almost random which one this
+            // method will return. So let's dictate that it returns the one in the public
+            // schema (assuming their is one). It is not possible to have tables in
+            // PostgreSQL without them being in some schema.
+            
+            // Update, method now accepts second argument of defaultSchema, which defaults to
+            // public, but can be overridden
+
+            if(empty($schemaName))
+            {
+                $schemaName = $defaultSchema;
+            }
+
+            return array($schemaName, $tableName);
+
+        } // parseIdentifier()
+
         
         /**
          * This method returns all tables for the database the class is currently connected to.
@@ -559,24 +606,12 @@
          * 
          * If schema caching is on, this method can pull data from a schema cache. 
          * 
-         * @param string The name of the schema that contains the table
-         * @param string The name of the table for the requested schema
+         * @param string The identifier for the table
          * @returns array An array of schema information for the specified table     
          */  
-        public function getTableDefinition($schemaName, $tableName)
+        public function getTableDefinition($identifier)
         {
-            // If no schemaName is specified, we assume the schema is public. Since we're
-            // attempting to get the columns of a specific table, if no schemaName is
-            // specified, we assume the schema is public. Otherwise, if two tables with the
-            // same name exist in two different schemas, it's almost random which one this
-            // method will return. So let's dictate that it returns the one in the public
-            // schema (assuming their is one). It is not possible to have tables in
-            // PostgreSQL without them being in some schema.
-            
-            if(empty($schemaName))
-            {
-                $schemaName = 'public';
-            }
+            list($schemaName, $tableName) = $this->parseIdentifier($identifier);
             
             $tableIdentifier = $schemaName . "_". $tableName;
             
@@ -589,10 +624,10 @@
             }
             else
             {            
-                $this->getTableColumns($schemaName, $tableName);
-                $this->getTablePrimaryKey($schemaName, $tableName);
-                $this->getTableForeignKeys($schemaName, $tableName);
-            
+                $this->getTableColumns($identifier);
+                $this->getTablePrimaryKey($identifier);
+                $this->getTableForeignKeys($identifier);
+                
                 if(self::$_cacheSchemas)
                 {
                     $cache = new Cache();
@@ -601,10 +636,10 @@
             }
             
             return self::$_schemas[$tableIdentifier];
-        
+            
         } // getTableDefinition()
         
-
+        
         /**
          * Returns an array of columns that belong to the specified table.
          * 
@@ -613,25 +648,13 @@
          * 
          * If schema caching is on, this method can pull data from a schema cache. 
          *
-         * @param string The name of the schema that contains the table
-         * @param string The name of the table for the requested columns
+         * @param string The identifier for the table
          * @returns array An array of columns that belong to the specified table
          */
-        public function getTableColumns($schemaName, $tableName)
+        public function getTableColumns($identifier)
         {
-            // If no schemaName is specified, we assume the schema is public. Since we're
-            // attempting to get the columns of a specific table, if no schemaName is
-            // specified, we assume the schema is public. Otherwise, if two tables with the
-            // same name exist in two different schemas, it's almost random which one this
-            // method will return. So let's dictate that it returns the one in the public
-            // schema (assuming their is one). It is not possible to have tables in
-            // PostgreSQL without them being in some schema.
-            
-            if(empty($schemaName))
-            {
-                $schemaName = 'public';
-            }
-            
+            list($schemaName, $tableName) = $this->parseIdentifier($identifier);
+
             $tableIdentifier = $schemaName . "_". $tableName;
             
             if(isset(self::$_schemas[$tableIdentifier]["columns"]))
@@ -677,7 +700,7 @@
                 pn.nspname = '{$schemaName}'
             ORDER BY 
                 pa.attnum";
-
+            
             if(!($columns = $this->query($sql)))
             {
                 throw new QueryFailedException($this->getLastError());
@@ -722,33 +745,21 @@
          * 
          * If schema caching is on, this method can pull data from a schema cache. 
          * 
-         * @param string The name of the schema that contains the table
-         * @param string The name of the table for the requested primary key
+         * @param string The identifier for the table
          * @returns array An array of columns that belong to the primary key for the specified table
          */
-        public function getTablePrimaryKey($schemaName, $tableName)
+        public function getTablePrimaryKey($identifier)
         {
-            // If no schemaName is specified, we assume the schema is public. Since we're
-            // attempting to get the columns of a specific table, if no schemaName is
-            // specified, we assume the schema is public. Otherwise, if two tables with the
-            // same name exist in two different schemas, it's almost random which one this
-            // method will return. So let's dictate that it returns the one in the public
-            // schema (assuming their is one). It is not possible to have tables in
-            // PostgreSQL without them being in some schema.
-            
-            if(empty($schemaName))
-            {
-                $schemaName = 'public';
-            }
-            
+            list($schemaName, $tableName) = $this->parseIdentifier($identifier);
+           
             $tableIdentifier = $schemaName . "_". $tableName;
             
             if(isset(self::$_schemas[$tableIdentifier]["primary_key"]))
             {
                 return self::$_schemas[$tableIdentifier]["primary_key"];
             }
-        
-            $localTable = $this->getTableColumns($schemaName, $tableName);
+            
+            $localTable = $this->getTableColumns($identifier);
             
             self::$_schemas[$tableIdentifier]["primary_key"] = array();
              
@@ -775,7 +786,7 @@
             {
                 throw new QueryFailedException($this->getLastError());
             }
-
+            
             if($primaryKeys->Count() != 0)
             {             
                 $primaryKey = $primaryKeys->Current();
@@ -784,18 +795,18 @@
                 
                 foreach($indedColumns as $columnNumber)
                 {
-                    $column = $this->getColumnByNumber($schemaName, $tableName, $columnNumber);
+                    $column = $this->getColumnByNumber($identifier, $columnNumber);
                     
                     self::$_schemas[$tableIdentifier]["primary_key"][] = 
                         $column["name"];
                 }
             }
-    
+            
             return self::$_schemas[$tableIdentifier]["primary_key"];
-        
+            
         } // getTablePrimaryKey()
         
-
+        
         /**
          * Returns an array of relationships (foreign keys) for the specified table.
          * 
@@ -804,24 +815,12 @@
          * 
          * If schema caching is on, this method can pull data from a schema cache.
          * 
-         * @param string The name of the schema that contains the table
-         * @param string The name of the table for the requested relationships
+         * @param string The identifier for the table
          * @returns array An array of relationships for the specified table
          */
-        public function getTableForeignKeys($schemaName, $tableName)
+        public function getTableForeignKeys($identifier)
         {
-            // If no schemaName is specified, we assume the schema is public. Since we're
-            // attempting to get the columns of a specific table, if no schemaName is
-            // specified, we assume the schema is public. Otherwise, if two tables with the
-            // same name exist in two different schemas, it's almost random which one this
-            // method will return. So let's dictate that it returns the one in the public
-            // schema (assuming their is one). It is not possible to have tables in
-            // PostgreSQL without them being in some schema.
-            
-            if(empty($schemaName))
-            {
-                $schemaName = 'public';
-            }
+            list($schemaName, $tableName) = $this->parseIdentifier($identifier);
             
             $tableIdentifier = $schemaName . "_". $tableName;
             
@@ -830,7 +829,7 @@
                 return self::$_schemas[$tableIdentifier]["foreign_key"];
             }
             
-            $localTable = $this->getTableColumns($schemaName, $tableName);
+            $localTable = $this->getTableColumns($identifier);
             
             self::$_schemas[$tableIdentifier]["foreign_key"] = array();
         
@@ -866,7 +865,7 @@
                 contype = 'f'
             AND
                 confrelid IS NOT NULL";
-
+            
             if(!($foreignKeys = $this->query($sql)))
             {
                 throw new QueryFailedException($this->getLastError());
@@ -880,33 +879,33 @@
                 
                 $localFields = explode(",", 
                     str_replace(array("{", "}"), "", $foreignKey->conkey));
-            
+                
                 $foreignFields = explode(",", 
                     str_replace(array("{", "}"), "", $foreignKey->confkey));
-
-                $fields = $this->getTableColumns($foreignSchema, $foreignKey->typname);
+                
+                $fields = $this->getTableColumns(array($foreignSchema, $foreignKey->typname));
                 
                 foreach($foreignFields as $index => $fieldNumber)
                 {
-                    $foreignColumn = $this->getColumnByNumber($foreignSchema, $foreignKey->typname, $fieldNumber);
+                    $foreignColumn = $this->getColumnByNumber(array($foreignSchema, $foreignKey->typname), $fieldNumber);
                     $foreignFields[$index] = $foreignColumn["name"];
                 }
                 
                 foreach($localFields as $index => $fieldNumber)
                 {
-                    $localColumn = $this->getColumnByNumber($schemaName, $tableName, $fieldNumber);
+                    $localColumn = $this->getColumnByNumber(array($schemaName, $tableName), $fieldNumber);
                     $localFields[$index] = $localColumn["name"];
                 }
-            
+                
                 // we currently do not handle references to multiple fields:
-
+                
                 $localField = current($localFields);
-
+                
                 $name = substr($localField, strlen($localField) - 3) == "_id" ? 
                     substr($localField, 0, strlen($localField) - 3) : $localField;
                 
                 $name = StringFunctions::toSingular($name);
-                
+                                
                 self::$_schemas[$tableIdentifier]["foreign_key"][$name] = array(
                     "schema" => $foreignSchema,
                     "table" => $foreignKey->typname,
@@ -916,7 +915,7 @@
                     "type" => "m-1",
                     "dependency" => true
                 );
-            
+                
                 $count++;
             }
             
@@ -954,38 +953,40 @@
                 contype = 'f'
             AND
                 confrelid IS NOT NULL";
-
+            
             if(!($foreignKeys = $this->query($sql)))
             {
                 throw new QueryFailedException($this->getLastError());
             }
-
+            
             foreach($foreignKeys as $foreignKey)
             {
                 $foreignSchema = $foreignKey->nspname;
                 
                 $localFields = explode(",", 
                     str_replace(array("{", "}"), "", $foreignKey->confkey));
-            
+                
                 $foreignFields = explode( ",", 
                     str_replace(array("{", "}"), "", $foreignKey->conkey));
                 
-                $this->getTableDefinition($foreignSchema, $foreignKey->typname);
+                $foreignIdentifier = $foreignSchema . "." . $foreignkey->typname;
+
+                $this->getTableDefinition($foreignIdentifier);
                 
-                $fields = $this->getTableColumns($foreignSchema, $foreignKey->typname);
+                $fields = $this->getTableColumns($foreignIdentifier);
                 
                 foreach($foreignFields as $index => $fieldNumber)
                 {
-                    $field = $this->getColumnByNumber($foreignSchema, $foreignKey->typname, $fieldNumber);
+                    $field = $this->getColumnByNumber($foreignIdentifier, $fieldNumber);
                     $foreignFields[$index] = $field["name"];
                 }
                 
                 foreach($localFields as $index => $fieldNumber)
                 {
-                    $field = $this->getColumnByNumber($schemaName, $tableName, $fieldNumber);
+                    $field = $this->getColumnByNumber(array($schemaName, $tableName), $fieldNumber);
                     $localFields[$index] = $field["name"];
                 }
-
+                
                 $localField = reset($localFields);
                 $foreignField = reset($foreignFields);
                 
@@ -993,8 +994,10 @@
                 // if local_table.foreign_key == local_table.primary_key THEN
                 //      Relationship = 1-1
                 // end
+               
+                $foreignIdentifierKey = str_replace(".", "_", $foreignIdentifier);
                 
-                $tmpForeignPrimaryKey = &self::$_schemas[$foreignKey->typname]["primary_key"];
+                $tmpForeignPrimaryKey = &self::$_schemas[$foreignIdentifierKey]["primary_key"];
                 $tmpLocalPrimaryKey = &self::$_schemas[$tableIdentifier]["primary_key"];
                 
                 $foreignFieldIsPrimary = count($tmpForeignPrimaryKey) == 1 &&
@@ -1009,7 +1012,7 @@
                 {
                     $type = "1-1";
                 }
-
+                
                 self::$_schemas[$tableIdentifier]["foreign_key"][$foreignKey->typname] = array(
                     "schema" => $foreignSchema,
                     "table" => $foreignKey->typname,
@@ -1024,21 +1027,22 @@
             }
             
             return self::$_schemas[$tableIdentifier][ "foreign_key"];
-        
+            
         } // getTableForeignKeys()
         
-
+        
         /**
          * This method determines if the specified tables primary key (or a single column from
          * a compound primary key) references another table.         
          *
-         * @param string The name of the schema that contains the table
-         * @param string The name of the table that the key exists on
+         * @param string The identifier for the table
          * @param string The column that is, or is part of, the primary key for the table                 
          * @returns boolean True if the primary key references another table, false otherwise                
          */
-        public function isPrimaryKeyReference($schemaName, $tableName, $columnName)
+        public function isPrimaryKeyReference($identifier, $columnName)
         {
+            list($schemaName, $tableName) = $this->parseIdentifier($identifier);
+            
             $foreignKeys = $this->getTableForeignKeys($schemaName, $tableName);
                         
             foreach($foreignKeys as $foreignKey)
@@ -1050,20 +1054,21 @@
             }
             
             return false;
-        
+            
         } // isPrimaryKeyReference()
         
-
+        
         /**
          * Returns the data type of the specified column in the specified table. 
          * 
-         * @param string The name of the schema that contains the table
-         * @param string The name of the table that the desired column belongs to 
+         * @param string The identifier for the table
          * @param string The name of the column that is desired to know the type of 
          * @returns string The data type of the column, if one is found, or null.
          */
-        public function getColumnType($schemaName, $tableName, $columnName)
+        public function getColumnType($identifier, $columnName)
         {
+            list($schemaName, $tableName) = $this->parseIdentifier($identifier);
+
             $columns = $this->getTableColumns($schemaName, $tableName);
             
             foreach($columns as $column)
@@ -1085,25 +1090,13 @@
          * This method first determines whether or not the table exists in the schemas array. If not, 
          * it attempts to find the table in the PostgreSQL catalog. 
          * 
-         * @param string The name of the schema that contains the table
-         * @param string The name of the table to determine existence
+         * @param string The identifier for the table
          * @returns boolean True or false, depending on whether the table exists             
          */
-        public function tableExists($schemaName, $tableName)
+        public function tableExists($identifier)
         {
-            // If no schemaName is specified, we assume the schema is public. Since we're
-            // attempting to get the columns of a specific table, if no schemaName is
-            // specified, we assume the schema is public. Otherwise, if two tables with the
-            // same name exist in two different schemas, it's almost random which one this
-            // method will return. So let's dictate that it returns the one in the public
-            // schema (assuming their is one). It is not possible to have tables in
-            // PostgreSQL without them being in some schema.
-            
-            if(empty($schemaName))
-            {
-                $schemaName = 'public';
-            }
-            
+            list($schemaName, $tableName) = $this->parseIdentifier($identifier);
+
             $tableIdentifier = $schemaName . "_". $tableName;
             
             if(isset(self::$_schemas[$tableIdentifier]))
@@ -1142,28 +1135,16 @@
          * This method is primarily interally as, in the PostgreSQL catalog, table references, 
          * indexes, etc, are stored by column number in the catalog tables. 
          *
-         * @param string The name of the schema that the table belongs to
-         * @param string The name of the table that the column belongs to 
+         * @param string The identifier for the table
          * @param int The column number from the table (from the PostgreSQL catalog) 
          * @returns string The name of the column, if one is found, or null
          */
-        protected function getColumnByNumber($schemaName, $tableName, $columnNumber)
+        protected function getColumnByNumber($identifier, $columnNumber)
         {
-            // If no schemaName is specified, we assume the schema is public. Since we're
-            // attempting to get the columns of a specific table, if no schemaName is
-            // specified, we assume the schema is public. Otherwise, if two tables with the
-            // same name exist in two different schemas, it's almost random which one this
-            // method will return. So let's dictate that it returns the one in the public
-            // schema (assuming their is one). It is not possible to have tables in
-            // PostgreSQL without them being in some schema.
-            
-            if(empty($schemaName))
-            {
-                $schemaName = 'public';
-            }
-            
+            list($schemaName, $tableName) = $this->parseIdentifier($identifier);
+
             $tableIdentifier = $schemaName . "_". $tableName;
-            
+
             foreach(self::$_schemas[$tableIdentifier]["columns"] as $column)
             {
                 if($column["number"] == $columnNumber)
@@ -1195,16 +1176,16 @@
          * name. Accepts a separator, "." by default, and also, by default,
          * quotes the identifier using quoteIdentifier().
          *
-         * @param string The name of the schema for the identifier (can
-         *      be null)
-         * @param string The name of the table for the identifier
+         * @param string The identifier for the table
          * @param string The separator to place between schema and table.
          *      Default: .
          * @param bool Should the identifier be quoted. Default: true
          * @returns string The identifier
          */
-        public function getIdentifier($schemaName, $tableName, $separator = ".", $quote = true)
+        public function getIdentifier($identifier, $separator = ".", $quote = true)
         {
+            list($schemaName, $tableName) = $this->parseIdentifier($identifier);
+
             $identifier = "";
             
             if(!empty($schemaName))
@@ -1252,8 +1233,8 @@
             }
             
         } // setSearchPath()
-
-
+        
+        
         /**
          * Returns the version of the database server.
          *
@@ -1264,9 +1245,9 @@
             $versions = pg_version( $this->_databaseResource );
             
             return $versions[ "server" ];
-
+            
         } // getVersion()
-
+        
     } // PostgresDatabase()
 
 ?>
