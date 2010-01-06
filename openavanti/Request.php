@@ -12,160 +12,160 @@
  */
 
 
+/**
+ * The request object stores information about the web request and how it 
+ * was routed, as well as stores data setup by the controller, including 
+ * view file and loaded data.
+ *
+ * @category    Response
+ * @author      Kristopher Wilson
+ * @link        http://www.openavanti.com/docs/request
+ */
+class Request
+{
+    public $_uri = null;
+    public $_rewrittenUri = null;
+    
+    public $_controllerName = null;
+    public $_actionName = null;
+    
+    public $_arguments = array();
+    
+    public $_requestType = "";
+    
+    public $_secureConnection = false;
+    
+    
     /**
-     * The request object stores information about the web request and how it 
-     * was routed, as well as stores data setup by the controller, including 
-     * view file and loaded data.
+     * Constructor. Determines information about the request type and 
+     * connection type and stores it within the class.       
      *
-     * @category    Response
-     * @author      Kristopher Wilson
-     * @link        http://www.openavanti.com/docs/request
      */
-    class Request
+    public function __construct()
     {
-        public $_uri = null;
-        public $_rewrittenUri = null;
+        $this->_requestType = $_SERVER["REQUEST_METHOD"];
         
-        public $_controllerName = null;
-        public $_actionName = null;
+        $this->_secureConnection = isset($_SERVER["HTTPS"]) && 
+            !empty($_SERVER["HTTPS"]);
+    
+    } // __construct()
+    
+    
+    /**
+     * Returns true if the current request came via a secure connection, or 
+     * false otherwise.
+     *
+     * @returns bool True if the current request is a secure connection, 
+     *      false otherwise
+     */                             
+    public function isSecureConnection()
+    {
+        return $this->_secureConnection;
         
-        public $_arguments = array();
+    } // isSecureConnection()
+    
+    
+    /**
+     * Returns true if the current request is a POST request, or false 
+     * otherwise.
+     *
+     * @returns bool True if the current request is a POST request, false 
+     *      otherwise
+     */                             
+    public function isPostRequest()
+    {
+        return strtolower($this->_requestType) == "post";
         
-        public $_requestType = "";
+    } // isPostRequest()
+    
+    
+    /**
+     * Returns true if the current request is a GET request, or false 
+     * otherwise.
+     *
+     * @returns bool True if the current request is a GET request, false 
+     *      otherwise
+     */                             
+    public function isGetRequest()
+    {
+        return strtolower($this->_requestType) == "get";
         
-        public $_secureConnection = false;
+    } // isGetRequest()
+    
+    
+    /**
+     * Determines whether or not the current HTTP request came via AJAX.                                             
+     * 
+     * @returns boolean True of the request is via AJAX, false otherwise 
+     */
+    public static function isAjaxRequest()
+    {
+        return isset($_SERVER["HTTP_X_REQUESTED_WITH"]);
         
-        
-        /**
-         * Constructor. Determines information about the request type and 
-         * connection type and stores it within the class.       
-         *
-         */
-        public function __construct()
-        {
-            $this->_requestType = $_SERVER["REQUEST_METHOD"];
-            
-            $this->_secureConnection = isset($_SERVER["HTTPS"]) && 
-                !empty($_SERVER["HTTPS"]);
-        
-        } // __construct()
-        
-        
-        /**
-         * Returns true if the current request came via a secure connection, or 
-         * false otherwise.
-         *
-         * @returns bool True if the current request is a secure connection, 
-         *      false otherwise
-         */                             
-        public function isSecureConnection()
-        {
-            return $this->_secureConnection;
-            
-        } // isSecureConnection()
-        
-        
-        /**
-         * Returns true if the current request is a POST request, or false 
-         * otherwise.
-         *
-         * @returns bool True if the current request is a POST request, false 
-         *      otherwise
-         */                             
-        public function isPostRequest()
-        {
-            return strtolower($this->_requestType) == "post";
-            
-        } // isPostRequest()
-        
-        
-        /**
-         * Returns true if the current request is a GET request, or false 
-         * otherwise.
-         *
-         * @returns bool True if the current request is a GET request, false 
-         *      otherwise
-         */                             
-        public function isGetRequest()
-        {
-            return strtolower($this->_requestType) == "get";
-            
-        } // isGetRequest()
-        
-        
-        /**
-         * Determines whether or not the current HTTP request came via AJAX.                                             
-         * 
-         * @returns boolean True of the request is via AJAX, false otherwise 
-         */
-        public static function isAjaxRequest()
-        {
-            return isset($_SERVER["HTTP_X_REQUESTED_WITH"]);
-            
-        } // isAjaxRequest()
+    } // isAjaxRequest()
 
 
-        /**
-         * Returns the requested URI as it was passed to the server
-         * 
-         * @returns string The requested URI
-         */
-        public function getUri()
-        {
-            return $this->_uri;
-            
-        } // getUri()
+    /**
+     * Returns the requested URI as it was passed to the server
+     * 
+     * @returns string The requested URI
+     */
+    public function getUri()
+    {
+        return $this->_uri;
         
+    } // getUri()
+    
+    
+    /**
+     * Returns the requested URI after any user rewrites are performed
+     * through the dispatching process
+     * 
+     * @returns string The requested URI after any user rewrites are 
+     *      performed
+     */
+    public function getRewrittenUri()
+    {
+        return $this->_rewrittenUri;
         
-        /**
-         * Returns the requested URI after any user rewrites are performed
-         * through the dispatching process
-         * 
-         * @returns string The requested URI after any user rewrites are 
-         *      performed
-         */
-        public function getRewrittenUri()
-        {
-            return $this->_rewrittenUri;
-            
-        } // getRewrittenUri()
+    } // getRewrittenUri()
 
 
-        /**
-         * Returns the controller component of the request from the URI
-         * 
-         * @returns string The controller part of the request
-         */
-        public function getController()
-        {
-            return $this->_controllerName;
-            
-        } // getController()
+    /**
+     * Returns the controller component of the request from the URI
+     * 
+     * @returns string The controller part of the request
+     */
+    public function getController()
+    {
+        return $this->_controllerName;
         
+    } // getController()
+    
 
-        /**
-         * Returns the action component of the request from the URI
-         * 
-         * @returns string The action part of the request
-         */
-        public function getAction()
-        {
-            return $this->_actionName;
-            
-        } // getAction()
+    /**
+     * Returns the action component of the request from the URI
+     * 
+     * @returns string The action part of the request
+     */
+    public function getAction()
+    {
+        return $this->_actionName;
         
+    } // getAction()
+    
 
-        /**
-         * Returns all arguments of the request from the URI
-         * 
-         * @returns string The arguments of the request
-         */
-        public function getArguments()
-        {
-            return $this->_arguments;
-            
-        } // getAction()
+    /**
+     * Returns all arguments of the request from the URI
+     * 
+     * @returns string The arguments of the request
+     */
+    public function getArguments()
+    {
+        return $this->_arguments;
+        
+    } // getAction()
 
-    } // Request()
+} // Request()
 
 ?>

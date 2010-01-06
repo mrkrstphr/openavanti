@@ -12,15 +12,15 @@
  */
  
 
-    /**
-     * This exception extends the PHP Exception class and should be thrown when a needed file 
-     * does not exist at the specified location.
-     * 
-     * See http://www.php.net/Exception for more information.
-     */         
-    class FileNotFoundException extends Exception
-    {
-    
-    } // FileNotFoundException()
-    
+/**
+ * This exception extends the PHP Exception class and should be thrown when a needed file 
+ * does not exist at the specified location.
+ * 
+ * See http://www.php.net/Exception for more information.
+ */         
+class FileNotFoundException extends Exception
+{
+
+} // FileNotFoundException()
+
 ?>
