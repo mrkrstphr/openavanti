@@ -12,53 +12,53 @@
  */
 
 
+/**
+ * 
+ *
+ * @category    Forms
+ * @author      Kristopher Wilson
+ * @link        http://www.openavanti.com/docs/form
+ */
+class LabelElement extends FormElement
+{
+    protected $_label = null;
+    
+    
     /**
-     * 
      *
-     * @category    Forms
-     * @author      Kristopher Wilson
-     * @link        http://www.openavanti.com/docs/form
+     *
      */
-    class LabelElement extends FormElement
+    public function __construct($name, $label)
     {
-        protected $_label = null;
+        parent::__construct($name, array());
         
+        $this->_label = $label;
         
-        /**
-         *
-         *
-         */
-        public function __construct($name, $label)
+    } // __construct()
+    
+    
+    /**
+     *
+     *
+     */
+    public function render()
+    {
+        $label = "";
+        
+        if(class_exists("Validation") && isset($this->_name) && 
+            Validation::fieldHasErrors($this->_name))
         {
-            parent::__construct($name, array());
-            
-            $this->_label = $label;
-            
-        } // __construct()
+            $this->_attributes["class"] = isset($this->_attributes["class"]) ? 
+                $this->_attributes["class"] . " error" : "error";
+        }
         
+        $atts = $this->generateAttributeString();
+        $label = "<label for=\"{$this->_name}\" {$atts}>{$this->_label}</label>";
         
-        /**
-         *
-         *
-         */
-        public function render()
-        {
-            $label = "";
-            
-            if(class_exists("Validation") && isset($this->_name) && 
-                Validation::fieldHasErrors($this->_name))
-            {
-                $this->_attributes["class"] = isset($this->_attributes["class"]) ? 
-                    $this->_attributes["class"] . " error" : "error";
-            }
-            
-            $atts = $this->generateAttributeString();
-            $label = "<label for=\"{$this->_name}\" {$atts}>{$this->_label}</label>";
-            
-            return $label;
-            
-        } // render()
+        return $label;
         
-    } // LabelElement()
+    } // render()
+    
+} // LabelElement()
 
 ?>

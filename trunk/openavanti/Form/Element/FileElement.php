@@ -12,27 +12,27 @@
  */
 
 
+/**
+ * FormField for a file <input /> element.
+ *
+ * @category    Forms
+ * @author      Kristopher Wilson
+ * @link        http://www.openavanti.com/docs/form
+ */
+class FileElement extends InputElement
+{
+    
     /**
-     * FormField for a file <input /> element.
+     * Sets the type attribute to file. 
      *
-     * @category    Forms
-     * @author      Kristopher Wilson
-     * @link        http://www.openavanti.com/docs/form
+     * @returns void
      */
-    class FileElement extends InputElement
+    public function init()
     {
+        $this->_attributes["type"] = "file";
         
-        /**
-         * Sets the type attribute to file. 
-         *
-         * @returns void
-         */
-        public function init()
-        {
-            $this->_attributes["type"] = "file";
-            
-        } // init()
+    } // init()
 
-    } // FileElement()
+} // FileElement()
 
 ?>

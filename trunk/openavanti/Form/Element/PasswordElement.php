@@ -12,27 +12,27 @@
  */
 
 
+/**
+ * FormField for a password <input /> element.
+ *
+ * @category    Forms
+ * @author      Kristopher Wilson
+ * @link        http://www.openavanti.com/docs/form
+ */
+class PasswordElement extends InputElement
+{
+    
     /**
-     * FormField for a password <input /> element.
+     * Sets the type attribute to password. 
      *
-     * @category    Forms
-     * @author      Kristopher Wilson
-     * @link        http://www.openavanti.com/docs/form
+     * @returns void
      */
-    class PasswordElement extends InputElement
+    public function init()
     {
+        $this->_attributes["type"] = "password";
         
-        /**
-         * Sets the type attribute to password. 
-         *
-         * @returns void
-         */
-        public function init()
-        {
-            $this->_attributes["type"] = "password";
-            
-        } // init()
+    } // init()
 
-    } // PasswordElement()
+} // PasswordElement()
 
 ?>

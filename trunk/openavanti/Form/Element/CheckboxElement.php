@@ -12,27 +12,27 @@
  */
 
 
+/**
+ * FormField for a checkbox <input /> element.
+ *
+ * @category    Forms
+ * @author      Kristopher Wilson
+ * @link        http://www.openavanti.com/docs/form
+ */
+class CheckboxElement extends InputElement
+{
+    
     /**
-     * FormField for a checkbox <input /> element.
+     * Sets the type attribute to text. 
      *
-     * @category    Forms
-     * @author      Kristopher Wilson
-     * @link        http://www.openavanti.com/docs/form
+     * @returns void
      */
-    class CheckboxElement extends InputElement
+    public function init()
     {
+        $this->_attributes["type"] = "checkbox";
         
-        /**
-         * Sets the type attribute to text. 
-         *
-         * @returns void
-         */
-        public function init()
-        {
-            $this->_attributes["type"] = "checkbox";
-            
-        } // init()
+    } // init()
 
-    } // CheckboxElement()
+} // CheckboxElement()
 
 ?>

@@ -12,32 +12,32 @@
  */
 
 
+/**
+ * An abstract implementation of LabeledFormElement that encapsulates any
+ * <input /> element. This class is meant to be inherited by the various
+ * different types of <input /> elements. This implementation takes care of
+ * the default rendering of any <input /> element.
+ *
+ * @category    Forms
+ * @author      Kristopher Wilson
+ * @link        http://www.openavanti.com/docs/form
+ */
+abstract class InputElement extends LabeledFormElement
+{
     /**
-     * An abstract implementation of LabeledFormElement that encapsulates any
-     * <input /> element. This class is meant to be inherited by the various
-     * different types of <input /> elements. This implementation takes care of
-     * the default rendering of any <input /> element.
+     * Renders the form element as HTML and returns the HTML string
      *
-     * @category    Forms
-     * @author      Kristopher Wilson
-     * @link        http://www.openavanti.com/docs/form
+     * @return string The HTML of the rendered form element
      */
-    abstract class InputElement extends LabeledFormElement
+    public function render()
     {
-        /**
-         * Renders the form element as HTML and returns the HTML string
-         *
-         * @return string The HTML of the rendered form element
-         */
-        public function render()
-        {
-            $html = "<input name=\"{$this->_name}\" id=\"{$this->_id}\" " .
-                $this->generateAttributeString() . " value=\"{$this->_value}\" />";
-            
-            return $html;
-            
-        } // render()
+        $html = "<input name=\"{$this->_name}\" id=\"{$this->_id}\" " .
+            $this->generateAttributeString() . " value=\"{$this->_value}\" />";
         
-    } // InputElement()
+        return $html;
+        
+    } // render()
+    
+} // InputElement()
 
 ?>
