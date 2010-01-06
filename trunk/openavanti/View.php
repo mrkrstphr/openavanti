@@ -8,7 +8,7 @@
  * @copyright       Copyright (c) 2007-2010, Kristopher Wilson
  * @license         http://www.openavanti.com/license
  * @link            http://www.openavanti.com
- * @version         1.3.0-beta
+ * @version         SVN: $Id$
  */
  
  

@@ -1,14 +1,14 @@
 <?php
-/***************************************************************************************************
+/**
  * OpenAvanti
  *
  * OpenAvanti is an open source, object oriented framework for PHP 5+
  *
- * @author          Kristopher Wilson
+ * @author          Kristopher Wilson <kwilson@shuttlebox.net>
  * @copyright       Copyright (c) 2007-2010, Kristopher Wilson
  * @license         http://www.openavanti.com/license
  * @link            http://www.openavanti.com
- * @version         1.3.0-beta
+ * @version         SVN: $Id$
  */
  
  
@@ -16,7 +16,7 @@
  * A library for manipulating XML objects and/or strings
  *
  * @category    String
- * @author      Kristopher Wilson
+ * @author      Kristopher Wilson <kwilson@shuttlebox.net>
  * @link        http://www.openavanti.com/docs/xmlfunctions
  */
 class XMLFunctions
@@ -40,8 +40,9 @@ class XMLFunctions
      * This method requires the DOM extension and DOMDocument class. If this class does not
      * exist, PrettyPrint will throw an exception.                            
      *
-     * @argument string The XML string to format
-     * @returns string A properly indented, pretty version of the passed XML
+     * @param string $xml The XML string to format
+     *
+     * @return string A properly indented, pretty version of the passed XML
      */
     public static function prettyPrint($xml)
     {
