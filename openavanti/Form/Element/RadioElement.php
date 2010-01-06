@@ -12,27 +12,27 @@
  */
 
 
+/**
+ * FormField for a radio <input /> element.
+ *
+ * @category    Forms
+ * @author      Kristopher Wilson
+ * @link        http://www.openavanti.com/docs/form
+ */
+class RadioElement extends InputElement
+{
+    
     /**
-     * FormField for a radio <input /> element.
+     * Sets the type attribute to radio. 
      *
-     * @category    Forms
-     * @author      Kristopher Wilson
-     * @link        http://www.openavanti.com/docs/form
+     * @returns void
      */
-    class RadioElement extends InputElement
+    public function init()
     {
+        $this->_attributes["type"] = "radio";
         
-        /**
-         * Sets the type attribute to radio. 
-         *
-         * @returns void
-         */
-        public function init()
-        {
-            $this->_attributes["type"] = "radio";
-            
-        } // init()
+    } // init()
 
-    } // RadioElement()
+} // RadioElement()
 
 ?>

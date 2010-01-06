@@ -12,27 +12,27 @@
  */
 
 
+/**
+ * FormField for a text <input /> element.
+ *
+ * @category    Forms
+ * @author      Kristopher Wilson
+ * @link        http://www.openavanti.com/docs/form
+ */
+class TextElement extends InputElement
+{
+    
     /**
-     * FormField for a text <input /> element.
+     * Sets the type attribute to text. 
      *
-     * @category    Forms
-     * @author      Kristopher Wilson
-     * @link        http://www.openavanti.com/docs/form
+     * @returns void
      */
-    class TextElement extends InputElement
+    public function init()
     {
+        $this->_attributes["type"] = "text";
         
-        /**
-         * Sets the type attribute to text. 
-         *
-         * @returns void
-         */
-        public function init()
-        {
-            $this->_attributes["type"] = "text";
-            
-        } // init()
-        
-    } // TextElement()
+    } // init()
+    
+} // TextElement()
 
 ?>

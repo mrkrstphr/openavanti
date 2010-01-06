@@ -12,27 +12,27 @@
  */
 
 
+/**
+ * FormField for a hidden <input /> element.
+ *
+ * @category    Forms
+ * @author      Kristopher Wilson
+ * @link        http://www.openavanti.com/docs/form
+ */
+class HiddenElement extends InputElement
+{
+    
     /**
-     * FormField for a hidden <input /> element.
+     * Sets the type attribute to hidden. 
      *
-     * @category    Forms
-     * @author      Kristopher Wilson
-     * @link        http://www.openavanti.com/docs/form
+     * @returns void
      */
-    class HiddenElement extends InputElement
+    public function init()
     {
+        $this->_attributes["type"] = "hidden";
         
-        /**
-         * Sets the type attribute to hidden. 
-         *
-         * @returns void
-         */
-        public function init()
-        {
-            $this->_attributes["type"] = "hidden";
-            
-        } // init()
+    } // init()
 
-    } // HiddenElement()
+} // HiddenElement()
 
 ?>

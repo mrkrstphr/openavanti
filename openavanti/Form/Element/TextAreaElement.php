@@ -12,32 +12,31 @@
  */
 
 
+/**
+ * FormField for a <textarea> element.
+ *
+ * @category    Forms
+ * @author      Kristopher Wilson
+ * @link        http://www.openavanti.com/docs/form
+ */
+class TextAreaElement extends LabeledFormElement
+{
+    
     /**
-    /**
-     * FormField for a <textarea> element.
-     *
-     * @category    Forms
-     * @author      Kristopher Wilson
-     * @link        http://www.openavanti.com/docs/form
+     * Renders the <textarea> form element as HTML and returns the HTML
+     * string.
+     * 
+     * @return string The HTML of the rendered textarea element
      */
-    class TextAreaElement extends LabeledFormElement
+    public function render()
     {
+        $html = "<textarea name=\"{$this->_name}\" id=\"{$this->_id}\" " .
+            $this->generateAttributeString() . ">" . $this->_value . "</textarea>";
         
-        /**
-         * Renders the <textarea> form element as HTML and returns the HTML
-         * string.
-         * 
-         * @return string The HTML of the rendered textarea element
-         */
-        public function render()
-        {
-            $html = "<textarea name=\"{$this->_name}\" id=\"{$this->_id}\" " .
-                $this->generateAttributeString() . ">" . $this->_value . "</textarea>";
-            
-            return $html;
-            
-        } // render()
+        return $html;
         
-    } // TextAreaElement()
+    } // render()
+    
+} // TextAreaElement()
 
 ?>
