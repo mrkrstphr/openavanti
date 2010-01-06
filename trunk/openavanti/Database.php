@@ -273,7 +273,7 @@
          * 
          * 
          */
-        abstract public function getDefaultSchema();
+        //abstract public function getDefaultSchema();
         
 
         /**
@@ -347,11 +347,10 @@
          * 
          * If schema caching is on, this method can pull data from a schema cache. 
          * 
-         * @argument string The name of the schema that contains the table
-         * @argument string The name of the table for the requested schema
+         * @argument string The identifier for the table
          * @returns array An array of schema information for the specified table     
          */     
-        abstract public function getTableDefinition($schemaName, $tableName);
+        abstract public function getTableDefinition($identifier);
         
 
         /**
@@ -362,11 +361,10 @@
          * 
          * If schema caching is on, this method can pull data from a schema cache. 
          *
-         * @argument string The name of the schema that contains the table
-         * @argument string The name of the table for the requested columns
+         * @argument string The identifier for the table
          * @returns array An array of columns that belong to the specified table
          */
-        abstract public function getTableColumns($schemaName, $tableName);
+        abstract public function getTableColumns($identifier);
 
         /**
          * Returns an array of columns that belong to the primary key for the specified table.
@@ -376,11 +374,10 @@
          * 
          * If schema caching is on, this method can pull data from a schema cache. 
          * 
-         * @argument string The name of the schema that contains the table
-         * @argument string The name of the table for the requested primary key
+         * @argument string The identifier for the table
          * @returns array An array of columns that belong to the primary key for the specified table
          */
-        abstract public function getTablePrimaryKey($schemaName, $tableName);
+        abstract public function getTablePrimaryKey($identifier);
         
 
         /**
@@ -391,32 +388,29 @@
          * 
          * If schema caching is on, this method can pull data from a schema cache.
          * 
-         * @argument string The name of the schema that contains the table
-         * @argument string The name of the table for the requested relationships
+         * @argument string The identifier for the table
          * @returns array An array of relationships for the specified table
          */
-        abstract public function getTableForeignKeys($schemaName, $tableName);
+        abstract public function getTableForeignKeys($identifier);
         
 
         /**
          * Returns the data type of the specified column in the specified table.
          * 
-         * @argument string The name of the schema that contains the table
-         * @argument string The name of the table that the desired column belongs to
+         * @argument string The identifier for the table
          * @argument string The name of the column that is desired to know the type of
-         * @returns string The data type of the column, if one is found, or null.
+         * @return string The data type of the column, if one is found, or null.
          */
-        abstract public function getColumnType($schemaName, $tableName, $fieldName);
+        abstract public function getColumnType($identifier, $columnName);
         
 
         /**
          * Determines whether the specified table exists in the current database.
          * 
-         * @argument string The name of the schema that contains the table
-         * @argument string The name of the table to determine existence
+         * @argument string The identifier for the table
          * @returns bool True or false, depending on whether the table exists.                   
          */     
-        abstract public function tableExists($schemaName, $tableName);
+        abstract public function tableExists($identifier);
 
 
     

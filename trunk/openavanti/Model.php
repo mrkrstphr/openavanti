@@ -33,28 +33,28 @@
          */
         public final function __construct($data = null)
         {
-            if(empty($this->_tableName))
+            if(empty($this->_tableIdentifier))
             {
                 $className = get_class($this);
                 $tableName = ltrim(strtolower(preg_replace("/([A-Z])/", "_\$1", $className)), "_");
                 $className = strtolower(get_class($this));
                 
-                $this->_tableName = StringFunctions::toPlural($className);
+                $this->_tableIdentifier = StringFunctions::toPlural($className);
             }
 
             if(is_array($data) || is_object($data))
             {
-                parent::__construct($this->_tableName, $data);
+                parent::__construct($this->_tableIdentifier, $data);
             }
             else if(is_numeric($data) && strval(intval($data)) == strval($data))
             {
-                parent::__construct($this->_tableName);
+                parent::__construct($this->_tableIdentifier);
                 
                 $this->find((int)$data);
             }
             else
             {
-                parent::__construct($this->_tableName);
+                parent::__construct($this->_tableIdentifier);
             }
             
         } // __construct()
