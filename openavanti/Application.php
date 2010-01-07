@@ -1,10 +1,10 @@
 <?php
-/***************************************************************************************************
+/**
  * OpenAvanti
  *
  * OpenAvanti is an open source, object oriented framework for PHP 5+
  *
- * @author          Kristopher Wilson
+ * @author          Kristopher Wilson <kwilson@shuttlebox.net>
  * @copyright       Copyright (c) 2007-2010, Kristopher Wilson
  * @license         http://www.openavanti.com/license
  * @link            http://www.openavanti.com
@@ -18,7 +18,7 @@
  * standard request dispatching.
  * 
  * @category    Controller
- * @author      Kristopher Wilson
+ * @author      Kristopher Wilson <kwilson@shuttlebox.net>
  * @link        http://www.openavanti.com/docs/application
  */
 class Application
@@ -103,6 +103,7 @@ class Application
      * default autoloader to load requested classes.
      *
      * @param string $path The path to the controllers directory
+     * 
      * @return void
      */
     public function setControllerPath($path)
@@ -129,6 +130,7 @@ class Application
      * default autoloader to load requested classes.
      *
      * @param string $path The path to the models directory
+     * 
      * @return void
      */
     public function setModelPath($path)
@@ -155,6 +157,7 @@ class Application
      * the default autoloader to load requested classes.
      *
      * @param string $path The path to the library directory
+     * 
      * @return void
      */
     public function setLibraryPath($path)
@@ -181,6 +184,7 @@ class Application
      * include path to aid in requiring these layout files.
      *
      * @param string $path The path of the layouts directory
+     * 
      * @return void
      */
     public function setLayoutPath($path)
@@ -209,6 +213,7 @@ class Application
      * include path to aid in requiring these view files.
      *
      * @param string $path The path of the views directory
+     * 
      * @return void
      */
     public function setViewPath($path)
@@ -237,6 +242,7 @@ class Application
      * automatic class definition loading.
      *
      * @param array $paths An array of paths to add to the autoloader
+     * 
      * @return void
      */
     public function addAdditionalAutoloadPaths(array $paths)
@@ -259,6 +265,7 @@ class Application
      * loading of files without the path name specified.
      *
      * @param string $path The path to add to the include path
+     * 
      * @return void
      */
     public function appendIncludePath($path)
@@ -282,6 +289,7 @@ class Application
      * Class file names are assumed to be in the format "ClassFile.php"
      *
      * @param string $className The name of the class to attempt to autoload
+     * 
      * @return void
      */
     public function defaultAutoloader($className)
@@ -305,7 +313,7 @@ class Application
             
             if(file_exists($candidate))
             {
-                require($candidate);
+                include $candidate;
                 return;
             }
         }
