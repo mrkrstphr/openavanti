@@ -1,10 +1,10 @@
 <?php
-/***************************************************************************************************
+/**
  * OpenAvanti
  *
  * OpenAvanti is an open source, object oriented framework for PHP 5+
  *
- * @author          Kristopher Wilson
+ * @author          Kristopher Wilson <kwilson@shuttlebox.net>
  * @copyright       Copyright (c) 2007-2009, Kristopher Wilson
  * @license         http://www.openavanti.com/license
  * @link            http://www.openavanti.com
@@ -16,15 +16,13 @@
  * Database abstraction layer implementing CRUD procedures
  *
  * @category    Database
- * @author      Kristopher Wilson
+ * @author      Kristopher Wilson <kwilson@shuttlebox.net>
  * @link        http://www.openavanti.com/docs/crud
  */
 class CRUD implements Iterator, Countable
 {
     // specify the database profile to use:
     protected $_profileName = null;
-    // specify the database schema to use:
-    //protected $_schemaName = null;
     // the table identifier for this data element:
     protected $_tableIdentifier = null;
     
@@ -46,11 +44,9 @@ class CRUD implements Iterator, Countable
      *  If there is a define defined called ENABLE_SCHEMA_CACHING, schema caching is turned on, 
      *  allowing for faster subsequent page loads.       
      *       
-     * @param string The name of the database table
-     * @param mixed Optional; An array or object of data to load into the CRUD object
-     * @param string Optional; The name of the database schema 
-     * @param string Optional; The name of the database profile to use 
-     * @return void
+     * @param string $identifier The name of the database table
+     * @param mixed $data Optional; An array or object of data to load into the CRUD object
+     * @param string $profileName Optional; The name of the database profile to use
      */
     public function __construct($identifier, $data = null, $profileName = "")
     {
@@ -107,10 +103,10 @@ class CRUD implements Iterator, Countable
      * passed set of SQL query clauses. This method can be used retrieve one record from the
      * database, or a set of records that can be iterated through.
      *
-     * @param mixed The ID of the data being found
-     * @param array Additional databases clauses, including: join, where, order, offset and
-     *       limit. All except for join are string that are directly appended to the query.
-     *       Join is an array of referenced tables to inner join.
+     * @param mixed $data An ID to load into the class or additional databases
+     *      clauses, including: join, where, order, offset and limit. All
+     *      except for join are string that are directly appended to the query.
+     *      Join is an array of referenced tables to inner join.
      * @return CRUD returns a reference to itself to allow chaining
      */
     public function find($data = null)
@@ -150,7 +146,8 @@ class CRUD implements Iterator, Countable
         else
         {
             // FIXME: This is borked
-            $tableAlias = $this->_database->getIdentifier(StringFunctions::toSingular($this->_tableIdentifier), "_", false);
+            $singularIdentifier = StringFunctions::toSingular($this->_tableIdentifier);
+            $tableAlias = $this->_database->getIdentifier($singularIdentifier, "_", false);
         }
         
         $whereClause = isset($queryClauses["where"]) ? $queryClauses["where"] : "";
@@ -411,9 +408,9 @@ class CRUD implements Iterator, Countable
      * representing the number of matching records.
      *
      * @deprecated Use find() with option "count" => true
-     * @param array Additional databases clauses, including: join and where. Where is a string
-     *       that are directly appended to the query. Join is an array of referenced tables to
-     *       inner join.
+     * @param array $clauses Additional databases clauses, including: join and where. Where is a
+     *      string that are directly appended to the query. Join is an array of referenced tables
+     *      to inner join.
      * @return int Returns the number of database records that match the passed clauses
      */
     public function findCount($clauses)
@@ -433,13 +430,14 @@ class CRUD implements Iterator, Countable
      * This method is invoked through __call() when the user uses the CRUD::FindBy[column]()
      * "virtual" method.                                     
      *
-     * @param string The name of the column we are pulling records by. This name may 
-     *  underscores removed and be cased differently         
-     * @param string The value of the column in the first argument that determines which
-     *  records will be selected
-     * @param string The order clause for the query       
-     * @return CRUD A reference to the current object to support chaining or secondary assignment
-     * @throws Exception, QueryFailedException                                       
+     * @throws Exception, QueryFailedException  
+     * @param string $columnName The name of the column we are pulling records by. This name may 
+     *      underscores removed and be cased differently         
+     * @param string $columnValue The value of the column in the first argument that determines
+     *      which records will be selected
+     * @param string $orderBy The order clause for the query
+     * 
+     * @return CRUD A reference to the current object to support chaining or secondary assignment                                     
      */
     protected function getDataByColumnValue($columnName, $columnValue, $orderBy = "")
     {
