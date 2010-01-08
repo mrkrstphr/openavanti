@@ -24,6 +24,8 @@
 class Model extends CRUD
 {
 
+    protected $_saveEvents = array();
+
     /**
      * The Model's constructor - accepts an optional set of data to load into the parent CRUD 
      * object. 
@@ -57,7 +59,22 @@ class Model extends CRUD
             parent::__construct($this->_tableIdentifier);
         }
         
+        // Call user initializations:
+        
+        $this->init();
+        
     } // __construct()
+    
+    
+    /**
+     *
+     *
+     */
+    public function init()
+    {
+        
+        
+    } // init()
     
 
     /**
@@ -234,6 +251,165 @@ class Model extends CRUD
         return true;
     
     } // destroy()
+    
+    
+    /**
+     * This method adds a save event, allowing the user to call $this->save[EventName]() through
+     * the magic __call() method. More specifically, this allows the developer to define custom
+     * validation routines on custom save operations above and beyond the validate*() methods
+     * defined by the model class.
+     *
+     * For instance, we may want to just update a users email address, but our validateUpdate()
+     * method or validate() method has validation rules to assure that a first_name and last_name
+     * is present on updates.
+     *
+     * To get around this, we can define a save event, called 'EmailChange' and call
+     * $this->saveEmailChange() to invoke it, bypassing the validation rules for updates. We can
+     * also define validation rules specific to this new method. See definition of other parameters
+     * to see how.
+     *
+     * @throws Exception
+     *
+     * @param string $eventName The name of the save event
+     * @param callback $beforeSave The name of the method to call before attempting any save
+     *      (insert or update) operation. Default: null
+     * @param callback $beforeInsert The name of the method to call before attempting to insert
+     *      a new record using this event. Default: null
+     * @param callback $beforeUpdate The name of the method to call before attempting to update
+     *      an existing record using this event. Default: null
+     * @param callback $afterSave The name of the method to call after saving (insert or update)
+     *      data to the database using this event. Default: null
+     * @param callback $afterInsert The name of the method to call after inserting new data into
+     *      the database using this event. Default: null
+     * @param callback $afterUpdate The name of the method to call after updating an existing record
+     *      in the database using this event. Default: null
+     */
+    public function addSaveEvent($eventName, $beforeSave = null, $beforeInsert = null,
+        $beforeUpdate = null, $afterSave = null, $afterInsert = null, $afterUpdate = null)
+    {
+        if(array_key_exists($eventName, $this->_saveEvents))
+        {
+            throw new Exception("saveEvent {$eventName} already exists");    
+        }
+        
+        $this->_saveEvents[$eventName] = array(
+            'beforeSave' => $beforeSave,
+            'beforeInsert' => $beforeInsert,
+            'beforeUpdate' => $beforeUpdate,
+            'afterSave' => $afterUpdate,
+            'afterInsert' => $afterInsert,
+            'afterUpdate' => $afterUpdate
+        );
+        
+    } // addSaveEvent()
+    
+    
+    /**
+     * Magic __call method, used specifically in this class to call custom save events defined
+     * by the user through addSaveEvent(). If no save event is found, processing is passed off
+     * to CRUD::__call() for further analysis. 
+     *
+     * @param string $name The name of the magic method being called
+     * @param array $arguments Any arguments passed to the magic method
+     *
+     * @return mixed May return boolean if a save event is called, or may return whatever
+     *      CRUD::__call() returns
+     */
+    public function __call($name, $arguments)
+    {
+        if(substr($name, 0, 4) == "save")
+        {
+            $saveEvent = substr($name, 4);
+            
+            if(array_key_exists($saveEvent, $this->_saveEvents))
+            {
+                $saveEventData = $this->_saveEvents[$saveEvent];
+                
+                return $this->processSaveEvent($saveEvent, $saveEventData);
+            }
+        }
+        
+        parent::__call($name, $arguments);
+        
+    } // __call()
+    
+    
+    /**
+     * Processes a custom save event by calling all associated validation and filter events and,
+     * assuming they are all successfully, calls the CRUD::Save() method.
+     *
+     * @param string $eventName The name of the event being processed
+     * @param array $eventData An array of event data which includes validators and filters
+     *
+     * @return boolean True if save was successful, false on failure
+     */
+    protected function processSaveEvent($eventName, $eventData)
+    {
+        $isUpdate = parent::recordExists();
+        
+        if($isUpdate)
+        {
+            $success = true;
+            
+            if(!is_null($eventData['beforeSave']) && is_callable($eventData['beforeSave']))
+            {
+                $success = call_user_func($eventData['beforeSave']);
+            }
+            
+            if(!is_null($eventData['beforeUpdate']) && is_callable($eventData['beforeUpdate']))
+            {
+                $success = call_user_func($eventData['beforeUpdate']);
+            }
+            
+            if(!$success)
+            {
+                return false;
+            }
+        }
+        else
+        {
+            $success = true;
+            
+            if(!is_null($eventData['beforeSave']) && is_callable($eventData['beforeSave']))
+            {
+                $success = call_user_func($eventData['beforeSave']);
+            }
+            
+            if(!is_null($eventData['beforeInsert']) && is_callable($eventData['beforeInsert']))
+            {
+                $success = call_user_func($eventData['beforeInsert']);
+            }
+            
+            if(!$success)
+            {
+                return false;
+            }
+        }   
+        
+        if(!parent::save())
+        {
+            return false;
+        }
+        
+        if($isUpdate)
+        {
+            if(!$this->onAfterUpdate() || !$this->onAfterSave())
+            {
+                return false;
+            }
+        }
+        else
+        {
+            if(!$this->onAfterInsert() || !$this->onAfterSave())
+            {
+                return false;
+            }
+        }
+        
+        // Everything returned true, so should we:
+        return true;
+    
+    } // processSaveEvent()
     
     
     /**
