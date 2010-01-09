@@ -969,7 +969,7 @@ class PostgresDatabase extends Database
             $foreignFields = explode( ",", 
                 str_replace(array("{", "}"), "", $foreignKey->conkey));
             
-            $foreignIdentifier = $foreignSchema . "." . $foreignkey->typname;
+            $foreignIdentifier = $foreignSchema . "." . $foreignKey->typname;
 
             $this->getTableDefinition($foreignIdentifier);
             
