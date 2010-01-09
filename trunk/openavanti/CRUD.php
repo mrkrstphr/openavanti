@@ -935,7 +935,7 @@ class CRUD implements Iterator, Countable
      * @return boolean True if the save was successful, false otherwise         
      */
     public function save()
-    {           
+    {
         // grab a copy of the primary key:
         $primaryKeys = $this->_database->getTablePrimaryKey($this->_tableIdentifier);
         
@@ -1477,7 +1477,7 @@ class CRUD implements Iterator, Countable
          */
         public function getTableName()
         {
-            return $this->_tableName;
+            return $this->_tableIdentifier;
             
         } // getTableName() 
         
@@ -1735,10 +1735,10 @@ class CRUD implements Iterator, Countable
            
             $pieces = explode("_", $modelName);
            
-            // FIXME PHP 5.3 syntax:
-            array_walk($pieces, function(&$piece, $key) {
+            foreach($pieces as &$piece)
+            {
                 $piece = ucwords($piece);
-            });
+            }
             
             $modelName = implode("", $pieces);
 
