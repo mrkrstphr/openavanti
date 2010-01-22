@@ -59,8 +59,8 @@ abstract class FormElement
         // Normalize the name by removing array characters and adding
         // underscores in their place:
         
-        $this->_id = str_replace(array("[", "]"), array("_", ""), $name);
-         
+        $this->_id = str_replace(array("[", ".", "]"), array("_", "_", ""), $name);
+        
         $this->_attributes = $attributes;
         
         $this->init();

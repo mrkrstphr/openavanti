@@ -38,10 +38,11 @@ abstract class LabeledFormElement extends FormElement
      *      FormField
      */
     public function __construct($name, $label = null, $attributes = array())
-    {
-        $this->label = new LabelElement($name, $label);
-        
+    {        
         parent::__construct($name, $attributes);
+        
+        
+        $this->label = new LabelElement($this->_id, $label);
         
     } // __construct()
     
