@@ -13,6 +13,7 @@ CREATE TABLE users(
     username varchar(30),
     password varchar(256),
     reset_key varchar(32),
+    login_key varchar(32),
     status varchar(20) DEFAULT 'active',
     created_on timestamp with time zone,
     created_by_id bigint REFERENCES users(user_id),
