@@ -1,0 +1,54 @@
+
+    <form action="/login/validate" method="post">
+        <fieldset>
+            <p>
+                Please provide your login credentials.
+            </p>
+            
+            <?php if( Validation::HasErrors() ): ?>
+            <p class="error">
+                <?php 
+                    $aErrors = Validation::GetErrors();
+                    
+                    foreach( $aErrors as $sField => $aFieldErrors )
+                    {
+                        foreach( $aFieldErrors as $sError )
+                        {
+                            echo $sError . "<br />";
+                        }
+                    }
+                ?>
+            </p>
+            <?php endif; ?>
+            
+            <table cellspacing="1" cellpadding="3" class="form-entry">
+                <tr>
+                    <td class="label">
+                        <?php echo $this->form->email->label; ?>
+                    </td>
+                    <td class="entry">
+                        <?php echo $this->form->email; ?>
+                    </td>
+                </tr>
+                
+                <tr>
+                    <td class="label">
+                        <?php echo $this->form->password->label; ?>
+                    </td>
+                    <td class="entry">
+                        <?php echo $this->form->password; ?>
+                    </td>
+                </tr>
+                
+                <tr>
+                    <td colspan="2" style="text-align: center;">
+                        <a href="/login/forgot_password">Forgot your password?</a>
+                    </td>
+                </tr>
+            </table>
+            
+            <div class="form-toolbar">
+                <button type="submit" name="login">Login</button>
+            </div>
+        </fieldset>
+    </form>

@@ -1,0 +1,36 @@
+
+    <?php Helpers::page_header("View User", "Search Users", "/users", Helpers::IconSearch); ?>
+
+    <?php require("validation-errors.php"); ?>
+    <?php require("flash-message.php"); ?>
+                    
+    <table style="width: 100%;">
+        <tr>
+            <td style="text-align: right; width: 18%;">
+                Name: 
+            </td>
+            <td>
+                <?php echo $this->user->first_name . " " . $this->user->last_name; ?>
+            </td>
+        </tr>
+        
+        <tr>
+            <td style="text-align: right;">
+                E-mail:
+            </td>
+            <td class="entry">
+                <a href="mailto:<?php echo $this->user->email_address; ?>">
+                    <?php echo $this->user->email_address; ?></a>
+            </td>
+        </tr>    
+        
+        <tr>
+            <td style="text-align: right;">
+                Username:
+            </td>
+            <td class="entry">
+                <?php echo $this->user->username; ?>
+            </td>
+        </tr>    
+    </table>
+    

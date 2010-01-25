@@ -1,0 +1,18 @@
+body
+{
+    font: 10pt verdana, arial, sans-serif;
+}
+
+form, fieldset
+{
+    border: none;
+    margin: 0px;
+    padding: 0px;
+}
+
+div.document
+{
+    margin: 0px auto;
+    text-align: left;
+    width: 906px;
+}
