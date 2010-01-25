@@ -95,7 +95,23 @@ class Application
         
         $this->_dispatcher = new Dispatcher();
         
+        // Call user initialization:
+        
+        $this->init();
+        
     } // __construct()
+    
+    
+    /**
+     *
+     *
+     */
+    public function init()
+    {
+        
+        
+    } // init()
+    
     
     
     /**

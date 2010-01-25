@@ -177,22 +177,22 @@ class View
             {
                 if(FileFunctions::fileExistsInPath($this->_layout))
                 {
-                    require($this->_layout);
+                    require $this->_layout;
                 }
                 else
                 {
-                    throw new Exception(ErrorHandler::VIEW_NOT_FOUND);
+                    throw new LayoutNotFoundException("Layout {$this->_layout} not found.");
                 }
             }
             else if(!empty(self::$_defaultLayout))
             {
                 if(FileFunctions::fileExistsInPath(self::$_defaultLayout))
                 {
-                    require(self::$_defaultLayout);
+                    require self::$_defaultLayout;
                 }
                 else
                 {
-                    throw new Exception(ErrorHandler::VIEW_NOT_FOUND);
+                    throw new LayoutNotFoundException("Layout {$this->_layout} not found.");
                 }
             }
         }
@@ -220,7 +220,7 @@ class View
             }
             else
             {
-                throw new Exception(ErrorHandler::VIEW_NOT_FOUND);
+                throw new ViewNotFoundException("View file {$this->_viewScript} not found.");
             }
         }
         
