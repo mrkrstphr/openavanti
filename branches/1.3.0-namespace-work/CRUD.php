@@ -10,8 +10,13 @@
  * @link            http://www.openavanti.com
  * @version         SVN: $Id$
  */
+
+
+namespace OpenAvanti;
  
- 
+use \Exception;
+
+
 /**
  * Database abstraction layer implementing CRUD procedures
  *
@@ -19,7 +24,7 @@
  * @author      Kristopher Wilson <kwilson@shuttlebox.net>
  * @link        http://www.openavanti.com/docs/crud
  */
-class CRUD implements Iterator, Countable
+class CRUD implements \Iterator, \Countable
 {
     // specify the database profile to use:
     protected $_profileName = null;
@@ -544,7 +549,7 @@ class CRUD implements Iterator, Countable
      */
     public function getRecord()
     {           
-        $record = new StdClass();
+        $record = new \StdClass();
         
         foreach($this->_data as $key => $value)
         {

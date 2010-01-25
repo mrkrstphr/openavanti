@@ -10,7 +10,8 @@
  * @link            http://www.openavanti.com
  * @version         SVN: $Id$
  */
- 
+
+namespace OpenAvanti;
  
 /**
  * Handles application execution, sets up an autoloader, provides a
@@ -79,7 +80,7 @@ class Application
         $this->_controllerPath = realpath("{$documentRoot}/../application/controllers");
         $this->_modelPath = realpath("{$documentRoot}/../application/models");
         $this->_formPath = realpath("{$documentRoot}/../application/forms");
-        $this->_libraryPath = realpath("{$documentRoot}/../application/library/openavanti");
+        $this->_libraryPath = realpath("{$documentRoot}/../library/OpenAvanti");
         $this->_layoutPath = realpath("{$documentRoot}/../application/layouts");
         $this->_viewPath = realpath("{$documentRoot}/../application/views");
         
@@ -294,6 +295,14 @@ class Application
      */
     public function defaultAutoloader($className)
     {
+        // normalize the class name for namespaces:
+        $className = str_replace("\\", "/", $className);
+        
+        if(substr($className, 0, 11) == "OpenAvanti/")
+        {
+            $className = substr($className, 11);
+        }
+        
         $fileName = "{$className}.php";
         
         $paths = array(
@@ -313,7 +322,7 @@ class Application
             
             if(file_exists($candidate))
             {
-                include $candidate;
+                include_once $candidate;
                 return;
             }
         }

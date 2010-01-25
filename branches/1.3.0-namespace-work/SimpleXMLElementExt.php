@@ -10,8 +10,10 @@
  * @link            http://www.openavanti.com
  * @version         SVN: $Id$
  */
- 
- 
+
+
+namespace OpenAvanti; 
+
 /**
  * This class extends the SimpleXMLElement class in PHP and adds a few extra methods to aid
  * in the XML DOM manipulation.

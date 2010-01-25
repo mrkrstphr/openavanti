@@ -10,7 +10,12 @@
  * @link            http://www.openavanti.com
  * @version         SVN: $Id$
  */
- 
+
+
+namespace OpenAvanti;
+
+use \Exception;
+
  
 /**
  * Simple object to aid in creating CSV documents

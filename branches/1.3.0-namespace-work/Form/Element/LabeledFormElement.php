@@ -11,6 +11,7 @@
  * @version         SVN: $Id$
  */
 
+namespace OpenAvanti;
 
 /**
  * A specialized FormElement subclass that combines any inherited class

@@ -12,6 +12,10 @@
  */
 
 
+namespace OpenAvanti;
+
+use \Exception;
+
 /**
  * A library of form field generation helpers, mainly useful automate data preservation on
  * form errors   
