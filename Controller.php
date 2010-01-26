@@ -330,6 +330,25 @@ class Controller
         return $flash;
         
     } // getFlash()
+    
+    
+    /**
+     * __call() magic method setup to load action helpers as requested
+     *
+     * @param string $method The method being called, which translates to the helper class
+     * @param array $arguments An array of arguments to pass to the render() method of the helper
+     * @return mixed The return value of the helper, if any
+     */
+    public function __call($method, $arguments)
+    {
+        $method = $method . 'Helper';
+        
+        if($this->getApplication()->actionHelperExists($method))
+        {
+            return call_user_func_array(array($method, 'process'), $arguments);
+        }
+        
+    } // __call()
 
 } // Controller()
 
