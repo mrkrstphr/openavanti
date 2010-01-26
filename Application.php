@@ -93,7 +93,7 @@ class Application
         
         spl_autoload_register(array($this, "defaultAutoloader"));
         
-        $this->_dispatcher = new Dispatcher();
+        $this->_dispatcher = new Dispatcher($this);
         
         // Call user initialization:
         
@@ -347,6 +347,30 @@ class Application
         return $this->_dispatcher;
         
     } // getDispatcher()
+    
+    
+    /**
+     * Determines if a view helper class exists and, if so, loads the class file
+     *
+     * @param string $helper The name of the helper class to check for existance and load
+     * @return bool True if the helper exists and is loaded, false otherwise
+     */
+    public function viewHelperExists($helper)
+    {
+        if(class_exists($helper) && is_subclass_of($helper, "ViewHelper"))
+        {
+            return true;
+        }
+        else if(file_exists($this->_viewPath . "/helpers/" . ucfirst($helper) . ".php"))
+        {
+            require_once $this->_viewPath . "/helpers/" . ucfirst($helper) . ".php";
+            
+            return true;
+        }
+        
+        return false;
+        
+    } // viewHelperExists()
     
     
     /**
