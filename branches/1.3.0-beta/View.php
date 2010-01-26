@@ -37,6 +37,7 @@ class View
     // GetContent():
     protected $_viewScript = "";
     
+    //
     public static $_viewFileExtension = ".php";
     
     // Toggles whether to render the layout:
@@ -109,7 +110,7 @@ class View
     /**
      * 
      * @static 
-     * @argument String The file name of the layout that should be 
+     * @param string $layoutFile The file name of the layout that should be 
      *      rendered by default if no other layout file is specified
      * @returns void
      */
@@ -139,7 +140,7 @@ class View
      * actually exists. It is up to the code that loads the view file to 
      * do this (normally the Dispatcher class).                 
      *       
-     * @argument string The file name of the view file that should be 
+     * @param string $view The file name of the view file that should be 
      *      loaded.
      * @returns void
      */ 
@@ -331,6 +332,23 @@ class View
         return isset($this->_data[$name]);
 
     } // __isset()
+    
+    
+    /**
+     * __call() magic method setup to load view helpers as requested
+     *
+     * @param string $method The method being called, which translates to the helper class
+     * @param array $arguments An array of arguments to pass to the render() method of the helper
+     * @return mixed The return value of the helper, if any
+     */
+    public function __call($method, $arguments)
+    {
+        if($this->getController()->getApplication()->viewHelperExists($method))
+        {
+            return call_user_func_array(array($method, 'render'), $arguments);
+        }
+        
+    } // __call()
 
 } // View()
 

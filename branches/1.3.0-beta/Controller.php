@@ -108,7 +108,6 @@ class Controller
     } // index()
     
     
-    
     /**
      * Returns a copy of the Dispatcher class that handled the current request and loaded
      * this controller. 
@@ -121,6 +120,19 @@ class Controller
         return $this->_dispatcher;
     
     } // getDispatcher()
+    
+    
+    /**
+     * Returns a reference to the Application class for this application instance (responsible for
+     * creating the Dispatcher that handled the current request and loaded this controller)
+     *
+     * @returns Application The Application class for this application instance
+     */
+    public function &getApplication()
+    {
+        return $this->getDispatcher()->getApplication();
+        
+    } // getApplication()
     
     
     /**
