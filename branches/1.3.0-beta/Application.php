@@ -350,6 +350,30 @@ class Application
     
     
     /**
+     * Determines if an action helper class exists and, if so, loads the class file
+     *
+     * @param string $helper The name of the helper class to check for existance and load
+     * @return bool True if the helper exists and is loaded, false otherwise
+     */
+    public function actionHelperExists($helper)
+    {
+        if(class_exists($helper) && is_subclass_of($helper, "ControllerActionHelper"))
+        {
+            return true;
+        }
+        else if(file_exists($this->_controllerPath . "/helpers/" . ucfirst($helper) . ".php"))
+        {
+            require_once $this->_controllerPath . "/helpers/" . ucfirst($helper) . ".php";
+            
+            return true;
+        }
+        
+        return false;
+        
+    } // actionHelperExists()
+    
+    
+    /**
      * Determines if a view helper class exists and, if so, loads the class file
      *
      * @param string $helper The name of the helper class to check for existance and load

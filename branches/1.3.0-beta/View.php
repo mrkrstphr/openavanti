@@ -343,6 +343,8 @@ class View
      */
     public function __call($method, $arguments)
     {
+        $method = $method . 'Helper';
+        
         if($this->getController()->getApplication()->viewHelperExists($method))
         {
             return call_user_func_array(array($method, 'render'), $arguments);
