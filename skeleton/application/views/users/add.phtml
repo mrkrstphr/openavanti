@@ -1,85 +1,70 @@
 
-    <div class="short-box">	
-    	<?php Helpers::page_header("Add User", "Search Users", "/users", Helpers::IconSearch); ?>
-    	
-        <div class="gray-box">
-        	<?php require("validation-errors.php"); ?>
-        	<?php require("flash-message.php"); ?>
+    <?php $this->pageHeader("Add User", "Search Users", "/users", Helpers::IconSearch); ?>
+
+    <?php require("validation-errors.php"); ?>
+    <?php require("flash-message.php"); ?>
 
 
-        	<form action="/users/save" method="post" enctype="multipart/form-data">
-        		<fieldset>
-        			<table cellspacing="1" cellpadding="3" class="form-entry">
-        				
-        				<tr>
-        					<td class="label">
-        						<?php echo $this->form->first_name->label; ?>
-        					</td>
-        					<td class="entry">
-        						<?php echo $this->form->first_name; ?>
-        					</td>
-        				</tr>
-        				
-        				<tr>
-        					<td class="label">
-        						<?php echo $this->form->last_name->label; ?>
-        					</td>
-        					<td class="entry">
-        						<?php echo $this->form->last_name; ?>
-        					</td>
-        				</tr>
-        				
-        				<tr>
-        					<td class="label">
-        						<?php echo $this->form->email_address->label; ?>
-        					</td>
-        					<td class="entry">
-        						<?php echo $this->form->email_address; ?>
-        					</td>
-        				</tr>
-        				
-        				<tr>
-        					<td class="label">
-        						<?php echo $this->form->confirm_email_address->label; ?>
-        					</td>
-        					<td class="entry">
-        						<?php echo $this->form->confirm_email_address; ?>
-        					</td>
-        				</tr>
-        				
-        				<tr>
-        					<td class="label">
-        						<?php echo $this->form->password->label; ?>
-        					</td>
-        					<td class="entry">
-        						<?php echo $this->form->password; ?>
-        					</td>
-        				</tr>
-        				
-        				<tr>
-        					<td class="label">
-        						<?php echo $this->form->confirm_password->label; ?>
-        					</td>
-        					<td class="entry">
-        						<?php echo $this->form->confirm_password; ?>
-        					</td>
-        				</tr>
-        			</table>
-                    
-        			<div class="form-toolbar">
-        				<button type="submit">Save User</button>
-        			</div>
-        		</fieldset>
-        	</form>
-        </div>
-    </div>
-
-    <div class="right-box">
-        <h2> User Management </h2>
-        
-        <p>
+    <form action="/users/save" method="post" enctype="multipart/form-data">
+        <fieldset>
+            <table cellspacing="1" cellpadding="3" class="form-entry">
+                <tr>
+                    <td class="label">
+                        <?php echo $this->form->first_name->label; ?>
+                    </td>
+                    <td class="entry">
+                        <?php echo $this->form->first_name; ?>
+                    </td>
+                </tr>
+                
+                <tr>
+                    <td class="label">
+                        <?php echo $this->form->last_name->label; ?>
+                    </td>
+                    <td class="entry">
+                        <?php echo $this->form->last_name; ?>
+                    </td>
+                </tr>
+                
+                <tr>
+                    <td class="label">
+                        <?php echo $this->form->email_address->label; ?>
+                    </td>
+                    <td class="entry">
+                        <?php echo $this->form->email_address; ?>
+                    </td>
+                </tr>
+                
+                <tr>
+                    <td class="label">
+                        <?php echo $this->form->confirm_email_address->label; ?>
+                    </td>
+                    <td class="entry">
+                        <?php echo $this->form->confirm_email_address; ?>
+                    </td>
+                </tr>
+                
+                <tr>
+                    <td class="label">
+                        <?php echo $this->form->password->label; ?>
+                    </td>
+                    <td class="entry">
+                        <?php echo $this->form->password; ?>
+                    </td>
+                </tr>
+                
+                <tr>
+                    <td class="label">
+                        <?php echo $this->form->confirm_password->label; ?>
+                    </td>
+                    <td class="entry">
+                        <?php echo $this->form->confirm_password; ?>
+                    </td>
+                </tr>
+            </table>
             
-        </p>
-    </div>
-    
-    <br class="clear" />
+            <div class="form-toolbar">
+                <button type="submit">Save User</button>
+            </div>
+        </fieldset>
+    </form>

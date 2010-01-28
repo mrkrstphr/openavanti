@@ -119,7 +119,9 @@ class UsersController extends Controller
      */
     public function save()
     {
-        $user = new User($_POST);
+        $form = new UserEdit();
+        
+        $user = new User($form->loadSanitizedPost());
         
         $user->begin();
         
@@ -127,15 +129,13 @@ class UsersController extends Controller
         {
             $user->rollback();
             
-            Form::loadSanitizedPost();
-            
-            if(empty(Form::$aFields["user_id"]))
+            if(empty($form->_data["user_id"]))
             {
                 $this->forwardAction('add');
             }
             else
             {
-                $this->forwardAction('edit', null, array(Form::$aFields["user_id"]));
+                $this->forwardAction('edit', null, array($form->_data["user_id"]));
             }
             
             return;
@@ -153,15 +153,13 @@ class UsersController extends Controller
             
             if(!$user->save())
             {
-                Form::loadSanitizedPost();
-                
-                if(empty(Form::$aFields["user_id"]))
+                if(empty($form->_data["user_id"]))
                 {
                     $this->forwardAction("add");
                 }
                 else
                 {
-                    $this->forwardAction("edit", null, array(Form::$aFields["user_id"]));
+                    $this->forwardAction("edit", null, array($form->_data["user_id"]));
                 }
                 
                 return;
