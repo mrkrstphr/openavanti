@@ -2,6 +2,14 @@
 
 class User extends Model
 {
+    const StatusActive = 'active';
+    const StatusInactive = 'inactive';
+    
+    public static $_statuses = array(
+        self::StatusActive => 'Active',
+        self::StatusInactive => 'Inactive'
+    );
+    
     // virtual attributes
     
     public $confirm_password = "";

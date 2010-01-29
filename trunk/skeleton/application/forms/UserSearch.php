@@ -12,9 +12,9 @@
                 'size' => 25, 'maxlength' => 64
             )));
             
-            /*$this->addElement(new SelectElement('search[status]', 'Status:', array(
+            $this->addElement(new SelectElement('search[status]', 'Status:', array(
                 'options' => User::$_statuses
-            )));*/
+            )));
             
         }
         

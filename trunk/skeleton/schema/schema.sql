@@ -2,7 +2,7 @@
 CREATE TABLE roles(
     role_id bigserial PRIMARY KEY,
     name varchar(40) NOT NULL,
-    permission int NOT NULL
+    permission int UNIQUE NOT NULL
 );
 
 CREATE TABLE users(
