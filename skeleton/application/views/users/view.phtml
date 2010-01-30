@@ -1,5 +1,5 @@
 
-    <?php $this->pageHeader("View User", "Search Users", "/users", Helpers::IconSearch); ?>
+    <?php $this->pageHeader("View User", "Search Users", "/users", '/images/zoom.png'); ?>
 
     <?php require("validation-errors.php"); ?>
     <?php require("flash-message.php"); ?>
@@ -10,7 +10,7 @@
                 Name: 
             </td>
             <td>
-                <?php echo $this->user->first_name . " " . $this->user->last_name; ?>
+                <?php echo $this->record->first_name . " " . $this->record->last_name; ?>
             </td>
         </tr>
         
@@ -19,8 +19,8 @@
                 E-mail:
             </td>
             <td class="entry">
-                <a href="mailto:<?php echo $this->user->email_address; ?>">
-                    <?php echo $this->user->email_address; ?></a>
+                <a href="mailto:<?php echo $this->record->email_address; ?>">
+                    <?php echo $this->record->email_address; ?></a>
             </td>
         </tr>    
         
@@ -29,7 +29,7 @@
                 Username:
             </td>
             <td class="entry">
-                <?php echo $this->user->username; ?>
+                <?php echo $this->record->username; ?>
             </td>
         </tr>    
     </table>
