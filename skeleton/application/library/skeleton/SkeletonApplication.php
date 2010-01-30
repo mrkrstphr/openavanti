@@ -16,6 +16,7 @@
             
             $this->appendIncludePath("../");
             $this->addAdditionalAutoloadPaths(array("../application"));
+            $this->addAdditionalAutoloadPaths(array("../application/library/skeleton"));
             
             // Tell the Dispatcher to run the authenticate() method before routing the URI
             
