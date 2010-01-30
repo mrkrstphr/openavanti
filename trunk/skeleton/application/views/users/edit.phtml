@@ -1,10 +1,10 @@
 
-    <?php $this->pageHeader("Edit User", "Search Users", "/users", '/images/zoom.png'); ?>
-
     <?php require("validation-errors.php"); ?>
     <?php require("flash-message.php"); ?>
 
-
+    <div class="main">
+        <h2>Edit User</h2>
+        
     <form action="/users/save" method="post" enctype="multipart/form-data">
         <fieldset>
             <?php echo $this->form->user_id; ?>
@@ -41,3 +41,11 @@
             </div>
         </fieldset>
     </form>
+    </div>
+    
+    <div class="sidebar">
+        <h3>Quick Actions</h3>
+        
+        <?php $this->quickLink('/users', 'Search Users', QuickLinkHelper::IconSearch); ?>
+        <?php $this->quickLink('/users/add', 'Add User', QuickLinkHelper::IconAdd); ?>
+    </div>

@@ -1,8 +1,7 @@
 
-    <div class="full-box">
-    	<?php $this->pageHeader("Search Users", "Add User", "/users/add", "/images/add.png"); ?>
-    
-        <div class="gray-box">
+    <div class="main">
+        <h2>Search Users</h2>
+        
         	<form method="get" action="/users/paginate/1">
         		<input type="hidden" name="sort" value="<?php echo $this->search->sSort; ?>" />
         		<input type="hidden" name="order" value="<?php echo $this->search->sOrder; ?>" />
@@ -36,9 +35,7 @@
         			</tr>
         		</table>
         	</form>
-        </div>
-        
-        <div class="inner-box">
+            
         	<table class="data-table" cellpadding="4" cellspacing="1">
         		<tr class="header">
         			<td style="width: 25%;">
@@ -85,5 +82,10 @@
         		
         		<?php require("pagination-partial.php"); ?>
         	</table>
-        </div>
+    </div>
+    
+    <div class="sidebar">
+        <h3>Quick Actions</h3>
+        
+        <?php $this->quickLink('/users/add', 'Add User', QuickLinkHelper::IconAdd); ?>
     </div>

@@ -12,6 +12,28 @@ form, fieldset
     padding: 0px;
 }
 
+a, a:visited
+{
+    color: #3E458F;
+    text-decoration: none;
+}
+
+a:hover
+{
+    color: #000000;
+    text-decoration: underline;
+}
+
+a img
+{
+    border: none;
+}
+
+img.icon
+{
+    vertical-align: middle;
+}
+
 div.header
 {
     background-color: #222222;
@@ -170,6 +192,11 @@ div.sidebar
     -webkit-border-radius-bottomright: 6px;
     border-radius-topright: 6px;
     border-radius-bottomright: 6px;
+}
+
+div.quick-link
+{
+    line-height: 1.75em;
 }
 
 div.sidebar h3

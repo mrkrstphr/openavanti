@@ -31,8 +31,7 @@
     <div class="sidebar">
         <h3>Quick Actions</h3>
         
-        <a href="/roles/edit/<?php echo $this->record->role_id; ?>">
-            <img alt="edit" src="/images/icons/silk/page_white_edit.png" title="Edit Role" /></a>
-        <a href="/roles/edit/<?php echo $this->record->role_id; ?>">
-            Edit Role</a>
+        <?php $this->quickLink('/roles/edit/' . $this->record->role_id, 'Edit Role',
+            QuickLinkHelper::IconEdit); ?>
+        <?php $this->quickLink('/roles', 'Search Roles', QuickLinkHelper::IconSearch); ?>
     </div>
