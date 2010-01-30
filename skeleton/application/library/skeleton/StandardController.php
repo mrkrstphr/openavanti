@@ -118,7 +118,7 @@ abstract class StandardController extends Controller
         $formName = "{$normalizedName}Edit";
         
         $form = new $formName();
-
+        
         $record = new $normalizedName();
         $record->find($recordId);
         
@@ -126,11 +126,11 @@ abstract class StandardController extends Controller
             $form->loadData($record->getRecord());
         else
             $form->loadSanitizedPost();
-
+        
         $this->view->record = $record->getRecord();
         
         $this->view->form = $form;
-
+        
         $this->view->title = "Edit " . ucwords(str_replace("_", " ", $this->_elementName));
     
     } // edit()
@@ -178,7 +178,7 @@ abstract class StandardController extends Controller
         
         // Redirect to the edit page:
         
-        $this->setFlash(ucwords(str_replace("_", " ", $this->_elementName)) . " Saved Successfully");
+        $this->setFlash(ucwords(str_replace("_", " ", $this->_singularElementName)) . " Saved Successfully");
         
         $id = $record->$idName;
         
