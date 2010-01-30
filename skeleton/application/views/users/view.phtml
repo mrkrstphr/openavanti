@@ -1,36 +1,46 @@
 
-    <?php $this->pageHeader("View User", "Search Users", "/users", '/images/zoom.png'); ?>
-
     <?php require("validation-errors.php"); ?>
     <?php require("flash-message.php"); ?>
-                    
-    <table style="width: 100%;">
-        <tr>
-            <td style="text-align: right; width: 18%;">
-                Name: 
-            </td>
-            <td>
-                <?php echo $this->record->first_name . " " . $this->record->last_name; ?>
-            </td>
-        </tr>
+    
+    <div class="main">
+        <h2>View User</h2>
         
-        <tr>
-            <td style="text-align: right;">
-                E-mail:
-            </td>
-            <td class="entry">
-                <a href="mailto:<?php echo $this->record->email_address; ?>">
-                    <?php echo $this->record->email_address; ?></a>
-            </td>
-        </tr>    
+        <table style="width: 100%;">
+            <tr>
+                <td style="text-align: right; width: 18%;">
+                    Name: 
+                </td>
+                <td>
+                    <?php echo $this->record->first_name . " " . $this->record->last_name; ?>
+                </td>
+            </tr>
+            
+            <tr>
+                <td style="text-align: right;">
+                    E-mail:
+                </td>
+                <td class="entry">
+                    <a href="mailto:<?php echo $this->record->email_address; ?>">
+                        <?php echo $this->record->email_address; ?></a>
+                </td>
+            </tr>    
+            
+            <tr>
+                <td style="text-align: right;">
+                    Username:
+                </td>
+                <td class="entry">
+                    <?php echo $this->record->username; ?>
+                </td>
+            </tr>    
+        </table>
+    </div>
+    
+    <div class="sidebar">
+        <h3>Quick Actions</h3>
         
-        <tr>
-            <td style="text-align: right;">
-                Username:
-            </td>
-            <td class="entry">
-                <?php echo $this->record->username; ?>
-            </td>
-        </tr>    
-    </table>
+        <?php $this->quickLink('/users/edit/' . $this->record->user_id, 'Edit User',
+            QuickLinkHelper::IconEdit); ?>
+        <?php $this->quickLink('/users', 'Search Users', QuickLinkHelper::IconSearch); ?>
+    </div>
     

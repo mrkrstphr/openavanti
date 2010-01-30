@@ -6,7 +6,7 @@ class QuickLinkHelper extends ViewHelper
     // Icon constants
     const IconSearch = '/images/icons/silk/magnifier.png';
     const IconAdd = '/images/icons/silk/add.png';
-    const IconEdit = '/images/icons/silk/edit.png';
+    const IconEdit = '/images/icons/silk/page_white_edit.png';
 
     public function render($link, $caption, $icon)
     {
