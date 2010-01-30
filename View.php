@@ -347,6 +347,7 @@ class View
         
         if($this->getController()->getApplication()->viewHelperExists($method))
         {
+            $method = new $method;
             return call_user_func_array(array($method, 'render'), $arguments);
         }
         
