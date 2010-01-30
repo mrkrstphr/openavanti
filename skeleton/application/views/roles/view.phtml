@@ -1,26 +1,38 @@
 
-    <?php $this->pageHeader("View Role", "Search Roles", "/roles", '/images/zoom.png'); ?>
+    <div class="messages">
+        <?php require("validation-errors.php"); ?>
+        <?php require("flash-message.php"); ?>
+    </div>
 
-    <?php require("validation-errors.php"); ?>
-    <?php require("flash-message.php"); ?>
-                    
-    <table style="width: 100%;">
-        <tr>
-            <td style="text-align: right; width: 18%;">
-                Name: 
-            </td>
-            <td>
-                <?php echo $this->record->name; ?>
-            </td>
-        </tr>
+    <div class="main">
+    	<h2>View Roles</h2>
         
-        <tr>
-            <td style="text-align: right;">
-                Permission:
-            </td>
-            <td class="entry">
-                <?php echo $this->record->permission; ?>
-            </td>
-        </tr>    
-    </table>
+        <table style="width: 100%;">
+            <tr>
+                <td style="text-align: right; width: 18%;">
+                    Name: 
+                </td>
+                <td>
+                    <?php echo $this->record->name; ?>
+                </td>
+            </tr>
+            
+            <tr>
+                <td style="text-align: right;">
+                    Permission:
+                </td>
+                <td class="entry">
+                    <?php echo $this->record->permission; ?>
+                </td>
+            </tr>    
+        </table>
+    </div>
     
+    <div class="sidebar">
+        <h3>Quick Actions</h3>
+        
+        <a href="/roles/edit/<?php echo $this->record->role_id; ?>">
+            <img alt="edit" src="/images/icons/page_white_edit.png" title="Edit Role" /></a>
+        <a href="/roles/edit/<?php echo $this->record->role_id; ?>">
+            Edit Role</a>
+    </div>
