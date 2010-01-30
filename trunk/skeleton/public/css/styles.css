@@ -1,6 +1,8 @@
 body
 {
     font: 10pt verdana, arial, sans-serif;
+    margin: 0px;
+    padding: 0px;
 }
 
 form, fieldset
@@ -10,9 +12,120 @@ form, fieldset
     padding: 0px;
 }
 
+div.header
+{
+    background-color: #222222;
+    color: #ffffff;
+    padding: 8px 8px 0px 8px;
+}
+
+div.header div.document
+{
+    height: 90px;
+    position: relative;
+}
+
+div.header h1.logo
+{
+    font-size: 16pt;
+    font-weight: normal;
+    display: inline;
+    margin: 0px;
+    padding: 0px;
+}
+
+div.header div.menu
+{
+    position: absolute;
+    bottom: 0px;
+    right: 0px;
+}
+
+div.header div.menu ul
+{
+    list-style-type: none;
+    margin: 0px;
+    padding: 0px;
+}
+
+div.header div.menu ul li
+{
+    display: inline;
+}
+
+div.header div.menu ul li a,
+div.header div.menu ul li a:visited
+{
+    background-color: #444444;
+    color: #ffffff;
+    float: left;
+    line-height: 2em;
+    margin-left: 4px;
+    padding: 3px 12px;
+    text-decoration: none;
+    
+    -moz-border-radius-topleft: 5px;
+    -moz-border-radius-topright: 5px;
+    -webkit-border-radius-topleft: 5px;
+    -webkit-border-radius-topright: 5px;
+    border-radius-topleft: 5px;
+    border-radius-topright: 5px;
+}
+
+div.header div.menu ul li.current a,
+div.header div.menu ul li.current a:visited,
+div.header div.menu ul li a:hover
+{
+    background-color: #e2e2e2;
+    color: #191919;
+}
+
+div.header div.user
+{
+    background-color: #e2e2e2;
+    color: #191919;
+    float: right;
+    padding: 4px 8px;
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    text-align: right;
+    
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    border-radius: 5px;
+}
+
+div.header div.user a,
+div.header div.user a:visited
+{
+    color: #4f4f4f;
+    text-decoration: none;
+}
+
+div.header div.user a:hover
+{
+    color: #000000;
+    text-decoration: underline;
+}
+
 div.document
 {
     margin: 0px auto;
     text-align: left;
     width: 906px;
 }
+
+div.footer
+{
+    background-color: #222222;
+    color: #ffffff;
+    font-size: 9pt;
+    padding: 8px 8px 8px 8px;
+}
+
+div.clear
+{
+    clear: both;
+}
+
