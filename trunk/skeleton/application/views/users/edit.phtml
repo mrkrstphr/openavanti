@@ -1,5 +1,5 @@
 
-    <?php $this->pageHeader("Add User", "Search Users", "/users", '/images/zoom.png'); ?>
+    <?php $this->pageHeader("Edit User", "Search Users", "/users", '/images/zoom.png'); ?>
 
     <?php require("validation-errors.php"); ?>
     <?php require("flash-message.php"); ?>
@@ -7,6 +7,8 @@
 
     <form action="/users/save" method="post" enctype="multipart/form-data">
         <fieldset>
+            <?php echo $this->form->user_id; ?>
+
             <table cellspacing="1" cellpadding="3" class="form-entry">
                 <tr>
                     <td class="label">
@@ -16,7 +18,6 @@
                         <?php echo $this->form->first_name; ?>
                     </td>
                 </tr>
-                
                 <tr>
                     <td class="label">
                         <?php echo $this->form->last_name->label; ?>
@@ -25,40 +26,12 @@
                         <?php echo $this->form->last_name; ?>
                     </td>
                 </tr>
-                
                 <tr>
                     <td class="label">
                         <?php echo $this->form->email_address->label; ?>
                     </td>
                     <td class="entry">
                         <?php echo $this->form->email_address; ?>
-                    </td>
-                </tr>
-                
-                <tr>
-                    <td class="label">
-                        <?php echo $this->form->confirm_email_address->label; ?>
-                    </td>
-                    <td class="entry">
-                        <?php echo $this->form->confirm_email_address; ?>
-                    </td>
-                </tr>
-                
-                <tr>
-                    <td class="label">
-                        <?php echo $this->form->password->label; ?>
-                    </td>
-                    <td class="entry">
-                        <?php echo $this->form->password; ?>
-                    </td>
-                </tr>
-                
-                <tr>
-                    <td class="label">
-                        <?php echo $this->form->confirm_password->label; ?>
-                    </td>
-                    <td class="entry">
-                        <?php echo $this->form->confirm_password; ?>
                     </td>
                 </tr>
             </table>
