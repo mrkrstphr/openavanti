@@ -1,0 +1,26 @@
+
+    <?php $this->pageHeader("View Role", "Search Roles", "/roles", Helpers::IconSearch); ?>
+
+    <?php require("validation-errors.php"); ?>
+    <?php require("flash-message.php"); ?>
+                    
+    <table style="width: 100%;">
+        <tr>
+            <td style="text-align: right; width: 18%;">
+                Name: 
+            </td>
+            <td>
+                <?php echo $this->role->name; ?>
+            </td>
+        </tr>
+        
+        <tr>
+            <td style="text-align: right;">
+                Permission:
+            </td>
+            <td class="entry">
+                <?php echo $this->role->permission; ?>
+            </td>
+        </tr>    
+    </table>
+    

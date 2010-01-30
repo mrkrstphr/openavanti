@@ -8,9 +8,16 @@
 </head>
 <body>
 
-    <div class="document">
-        <div class="header">
-            OpenAvanti Skeleton
+    <div class="header">
+        <div class="document">
+            <h1 class="logo">OpenAvanti Skeleton</h1>
+            
+            <div class="user">
+                <img alt="user" src="/images/user.png" />
+                Welcome, <strong><?php echo Authenticator::$user->first_name . " " .
+                    Authenticator::$user->last_name; ?></strong> <br />
+                <a href="/account">My Account</a> | <a href="/login/destroy">Logout</a>
+            </div>
             
             <div class="menu">
                 <ul>
@@ -22,12 +29,20 @@
                     </li>
                 </ul>
             </div>
+            
+            <div class="clear"></div>
         </div>
+    </div>
+    
+    <div class="document">
         <div class="body">
             <?php $this->renderContent(); ?>
         </div>
-        <div class="footer">
-            Copyright &copy; <?php echo date("Y"); ?> My Company
+    </div>
+    
+    <div class="footer">
+        <div class="document">
+            Copyright &copy; <?php echo date("Y"); ?> My Company. All Rights Reserved.
         </div>
     </div>
 

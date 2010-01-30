@@ -1,0 +1,35 @@
+
+    <?php $this->pageHeader("Edit Role", "Search Roles", "/roles", Helpers::IconSearch); ?>
+
+    <?php require("validation-errors.php"); ?>
+    <?php require("flash-message.php"); ?>
+
+
+    <form action="/roles/save" method="post" enctype="multipart/form-data">
+        <fieldset>
+            <?php echo $this->form->role_id; ?>
+
+            <table cellspacing="1" cellpadding="3" class="form-entry">
+                <tr>
+                    <td class="label">
+                        <?php echo $this->form->name->label; ?>
+                    </td>
+                    <td class="entry">
+                        <?php echo $this->form->name; ?>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">
+                        <?php echo $this->form->permission->label; ?>
+                    </td>
+                    <td class="entry">
+                        <?php echo $this->form->permission; ?>
+                    </td>
+                </tr>
+            </table>
+            
+            <div class="form-toolbar">
+                <button type="submit">Save Role</button>
+            </div>
+        </fieldset>
+    </form>

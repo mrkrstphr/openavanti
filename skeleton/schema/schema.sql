@@ -2,7 +2,12 @@
 CREATE TABLE roles(
     role_id bigserial PRIMARY KEY,
     name varchar(40) NOT NULL,
-    permission int UNIQUE NOT NULL
+    permission int UNIQUE NOT NULL,
+    status varchar(20) DEFAULT 'active',
+    created_on timestamp with time zone,
+    created_by_id bigint REFERENCES users(user_id),
+    last_updated_on timestamp with time zone,
+    last_updated_by_id bigint REFERENCES users(user_id)
 );
 
 CREATE TABLE users(

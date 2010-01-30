@@ -4,6 +4,8 @@
     {
         public function init()
         {
+            $this->addElement(new HiddenElement('user_id'));
+
             $this->addElement(new TextElement('first_name', '* First Name:', array(
                 'size' => 25, 'maxlength' => 32
             )));
