@@ -218,3 +218,39 @@ div.clear
     clear: both;
 }
 
+
+/* VALIDATION ERRORS */
+
+div.validation-errors {
+	background-color: #FFDFDF;
+	border-top: 1px solid #ff9f9f;
+	border-bottom: 1px solid #ff9f9f;
+	margin-bottom: 8px;
+	padding: 8px 4px;
+}
+
+div.validation-errors ol {
+	margin-bottom: 0px;
+	padding-bottom: 0px;
+}
+
+div.validation-errors img {
+	vertical-align: middle; 
+}
+
+
+/* FLASH MESSAGE */
+
+div#flash-message {
+	background-color: #e4ffcf;
+	border-bottom: 1px solid #8fdf53;
+	border-top: 1px solid #8fdf53;
+	line-height: 16px;
+	margin-top: 8px;
+	margin-bottom: 8px;
+	padding: 4px 8px;
+}
+
+div#flash-message img {
+	vertical-align: middle;
+}
