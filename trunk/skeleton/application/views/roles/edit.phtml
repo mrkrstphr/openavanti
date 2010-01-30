@@ -1,12 +1,11 @@
 
-    <div class="messages">
-        <?php require("validation-errors.php"); ?>
-        <?php require("flash-message.php"); ?>
-    </div>
-
-
     <div class="main">
         <h2>Edit Role</h2>
+        
+        <div class="messages">
+            <?php require("validation-errors.php"); ?>
+            <?php require("flash-message.php"); ?>
+        </div>
         
         <form action="/roles/save" method="post" enctype="multipart/form-data">
             <fieldset>

@@ -1,19 +1,17 @@
 
-<?php if( Validation::HasErrors() ): ?>
+<?php if(Validation::hasErrors()): ?>
 
-	<?php $aErrors = Validation::GetErrors(); ?>
+	<?php $errors = Validation::getErrors(); ?>
 
 	<div class="validation-errors">
-		<img alt="Error" src="/images/error.png" title="Validation Errors" />
+		<img alt="Error" src="/images/icons/silk/error.png" title="Validation Errors" />
 		The following validation errors have occurred:
 		
 		<ol>
-			<?php foreach( $aErrors as $sField => $aFieldErrors ): ?>
-			<?php foreach( $aFieldErrors as $sError ): ?>
+			<?php foreach($errors as $fieldErrors): ?>
+			<?php foreach($fieldErrors as $error): ?>
 			
-			<li>
-				<?php echo $sError; ?>
-			</li>
+			<li><?php echo $error; ?></li>
 			
 			<?php endforeach; ?>
 			<?php endforeach; ?>
