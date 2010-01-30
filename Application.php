@@ -314,8 +314,10 @@ class Application
         
         $paths = array(
             $this->_controllerPath,
+            $this->_controllerPath . "/helpers",
             $this->_modelPath,
             $this->_formPath,
+            $this->_viewPath . "/helpers",
             $this->_libraryPath,
             $this->_libraryPath . '/Form',
             $this->_libraryPath . '/Form/Element'
