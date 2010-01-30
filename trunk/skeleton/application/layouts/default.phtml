@@ -19,15 +19,12 @@
                 <a href="/account">My Account</a> | <a href="/login/destroy">Logout</a>
             </div>
             
-            <div class="menu">
-                <ul>
-                    <li>
-                        <a href="/users">Users</a>
-                    </li>
-                    <li>
-                        <a href="/roles">Roles</a>
-                    </li>
-                </ul>
+            <div class="main-menu top-menu">
+                <?php echo $this->menuRenderer('mainMenu'); ?>
+            </div>
+            
+            <div class="admin-menu top-menu">
+                <?php echo $this->menuRenderer('adminMenu'); ?>
             </div>
             
             <div class="clear"></div>

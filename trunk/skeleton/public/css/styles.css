@@ -56,29 +56,37 @@ div.header h1.logo
     padding: 0px;
 }
 
-div.header div.menu
+div.header div.top-menu
 {
     position: absolute;
     bottom: 0px;
+}
+
+div.header div.main-menu
+{
+    left: 0px;
+}
+
+div.header div.admin-menu
+{
     right: 0px;
 }
 
-div.header div.menu ul
+div.header div.top-menu ul
 {
     list-style-type: none;
     margin: 0px;
     padding: 0px;
 }
 
-div.header div.menu ul li
+div.header div.top-menu ul li
 {
     display: inline;
 }
 
-div.header div.menu ul li a,
-div.header div.menu ul li a:visited
+div.header div.top-menu ul li a,
+div.header div.top-menu ul li a:visited
 {
-    background-color: #444444;
     color: #ffffff;
     float: left;
     line-height: 2em;
@@ -94,9 +102,19 @@ div.header div.menu ul li a:visited
     border-radius-topright: 5px;
 }
 
-div.header div.menu ul li.current a,
-div.header div.menu ul li.current a:visited,
-div.header div.menu ul li a:hover
+div.header div.admin-menu ul li a
+{
+    background-color: #7F2727;
+}
+
+div.header div.main-menu ul li a
+{
+    background-color: #444444;
+}
+
+div.header div.top-menu ul li.current a,
+div.header div.top-menu ul li.current a:visited,
+div.header div.top-menu ul li a:hover
 {
     background-color: #e2e2e2;
     color: #191919;
