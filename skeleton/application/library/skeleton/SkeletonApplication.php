@@ -11,12 +11,14 @@
          */
         public function init()
         {
-            $this->initializeSession();
-            $this->initializeEnvironment();
-            
             $this->appendIncludePath("../");
             $this->addAdditionalAutoloadPaths(array("../application"));
             $this->addAdditionalAutoloadPaths(array("../application/library/skeleton"));
+            
+            $this->initializeSession();
+            $this->initializeEnvironment();
+            
+            $this->initializeMenus();
             
             // Tell the Dispatcher to run the authenticate() method before routing the URI
             
@@ -57,6 +59,32 @@
             View::setViewFileExtension(".phtml");
             
         } // initializeEnvironment()
+        
+        
+        /**
+         *
+         *
+         */
+        public function initializeMenus()
+        {
+            $adminMenu = new MenuContainer();
+            $adminMenu->addItems(array(
+                new MenuItem('Roles', '/roles'),
+                new MenuItem('Users', '/users'),
+            ));
+            
+            $mainMenu = new MenuContainer();
+            $mainMenu->addItems(array(
+                new MenuItem('Menu #1', '#'),
+                new MenuItem('Menu #2', '#'),
+                new MenuItem('Menu #3', '#'),
+                new MenuItem('Menu #4', '#')
+            ));
+            
+            Registry::store('adminMenu', $adminMenu);
+            Registry::store('mainMenu', $mainMenu);
+            
+        } // initializeMenus()
         
         
         /**
