@@ -1,80 +1,87 @@
 
-    	<?php $this->pageHeader("Search Roles", "Add Role", "/roles/add", "/images/add.png"); ?>
+    <div class="main">
+    	<h2>Search Roles</h2>
+
+        <form method="get" action="/roles/paginate/1">
+            <input type="hidden" name="sort" value="<?php echo $this->search->sSort; ?>" />
+            <input type="hidden" name="order" value="<?php echo $this->search->sOrder; ?>" />
+            
+            <table class="data-filters" cellpadding="3" cellspacing="1">
+                <tr>
+                    <td>
+                        <?php echo $this->form->search_name->label; ?>
+                    </td>
+                    <td>
+                        <?php echo $this->form->search_name; ?>
+                    </td>
+                
+                    <td>
+                        <?php echo $this->form->search_status->label; ?>
+                    </td>
+                    <td>
+                        <?php echo $this->form->search_status; ?>
+                    </td>
+                
+                    <td>
+                        <button type="submit">Filter</button>
+                    </td>
+                </tr>
+            </table>
+        </form>
+
+        <table class="data-table" cellpadding="4" cellspacing="1">
+            <tr class="header">
+                <td style="">
+                    <a href="/roles/paginate/1/<?php
+                        echo $this->search->SortableColumnString("name"); ?>">Name</a>
+                </td>
+                
+                <td style="width:20%">
+                    <a href="/roles/paginate/1/<?php
+                        echo $this->search->SortableColumnString("permission"); ?>">Permission</a>
+                </td>
+                
+                <td style="width: 15%;">
+                    <a href="/roles/paginate/1/<?php
+                        echo $this->search->SortableColumnString("status"); ?>">Status</a>
+                </td>
+            </tr>
+            
+            <?php foreach($this->search->results as $count => $result): ?>
+            <tr class="row<?php echo $count % 2; ?>">
+                <td>
+                    <a href="/roles/view/<?php echo $result->role_id; ?>">
+                        <?php echo $result->name; ?></a>
+                </td>
+                
+                <td>
+                    <a href="/roles/view/<?php echo $result->role_id; ?>">
+                        <?php echo $result->permission; ?></a>
+                </td>
+                
+                <td>
+                    <?php echo ucwords($result->status); ?>
+                </td>
+            </tr>
+            <?php endforeach; ?>
+        		
+            <?php if(count($this->search->results) == 0): ?>
+            <tr>
+                <td class="no-results" colspan="2">
+                    No Results Found
+                </td>
+            </tr>
+            <?php endif; ?>
+            
+            <?php require("pagination-partial.php"); ?>
+        </table>
+    </div>
     
-        	<form method="get" action="/roles/paginate/1">
-        		<input type="hidden" name="sort" value="<?php echo $this->search->sSort; ?>" />
-        		<input type="hidden" name="order" value="<?php echo $this->search->sOrder; ?>" />
-        		
-        		<table class="data-filters" cellpadding="3" cellspacing="1">
-        			<tr>
-        				<td>
-                            <?php echo $this->form->search_name->label; ?>
-                        </td>
-        				<td>
-                            <?php echo $this->form->search_name; ?>
-        				</td>
-        			
-        				<td>
-                            <?php echo $this->form->search_status->label; ?>
-                        </td>
-        				<td>
-                            <?php echo $this->form->search_status; ?>
-        				</td>
-        			
-        				<td>
-        					<button type="submit">Filter</button>
-        				</td>
-        			</tr>
-        		</table>
-        	</form>
-        </div>
+    <div class="sidebar">
+        <h3>Quick Actions</h3>
         
-        <div class="inner-box">
-        	<table class="data-table" cellpadding="4" cellspacing="1">
-        		<tr class="header">
-        			<td style="">
-        				<a href="/roles/paginate/1/<?php
-        					echo $this->search->SortableColumnString("name"); ?>">Name</a>
-        			</td>
-        			
-        			<td style="width:20%">
-        				<a href="/roles/paginate/1/<?php
-        					echo $this->search->SortableColumnString("permission"); ?>">Permission</a>
-        			</td>
-        			
-        			<td style="width: 15%;">
-        				<a href="/roles/paginate/1/<?php
-        					echo $this->search->SortableColumnString("status"); ?>">Status</a>
-        			</td>
-        		</tr>
-        		
-        		<?php foreach($this->search->results as $count => $result): ?>
-        		<tr class="row<?php echo $count % 2; ?>">
-        			<td>
-                        <a href="/roles/view/<?php echo $result->role_id; ?>">
-        				    <?php echo $result->name; ?></a>
-        			</td>
-        			
-        			<td>
-                        <a href="/roles/view/<?php echo $result->role_id; ?>">
-        				    <?php echo $result->permission; ?></a>
-        			</td>
-        			
-        			<td>
-        				<?php echo ucwords($result->status); ?>
-        			</td>
-        		</tr>
-        		<?php endforeach; ?>
-        		
-        		<?php if(count($this->search->results) == 0): ?>
-        		<tr>
-        			<td class="no-results" colspan="2">
-        				No Results Found
-        			</td>
-        		</tr>
-        		<?php endif; ?>
-        		
-        		<?php require("pagination-partial.php"); ?>
-        	</table>
-        </div>
+        <a href="/roles/add">
+            <img alt="add" src="/images/icons/add.png" title="Add Role" /></a>
+        <a href="/roles/add">
+            Add New Role</a>
     </div>
