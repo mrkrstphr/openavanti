@@ -11,7 +11,8 @@
  * @version         SVN: $Id$
  */
  
- 
+namespace OpenAvanti;
+
 /**
  * View Helper abstract class implementation
  *

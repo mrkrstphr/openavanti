@@ -80,7 +80,7 @@ class Application
         $this->_controllerPath = realpath("{$documentRoot}/../application/controllers");
         $this->_modelPath = realpath("{$documentRoot}/../application/models");
         $this->_formPath = realpath("{$documentRoot}/../application/forms");
-        $this->_libraryPath = realpath("{$documentRoot}/../library/OpenAvanti");
+        $this->_libraryPath = realpath("{$documentRoot}/../library/openavanti");
         $this->_layoutPath = realpath("{$documentRoot}/../application/layouts");
         $this->_viewPath = realpath("{$documentRoot}/../application/views");
         
