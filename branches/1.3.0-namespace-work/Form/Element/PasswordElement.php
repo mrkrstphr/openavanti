@@ -34,6 +34,20 @@ class PasswordElement extends InputElement
         
     } // init()
 
+
+    /**
+     * Override the parent setValue() method to prevent a value being set to 
+     * a password field. This is done for security reasons to prevent others
+     * from spying on a password value when the user is away from the computer.
+     *
+     * @param string $value The value to propogate (ignored)
+     */
+    public function setValue($value)
+    {
+        // set value on the password field is not allowed for security reasons
+
+    } // setValue()
+
 } // PasswordElement()
 
 ?>
