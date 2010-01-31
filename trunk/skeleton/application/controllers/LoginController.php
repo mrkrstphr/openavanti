@@ -1,6 +1,6 @@
 <?php
 
-	class LoginController extends Controller
+	class LoginController extends OpenAvanti\Controller
 	{
 		
         /**

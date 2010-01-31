@@ -1,7 +1,7 @@
 <?php
 
 
-class QuickLinkHelper extends ViewHelper
+class QuickLinkHelper extends OpenAvanti\ViewHelper
 {
     // Icon constants
     const IconSearch = '/images/icons/silk/magnifier.png';

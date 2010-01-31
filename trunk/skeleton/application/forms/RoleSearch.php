@@ -1,14 +1,14 @@
 <?php
 
-    class RoleSearch extends Form
+    class RoleSearch extends OpenAvanti\Form
     {
         public function init()
         {
-            $this->addElement(new TextElement('search[name]', 'Name:', array(
+            $this->addElement(new OpenAvanti\TextElement('search[name]', 'Name:', array(
                 'size' => 25, 'maxlength' => 64
             )));
             
-            $this->addElement(new SelectElement('search[status]', 'Status:', array(
+            $this->addElement(new OpenAvanti\SelectElement('search[status]', 'Status:', array(
                 'options' => Role::$_statuses
             )));
             

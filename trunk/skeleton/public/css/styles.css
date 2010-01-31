@@ -1,5 +1,6 @@
 body
 {
+    background-color: #e7e7e7;
     font: 10pt verdana, arial, sans-serif;
     margin: 0px;
     padding: 0px;
@@ -158,7 +159,6 @@ div.document
 
 div.body
 {
-    background-color: #e2e2e2;
 }
 
 div.body div.document
@@ -225,10 +225,10 @@ div.sidebar h3
 
 div.footer
 {
-    background-color: #222222;
-    color: #ffffff;
+    color: #4f4f4f;
     font-size: 9pt;
     padding: 8px 8px 8px 8px;
+    text-align: center;
 }
 
 div.clear
@@ -271,4 +271,28 @@ div#flash-message {
 
 div#flash-message img {
 	vertical-align: middle;
+}
+
+
+/** DATA GRID **/
+
+table.data-grid
+{
+    background-color: #cccccc;
+    width: 100%;
+}
+
+table.data-grid tr.header
+{
+    background-color: #cccccc;
+}
+
+table.data-grid tr.row0
+{
+    background-color: #ffffff;
+}
+
+table.data-grid tr.row1
+{
+    background-color: #efefef;
 }

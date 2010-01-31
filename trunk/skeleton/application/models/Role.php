@@ -1,6 +1,8 @@
 <?php
 
-class Role extends Model
+use OpenAvanti\Validation;
+
+class Role extends OpenAvanti\Model
 {
     const StatusActive = 'active';
     const StatusInactive = 'inactive';

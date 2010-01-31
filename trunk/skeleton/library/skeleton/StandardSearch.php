@@ -1,6 +1,6 @@
 <?php
 
-class StandardSearch extends CRUD
+class StandardSearch extends OpenAvanti\CRUD
 {
     public $iResultsPerPage = 10;
     public $sHardFilters = "";
@@ -55,7 +55,7 @@ class StandardSearch extends CRUD
             $this->sPaginationLink = "/" . $this->getTableName() . "/paginate/%s";
         }
         
-        $this->aPagination = Pagination::Generate( $this->sPaginationLink, 
+        $this->aPagination = OpenAvanti\Pagination::Generate( $this->sPaginationLink, 
             $iCurrentPage, $this->iResultsPerPage, $this->iResultCount, 5 );
         
         
