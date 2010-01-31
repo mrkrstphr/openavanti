@@ -1,5 +1,7 @@
 <?php
-	
+
+use OpenAvanti\Validation;
+
 	class Authenticator
 	{
 		public static $user = null;
@@ -8,7 +10,7 @@
          *
          *
          */
-		public static function authenticate(Request &$request)
+		public static function authenticate(OpenAvanti\Request &$request)
 		{
 			if(!Authenticator::confirm())
 			{

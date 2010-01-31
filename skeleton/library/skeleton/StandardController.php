@@ -1,6 +1,8 @@
 <?php
 
-abstract class StandardController extends Controller
+use OpenAvanti\StringFunctions;
+
+abstract class StandardController extends OpenAvanti\Controller
 {
     protected $_elementName = "";
     protected $_singularElementName = "";

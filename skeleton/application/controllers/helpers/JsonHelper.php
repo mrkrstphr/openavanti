@@ -1,6 +1,6 @@
 <?php
 
-class JsonHelper extends ControllerActionHelper
+class JsonHelper extends OpenAvanti\ControllerActionHelper
 {
     public function process($data)
     {

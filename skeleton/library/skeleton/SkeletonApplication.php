@@ -1,8 +1,8 @@
 <?php
 
-    require("../application/library/openavanti/Application.php");
+    require("../library/openavanti/Application.php");
     
-    class SkeletonApplication extends Application
+    class SkeletonApplication extends OpenAvanti\Application
     {
         
         /**
@@ -12,8 +12,8 @@
         public function init()
         {
             $this->appendIncludePath("../");
-            $this->addAdditionalAutoloadPaths(array("../application"));
-            $this->addAdditionalAutoloadPaths(array("../application/library/skeleton"));
+            //$this->addAdditionalAutoloadPaths(array("../application"));
+            $this->addAdditionalAutoloadPaths(array("../library/skeleton"));
             
             $this->initializeSession();
             $this->initializeEnvironment();
@@ -24,7 +24,7 @@
             
             $this->getDispatcher()->registerPreDispatchMethod(array($this, 'authenticate'));
             
-            Database::addProfile('default', array(
+            OpenAvanti\Database::addProfile('default', array(
                 "driver" => "postgres",
                 "name" => "skeleton",
                 "user" => "postgres",
@@ -55,8 +55,8 @@
             
             date_default_timezone_set("GMT");
             
-            View::setDefaultLayout("default.phtml");
-            View::setViewFileExtension(".phtml");
+            OpenAvanti\View::setDefaultLayout("default.phtml");
+            OpenAvanti\View::setViewFileExtension(".phtml");
             
         } // initializeEnvironment()
         
@@ -81,8 +81,8 @@
                 new MenuItem('Menu #4', '#')
             ));
             
-            Registry::store('adminMenu', $adminMenu);
-            Registry::store('mainMenu', $mainMenu);
+            OpenAvanti\Registry::store('adminMenu', $adminMenu);
+            OpenAvanti\Registry::store('mainMenu', $mainMenu);
             
         } // initializeMenus()
         

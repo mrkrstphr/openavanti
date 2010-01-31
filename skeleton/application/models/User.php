@@ -1,6 +1,8 @@
 <?php
 
-class User extends Model
+use OpenAvanti\Validation;
+
+class User extends OpenAvanti\Model
 {
     const StatusActive = 'active';
     const StatusInactive = 'inactive';

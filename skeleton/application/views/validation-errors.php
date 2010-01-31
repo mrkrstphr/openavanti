@@ -1,7 +1,7 @@
 
-<?php if(Validation::hasErrors()): ?>
+<?php if(OpenAvanti\Validation::hasErrors()): ?>
 
-	<?php $errors = Validation::getErrors(); ?>
+	<?php $errors = OpenAvanti\Validation::getErrors(); ?>
 
 	<div class="validation-errors">
 		<img alt="Error" src="/images/icons/silk/error.png" title="Validation Errors" />

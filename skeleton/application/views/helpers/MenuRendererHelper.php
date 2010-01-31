@@ -1,12 +1,12 @@
 <?php
 
 
-class MenuRendererHelper extends ViewHelper
+class MenuRendererHelper extends OpenAvanti\ViewHelper
 {
 
     public function render($menuName)
     {
-        $menu = Registry::retrieve($menuName);
+        $menu = OpenAvanti\Registry::retrieve($menuName);
         
         if(is_null($menu) || !is_a($menu, "MenuContainer"))
             return '';

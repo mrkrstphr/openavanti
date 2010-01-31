@@ -5,10 +5,10 @@
                 Please provide your login credentials.
             </p>
             
-            <?php if( Validation::HasErrors() ): ?>
+            <?php if( OpenAvanti\Validation::HasErrors() ): ?>
             <p class="error">
                 <?php 
-                    $aErrors = Validation::GetErrors();
+                    $aErrors = OpenAvanti\Validation::GetErrors();
                     
                     foreach( $aErrors as $sField => $aFieldErrors )
                     {

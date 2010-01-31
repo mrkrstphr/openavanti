@@ -1,6 +1,10 @@
 <?php
 
-    class UserEdit extends Form
+use OpenAvanti\HiddenElement;
+use OpenAvanti\TextElement;
+use OpenAvanti\PasswordElement;
+
+    class UserEdit extends OpenAvanti\Form
     {
         public function init()
         {
