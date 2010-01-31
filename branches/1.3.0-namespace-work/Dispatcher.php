@@ -34,6 +34,11 @@ class Dispatcher
     // dispatching errors:
     protected $_errorController = "ErrorController";
     
+    /**
+     * Stores a reference to the Application object for this application instance
+     */
+    protected $_application = null;
+    
     // Stores a reference to the Request object for this request:
     protected $_request = null;
     
@@ -47,14 +52,27 @@ class Dispatcher
     protected $_view = null;
     
     /**
-     *
+     * A set of callback methods to invoke before the dispatching process
      */
     protected $_preDispatchCallbacks = array();
     
     /**
-     *
+     * A set of callback methods to invoke after the dispatching process
      */
     protected $_postDispatchCallbacks = array();
+
+
+    /**
+     * The constructor is responsible for accepting and storing a reference to the Application
+     * object that created this dispatcher. 
+     *
+     * @param Application $application The application object that created this dispatcher
+     */
+    public function __construct(Application &$application)
+    {
+        $this->_application = &$application;
+        
+    } // __construct()
 
 
     /**
@@ -74,6 +92,19 @@ class Dispatcher
         );
     
     } // addRoute()
+
+    
+    /**
+     * Returns a reference to the Application class for this application instance (responsible for
+     * creating the Dispatcher that handled the current request and loaded this controller)
+     *
+     * @returns Application The Application class for this application instance
+     */
+    public function &getApplication()
+    {
+        return $this->_application;
+        
+    } // getApplication()
 
 
     /**

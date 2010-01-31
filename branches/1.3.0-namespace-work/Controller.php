@@ -109,7 +109,6 @@ class Controller
     } // index()
     
     
-    
     /**
      * Returns a copy of the Dispatcher class that handled the current request and loaded
      * this controller. 
@@ -122,6 +121,19 @@ class Controller
         return $this->_dispatcher;
     
     } // getDispatcher()
+    
+    
+    /**
+     * Returns a reference to the Application class for this application instance (responsible for
+     * creating the Dispatcher that handled the current request and loaded this controller)
+     *
+     * @returns Application The Application class for this application instance
+     */
+    public function &getApplication()
+    {
+        return $this->getDispatcher()->getApplication();
+        
+    } // getApplication()
     
     
     /**
@@ -319,6 +331,25 @@ class Controller
         return $flash;
         
     } // getFlash()
+    
+    
+    /**
+     * __call() magic method setup to load action helpers as requested
+     *
+     * @param string $method The method being called, which translates to the helper class
+     * @param array $arguments An array of arguments to pass to the render() method of the helper
+     * @return mixed The return value of the helper, if any
+     */
+    public function __call($method, $arguments)
+    {
+        $method = $method . 'Helper';
+        
+        if($this->getApplication()->actionHelperExists($method))
+        {
+            return call_user_func_array(array($method, 'process'), $arguments);
+        }
+        
+    } // __call()
 
 } // Controller()
 

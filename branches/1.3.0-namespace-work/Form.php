@@ -353,7 +353,7 @@ class Form
      */
     protected function elementExists($elementType)
     {
-        $elementName = "{$name}Element";
+        $elementName = "{$elementType}Element";
         
         if(class_exists($elementName, true))
         {

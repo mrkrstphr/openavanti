@@ -95,6 +95,28 @@ class Request
     
     
     /**
+     *
+     *
+     */
+    public function isPostEmpty()
+    {
+        return empty($_POST);
+        
+    } // isPostEmpty()
+    
+    
+    /**
+     *
+     *
+     */
+    public function isGetEmpty()
+    {
+        return empty($_GET);
+        
+    } // isGetEmpty()
+    
+    
+    /**
      * Determines whether or not the current HTTP request came via AJAX.                                             
      * 
      * @returns boolean True of the request is via AJAX, false otherwise 

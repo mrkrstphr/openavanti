@@ -94,9 +94,25 @@ class Application
         
         spl_autoload_register(array($this, "defaultAutoloader"));
         
-        $this->_dispatcher = new Dispatcher();
+        $this->_dispatcher = new Dispatcher($this);
+        
+        // Call user initialization:
+        
+        $this->init();
         
     } // __construct()
+    
+    
+    /**
+     *
+     *
+     */
+    public function init()
+    {
+        
+        
+    } // init()
+    
     
     
     /**
@@ -307,8 +323,10 @@ class Application
         
         $paths = array(
             $this->_controllerPath,
+            $this->_controllerPath . "/helpers",
             $this->_modelPath,
             $this->_formPath,
+            $this->_viewPath . "/helpers",
             $this->_libraryPath,
             $this->_libraryPath . '/Form',
             $this->_libraryPath . '/Form/Element'
@@ -340,6 +358,54 @@ class Application
         return $this->_dispatcher;
         
     } // getDispatcher()
+    
+    
+    /**
+     * Determines if an action helper class exists and, if so, loads the class file
+     *
+     * @param string $helper The name of the helper class to check for existance and load
+     * @return bool True if the helper exists and is loaded, false otherwise
+     */
+    public function actionHelperExists($helper)
+    {
+        if(class_exists($helper) && is_subclass_of($helper, "ControllerActionHelper"))
+        {
+            return true;
+        }
+        else if(file_exists($this->_controllerPath . "/helpers/" . ucfirst($helper) . ".php"))
+        {
+            require_once $this->_controllerPath . "/helpers/" . ucfirst($helper) . ".php";
+            
+            return true;
+        }
+        
+        return false;
+        
+    } // actionHelperExists()
+    
+    
+    /**
+     * Determines if a view helper class exists and, if so, loads the class file
+     *
+     * @param string $helper The name of the helper class to check for existance and load
+     * @return bool True if the helper exists and is loaded, false otherwise
+     */
+    public function viewHelperExists($helper)
+    {
+        if(class_exists($helper) && is_subclass_of($helper, "ViewHelper"))
+        {
+            return true;
+        }
+        else if(file_exists($this->_viewPath . "/helpers/" . ucfirst($helper) . ".php"))
+        {
+            require_once $this->_viewPath . "/helpers/" . ucfirst($helper) . ".php";
+            
+            return true;
+        }
+        
+        return false;
+        
+    } // viewHelperExists()
     
     
     /**
