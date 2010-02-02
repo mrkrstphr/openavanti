@@ -63,7 +63,12 @@ class Application
      *
      */
     protected $_dispatcher = null;
-    
+
+    /**
+     *
+     */
+    protected $_environment = null;
+
     
     /**
      * Constructor; sets up default paths, adds layout and view paths to
@@ -96,12 +101,19 @@ class Application
         
         $this->_dispatcher = new Dispatcher($this);
         
-        // Call user initialization:
-        
-        $this->init();
-        
     } // __construct()
+   
     
+    /**
+     *
+     *
+     */
+    public function setEnvironment($environment)
+    {
+        $this->_environment = $environment;
+    
+    } // setEnvironment()
+
     
     /**
      *
@@ -112,8 +124,7 @@ class Application
         
         
     } // init()
-    
-    
+   
     
     /**
      * Sets the path to the controllers directory, which is used by the
@@ -416,6 +427,14 @@ class Application
      */
     public function run()
     {
+        $this->init();
+        
+        if(!empty($this->_environment) && method_exists($this, "init" . $this->_environment))
+        {
+            $init = "init" . $this->_environment;
+            $this->$init();
+        }
+
         $uri = str_replace("?" . $_SERVER["QUERY_STRING"], "", $_SERVER["REQUEST_URI"]);
         $uri = $uri != "/" ? $uri : "index";
         
