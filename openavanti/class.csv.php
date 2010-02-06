@@ -5,11 +5,10 @@
  * OpenAvanti is an open source, object oriented framework for PHP 5+
  *
  * @author          Kristopher Wilson
- * @copyright       Copyright (c) 2007-2009, Kristopher Wilson
+ * @copyright       Copyright (c) 2007-2010, Kristopher Wilson
+ * @package         openavanti
  * @license         http://www.openavanti.com/license
  * @link            http://www.openavanti.com
- * @version         1.0
- * 
  */
  
     /**
@@ -17,11 +16,19 @@
      *
      * @category    CSV
      * @author      Kristopher Wilson
-     * @link        http://www.openavanti.com/docs/csv
+     * @package     openavanti
+     * @link        http://www.openavanti.com/documentation/docs/1.0.3/CSV 
      */
     class CSV
     {
-        public $aHeaders = array(); 
+        /**
+         * The headers of the csv document
+         */
+        public $aHeaders = array();
+        
+        /**
+         * The data of the csv document
+         */
         public $aData = array();
         
         
@@ -29,8 +36,7 @@
          * Adds a header to the list of CSV column headers. This method appends to the current list 
          * of headers by adding the single header.       
          *
-         * @argument string The name of the header to add to the list of column headers      
-         * @returns void         
+         * @param string $sHeader The name of the header to add to the list of column headers       
          */                     
         public function AddHeader( $sHeader )
         {
@@ -44,8 +50,7 @@
          * current list of headers by adding the passed array of headers to the existing array of
          * headers already added.
          *                           
-         * @argument array An array of headers to append to the current array of headers
-         * @returns void
+         * @param array $aHeaders An array of headers to append to the current array of headers
          */
         public function AddHeaders( $aHeaders )
         {
@@ -54,8 +59,7 @@
                 $this->aHeaders += $aHeaders;
             }
             
-        } // AddHeaders()                           
-        
+        } // AddHeaders()
         
         
         /**
@@ -63,8 +67,7 @@
          * data does not match the number of columns in the headers (unless there are no headers),
          * this method will throw an exception.      
          * 
-         * @argument array An array of CSV row data
-         * @returns void
+         * @param array $aData An array of CSV row data
          */                     
         public function AddData( $aData )
         {
@@ -83,7 +86,7 @@
          * This method takes the headers and data stored in this object and creates a CSV
          * document from that data.      
          *       
-         * @returns string The headers and data supplied as a string formatted as a CSV document
+         * @return string The headers and data supplied as a string formatted as a CSV document
          */              
         public function __toString()
         {

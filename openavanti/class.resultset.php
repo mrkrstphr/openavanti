@@ -5,12 +5,11 @@
  * OpenAvanti is an open source, object oriented framework for PHP 5+
  *
  * @author          Kristopher Wilson
- * @dependencies    
+ * @dependencies    Database
  * @copyright       Copyright (c) 2007-2009, Kristopher Wilson
+ * @package         openavanti
  * @license         http://www.openavanti.com/license
  * @link            http://www.openavanti.com
- * @version         1.0
- *
  */
  
  
@@ -20,19 +19,39 @@
      *
      * @category    Database
      * @author      Kristopher Wilson
-     * @link        http://www.openavanti.com/docs/resultset
+     * @package     openavanti
+     * @link        http://www.openavanti.com/documentation/docs/1.0.3/ResultSet
      */
     class ResultSet implements Iterator, Countable
     {
+        /**
+         * The database connection resource for this resultset
+         */
         private $oDatabase = null;
-        private $rQueryResource = null;
-        private $oRecord = null;
         
+        /**
+         * The query resource for this resultset
+         */
+        private $rQueryResource = null;
+        
+        /**
+         * Stores whether or not the iterator is currently valid
+         */
         private $bValid = false;
         
+        /**
+         * Stores the number of rows in the resultset
+         */
         private $iNumRows = 0;
         
+        /**
+         * Stores the current row in the iterator
+         */
         private $iCurrentRow = -1;
+        
+        /**
+         * Stores the data for the iterator
+         */
         private $aData = array();
         
         
@@ -40,8 +59,8 @@
          * Stores the supplied database and query resource for later processing. Counts the number
          * of rows in the query resource and stores for later use.   
          * 
-         * @argument Database An instance of a database connection
-         * @argument Resource A reference to the database result returned by a query
+         * @param Database $oDatabase An instance of a database connection
+         * @param Resource $rQueryResource A reference to the database result returned by a query
          */
         public function __construct( &$oDatabase, &$rQueryResource )
         {
@@ -61,7 +80,7 @@
         /**
          * Returns a copy of the current record, if any, or null if no record is stored
          *       
-         * @returns StdClass The current data record, or null if none
+         * @return StdClass The current data record, or null if none
          */
         public function GetRecord()
         {
@@ -73,7 +92,7 @@
         /**
          * Returns the number of rows returned by the query this result set originated from
          *       
-         * @returns int The number of rows in the query resource resulting from the query        
+         * @return int The number of rows in the query resource resulting from the query        
          */
         public function Count()
         {           
@@ -86,7 +105,8 @@
          * Returns the data record for the current row, if any, or false if there is not a current 
          * row
          *       
-         * @returns StdClass The current data record for the current row, or false if there is no data
+         * @return StdClass The current data record for the current row, or false if there is no
+         *      data
          */
         public function Current()
         {           
@@ -106,7 +126,7 @@
          * Returns the key for the current data. This is defined as the current row of data in 
          * the query result.         
          *       
-         * @returns int The current row loaded into the ResultSet from the query resource        
+         * @return int The current row loaded into the ResultSet from the query resource        
          */
         public function Key()
         {
@@ -118,9 +138,7 @@
         /**
          * Attempts to advance the internal pointer of the query result to the next row of data.
          * On success, the data is loaded into this object. On failure, the data is cleared and
-         * operations such as current will return false.                 
-         *       
-         * @returns void         
+         * operations such as current will return false.    
          */
         public function Next()
         {
@@ -151,9 +169,7 @@
         
 
         /**
-         * Returns the internal pointer of the query result to the first row of the data. 
-         *       
-         * @returns void         
+         * Returns the internal pointer of the query result to the first row of the data.        
          */
         public function Rewind()
         {           
@@ -173,7 +189,7 @@
          * returned by the query, or if the internal pointer is out of bounds (higher than the
          * number of results in the query), this method will return false.               
          *       
-         * @returns bool True if there is data currently loaded in the result set, false otherwise       
+         * @return bool True if there is data currently loaded in the result set, false otherwise       
          */
         public function Valid()
         {           

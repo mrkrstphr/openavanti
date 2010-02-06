@@ -6,10 +6,10 @@
  *
  * @author          Kristopher Wilson
  * @dependencies    Dispatcher
- * @copyright       Copyright (c) 2007-2009, Kristopher Wilson
+ * @copyright       Copyright (c) 2007-2010, Kristopher Wilson
+ * @package         openavanti
  * @license         http://www.openavanti.com/license
  * @link            http://www.openavanti.com
- * @version         1.0
  */
  
  
@@ -18,20 +18,29 @@
      *
      * @category    Controller
      * @author      Kristopher Wilson
-     * @link        http://www.openavanti.com/docs/controller
+     * @package     openavanti
+     * @link        http://www.openavanti.com/documentation/docs/1.0.3/Controller
      */
     class Controller
-    {       
+    {
+        /**
+         * Stores view data that is passed from the Controller to the View
+         */
         public $aData = array();
+        
+        /**
+         * Stores the name of the file file that will be loaded at the end of the request
+         */
         public $sView = "";
         
+        /**
+         * Stores whether the current request will result in a 404 error
+         */
         public $b404Error = false;
         
         
         /**
          * Constructor. Currently does not do anything.                                                      
-         * 
-         * @returns void 
          */
         public function __construct()
         {
@@ -42,9 +51,7 @@
         /**
          * Every controller must have an index() method defined for default requests to the 
          * controller that do not define a method. Since it is a requirement for this method to 
-         * exist, it is defined in the parent controller class.                                                  
-         * 
-         * @returns void 
+         * exist, it is defined in the parent controller class.
          */
         public function index()
         {
@@ -56,7 +63,7 @@
         /**
          * Returns the internal 404 status to determine if a 404 error flag was triggered
          *
-         * @returns bool True if a 404 error was encountered, false otherwise
+         * @return bool True if a 404 error was encountered, false otherwise
          */                             
         public function Is404Error()
         {
@@ -68,8 +75,8 @@
         /**
          * Sets or clears the internal 404 error status flag. 
          * 
-         * @argument bool True to trigger a 404 error, false to clear the 404 flag, default: true
-         * @returns void
+         * @param bool $bIs404Error True to trigger a 404 error, false to clear the 404 flag.
+         *      Default: true
          */ 
         public function Set404Error( $bIs404Error = true )
         {
@@ -81,7 +88,7 @@
         /**
          * Determines whether or not the current HTTP request came via AJAX.                                             
          * 
-         * @returns boolean True of the request is via AJAX, false otherwise 
+         * @return boolean True of the request is via AJAX, false otherwise 
          */
         public function IsAjaxRequest()
         {
@@ -94,8 +101,8 @@
          * Sets the HTTP status code header. This method will only work if no output or headers
          * have already been sent.
          *       
-         * @argument int The HTTP status code
-         * @returns bool True if the operation was successful, false on failure
+         * @param int $iCode The HTTP status code
+         * @return bool True if the operation was successful, false on failure
          */
         public function SetHTTPStatus( $iCode )
         {
@@ -117,9 +124,9 @@
          * echoes the supplied error message to the browser, which could be a simple string or
          * a JSON object.                
          *
-         * @argument string The error message to output
-         * @argument int The response code to send to the browser, default: 400
-         * @returns void                         
+         * @param string $sError The error message to output
+         * @param int $iResponseCode Optional; The response code to send to the browser.
+         *      Default: 400
          */                     
         public function AjaxError( $sError, $iResponseCode = 400 )
         {
@@ -139,9 +146,10 @@
          * If headers have already been sent to the browser, this method will return false and will
          * not call the redirect. Otherwise this method will always return true.                                                     
          *
-         * @argument string The URL to redirect to 
-         * @argument bool True to signal a permanent redirect, false to not set the HTTP response code       
-         * @returns bool True if the redirect was sucessfull, false otherwise        
+         * @param string $sURL The URL to redirect to 
+         * @param bool $bPermanentRedirect Optional; True to signal a permanent redirect, false to
+         *      not set the HTTP response code. Default: true
+         * @return bool True if the redirect was sucessfull, false otherwise        
          */ 
         public function RedirectTo( $sURL, $bPermanentRedirect = true )
         {
@@ -162,8 +170,7 @@
          * check to ensure that the file specified actually exists. It is up to the code that loads
          * the view file to do this (normally the Dispatcher class).                 
          *       
-         * @argument string The file name of the view file that should be loaded.
-         * @returns void
+         * @param string $sView The file name of the view file that should be loaded.
          */ 
         public function SetView( $sView )
         {
@@ -179,9 +186,8 @@
          * 
          * If the supplied variable already exists, it will be overwritten.                                  
          *
-         * @argument string The name of the variable to set
-         * @argument mixed The value of the variable to set                  
-         * @returns void
+         * @param string $sName The name of the variable to set
+         * @param mixed $sValue The value of the variable to set
          */ 
         public function SetData( $sName, $sValue )
         {
@@ -196,8 +202,7 @@
          *
          * If a flash message is already set, it will be overwritten on subsequent calls.
          *               
-         * @argument string The message to set in the flash session variable
-         * @returns void         
+         * @param string $sMessage The message to set in the flash session variable
          */ 
         public function SetFlash( $sMessage )
         {
@@ -210,7 +215,7 @@
          * Retrieves any flash message stored in the flash session variable, if any. See the
          * SetFlash() method.        
          *
-         * @returns string The flash message, if any, stored in the session
+         * @return string The flash message, if any, stored in the session
          */ 
         public function GetFlash()
         {

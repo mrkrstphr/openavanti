@@ -7,10 +7,9 @@
  * @author          Kristopher Wilson
  * @dependencies    DOM
  * @copyright       Copyright (c) 2007-2009, Kristopher Wilson
+ * @package         openavanti
  * @license         http://www.openavanti.com/license
  * @link            http://www.openavanti.com
- * @version         1.0
- *
  */
  
  
@@ -19,14 +18,14 @@
      *
      * @category    String
      * @author      Kristopher Wilson
-     * @link        http://www.openavanti.com/docs/xmlfunctions
+     * @package     openavanti
+     * @link        http://www.openavanti.com/documentation/docs/1.0.3/XMLFunctions
      */
     class XMLFunctions
     {
         
         /**
-         *
-         *
+         * The constructor does nothing but prevent the class from being instantiated
          */                     
         private function __construct()
         {
@@ -42,8 +41,8 @@
          * This method requires the DOM extension and DOMDocument class. If this class does not
          * exist, PrettyPrint will throw an exception.                            
          *
-         * @argument string The XML string to format
-         * @returns string A properly indented, pretty version of the passed XML
+         * @param string $sXML The XML string to format
+         * @return string A properly indented, pretty version of the passed XML
          */
         public static function PrettyPrint( $sXML )
         {
@@ -61,7 +60,6 @@
             
         } // PrettyPrint()
     
-    
-    }; // XMLFunctions()
+    } // XMLFunctions()
 
 ?>

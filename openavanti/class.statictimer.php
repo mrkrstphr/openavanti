@@ -5,12 +5,10 @@
  * OpenAvanti is an open source, object oriented framework for PHP 5+
  *
  * @author          Kristopher Wilson
- * @dependencies    
  * @copyright       Copyright (c) 2007-2009, Kristopher Wilson
+ * @package         openavanti
  * @license         http://www.openavanti.com/license
  * @link            http://www.openavanti.com
- * @version         1.0
- *
  */
  
  
@@ -19,19 +17,25 @@
      *
      * @category    Controller
      * @author      Kristopher Wilson
-     * @link        http://www.openavanti.com/docs/statictimer
+     * @package     openavanti
+     * @link        http://www.openavanti.com/documentation/docs/1.0.3/StaticTimer
      */
     class StaticTimer
     {
+        /**
+         * The starting time
+         */
         private static $iStart = 0;
+        
+        /**
+         * The ending time
+         */
         private static $iEnd = 0;
         
         
         /**
          * Starts the timer -- if a timer was already previously started, this action
-         * will overwrite the start time                                                             
-         * 
-         * @returns void 
+         * will overwrite the start time
          */
         public static function Start()
         {
@@ -45,7 +49,7 @@
          * started, this will return 0. This does not actually stop the timer. For timing a series 
          * of events, Stop() can be called multiple time to get increments in between various steps                                                                          
          * 
-         * @returns double The amount of time that has passed since starting 
+         * @return double The amount of time that has passed since starting 
          */
         public static function Stop()
         {
@@ -57,9 +61,7 @@
         
         
         /**
-         * Internally used to update the supplied iVar with the current micro time.                                                                          
-         * 
-         * @returns void
+         * Internally used to update the supplied iVar with the current micro time.
          */
         protected static function Update( &$iVar )
         {           
@@ -67,6 +69,6 @@
             
         } // Update()
     
-    }; // StaticTimer()
+    } // StaticTimer()
 
 ?>

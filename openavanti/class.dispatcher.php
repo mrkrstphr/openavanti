@@ -5,12 +5,10 @@
  * OpenAvanti is an open source, object oriented framework for PHP 5+
  *
  * @author          Kristopher Wilson
- * @dependencies    
  * @copyright       Copyright (c) 2007-2009, Kristopher Wilson
+ * @package         openavanti
  * @license         http://www.openavanti.com/license
  * @link            http://www.openavanti.com
- * @version         1.0
- *
  */
  
  
@@ -21,37 +19,47 @@
      *
      * @category    Database
      * @author      Kristopher Wilson
-     * @link        http://www.openavanti.com/docs/dispatcher
+     * @package     openavanti
+     * @link        http://www.openavanti.com/documentation/docs/1.0.3/Dispatcher
      */
     class Dispatcher
     {
+        /**
+         * Stores a list of custom routes for the dispatching process
+         */
         private $aRoutes = array();
-        private $bRequireViewFiles = true;
-        
-        private $s404ViewFile = "404.php";
-        
-        private $x404Callback = null;
-        
-        private $sHeaderFile = "header.php";
-        private $sFooterFile = "footer.php";
-        
         
         /**
-         *
-         *
-         */                          
-        public function __construct()
-        {
+         * Should view files be automatically required
+         */
+        private $bRequireViewFiles = true;
         
-        } // __construct()
+        /**
+         * Stores the name of the view file to use for 404 errors
+         */
+        private $s404ViewFile = "404.php";
+        
+        /**
+         * Stores a callback to be executed when a 404 error occurs
+         */
+        private $x404Callback = null;
+        
+        /**
+         * Stores the name of the header file to load with each view (except during AJAX calls)
+         */
+        private $sHeaderFile = "header.php";
+        
+        /**
+         * Stores the name of the footer file to load with each view (except during AJAX calls)
+         */
+        private $sFooterFile = "footer.php";
         
         
         /**
          * Toggles whether or not the controller should load view files (header, the view setup
          * by the controller, and the footer view file.          
          * 
-         * @argument bool True if views should be required, false otherwise      
-         * @returns void
+         * @param bool $bRequireViewFiles True if views should be required, false otherwise
          */
         public function RequireViewFiles( $bRequireViewFiles )
         {
@@ -65,8 +73,7 @@
          * view file is specified, the file the dispatcher will attempt to load is "404.php". The
          * include path will be used to search for this file.                
          * 
-         * @argument string The file name of the view file to load in the event of a 404 error       
-         * @returns void
+         * @param string $sView The file name of the view file to load in the event of a 404 error
          */
         public function Set404View( $sView )
         {
@@ -83,8 +90,7 @@
          * Passing null or an empty string, or supplying no argument at all, to this method will 
          * cause the dispatcher to not load any header view file at all.
          * 
-         * @argument string The name of the file to load as the header, default ""
-         * @returns void
+         * @param string $sView Optional; The name of the file to load as the header. Default: none
          */
         public function SetHeaderView( $sView = "" )
         {
@@ -101,8 +107,7 @@
          * Passing null or an empty string, or supplying no argument at all, to this method will 
          * cause the dispatcher to not load any footer view file at all.
          * 
-         * @argument string The name of the file to load as the footer, default ""
-         * @returns void
+         * @param string $sView Optional; The name of the file to load as the footer. Default: none
          */
         public function SetFooterView( $sView = "" )
         {
@@ -116,8 +121,7 @@
          * requiring the 404 view file. If this callback is not callable, nothing will happen 
          * on a 404 error.           
          * 
-         * @argument callback The callback to invoke upon a 404 error        
-         * @returns void
+         * @param callback $xCallback The callback to invoke upon a 404 error
          */
         public function Set404Handler( $xCallback )
         {
@@ -131,9 +135,8 @@
          * is simply run by running a preg_match against the URI, and rewriting it to the 
          * replacement on a valid match using preg_replace. 
          * 
-         * @argument string The pattern to match against
-         * @argument string The string to rewrite to
-         * @returns void
+         * @param string $sPattern The pattern to match against
+         * @param string $sReplacement The string to rewrite to
          */
         public function AddRoute( $sPattern, $sReplacement )
         {
@@ -160,8 +163,7 @@
          * The data loaded via the controller's SetData() method is exploded and available for the
          * view file.                                    
          * 
-         * @argument string The current request URI
-         * @returns void
+         * @param string $sRequest The current request URI
          */
         public function Connect( $sRequest )
         {
@@ -237,7 +239,7 @@
         /**
          * Determines whether or not the current HTTP request came via AJAX.                                             
          * 
-         * @returns boolean True of the request is via AJAX, false otherwise 
+         * @return boolean True of the request is via AJAX, false otherwise 
          */
         public static function IsAjaxRequest()
         {
@@ -249,8 +251,8 @@
         /**
          * Called from Connect(), responsible for calling the method of the controller
          * routed from the URI
-         * 
-         * @returns void
+         *
+         * @param Request $oRequest The Request object for the current HTTP request
          */
         protected function InvokeAction( Request &$oRequest )
         {
@@ -282,7 +284,7 @@
         /**
          * Called from Connect(), responsible for loading any view file
          * 
-         * @returns void
+         * @param Request $oRequest The Request object for the current HTTP request
          */
         protected function LoadView( Request &$oRequest )
         {               
@@ -327,9 +329,8 @@
         
         
         /**
-         * Called to handle a 404 error
-         * 
-         * @returns void
+         * Internally handles a 404 error, loads the 404 error view file or calls the 404 callback
+         * handler if one is defined.
          */
         protected function Invoke404Error()
         {
