@@ -6,11 +6,11 @@
  *
  * @author          Kristopher Wilson
  * @copyright       Copyright (c) 2007-2009, Kristopher Wilson
+ * @package         openavanti
  * @license         http://www.openavanti.com/license
  * @link            http://www.openavanti.com
- * @version         1.0
- *
  */
+ 
  
     /**
      * A library of form field generation helpers, mainly useful automate data preservation on
@@ -18,10 +18,14 @@
      *
      * @category    Forms
      * @author      Kristopher Wilson
-     * @link        http://www.openavanti.com/docs/form
+     * @package     openavanti
+     * @link        http://www.openavanti.com/documentation/docs/1.0.3/Form
      */
     class Form 
     {
+        /**
+         * Stores the form field values added through Load()
+         */
         public static $aFields = array();
 
         
@@ -31,8 +35,11 @@
          * method will recursively iterate through a multidimensional array, or an object with 
          * member objects to load all data within the array or object.       
          * 
-         * @argument mixed An array or object of keys and values to load into the forms data array
-         * @returns void
+         * @param mixed $oObject An array or object of keys and values to load into the forms data
+         *      array
+         * @param array $aTarget Optional; Used to aid in loading associate form array values when
+         *      this method is called recursively. Default: null
+         * @return void
          */
         public static function Load( $oObject, &$aTarget = null )
         {
@@ -63,9 +70,10 @@
          * valid attributes for the element. Each element provided is added to the XHTML tag. The
          * "label" element of aAttributes specifies the text of the label.            
          * 
-         * @argument array An array of attributes for the HTML element
-         * @argument bool Controls whether or not to return the HTML, otherwise echo it, default false
-         * @returns void/string If bReturn is true, returns a string with the XHTML, otherwise void
+         * @param array $aAttributes An array of attributes for the HTML element
+         * @param bool $bReturn Optional; Controls whether or not to return the HTML, otherwise
+         *      echo it. Default: false
+         * @return mixed If bReturn is true, returns a string with the XHTML, otherwise void
          */
         public static function Label( $aAttributes, $bReturn = false )
         {
@@ -112,9 +120,10 @@
          * validated to be valid attributes for the element. Each element provided is added to the 
          * XHTML tag.         
          * 
-         * @argument array An array of attributes for the HTML element
-         * @argument bool Controls whether or not to return the HTML, otherwise echo it, default false
-         * @returns void/string If bReturn is true, returns a string with the XHTML, otherwise void
+         * @param array $aAttributes An array of attributes for the HTML element
+         * @param bool $bReturn Optional; Controls whether or not to return the HTML, otherwise
+         *      echo it. Default: false
+         * @return mixed If bReturn is true, returns a string with the XHTML, otherwise void
          */
         public static function Input( $aAttributes, $bReturn = false )
         {
@@ -175,9 +184,10 @@
          * The default (selected) attribute is controlled by aAttributes[ default ], which should
          * match a valid key in aAttributes[ options ]                         
          * 
-         * @argument array An array of attributes for the HTML element
-         * @argument bool Controls whether or not to return the HTML, otherwise echo it, default false
-         * @returns void/string If bReturn is true, returns a string with the XHTML, otherwise void
+         * @param array $aAttributes An array of attributes for the HTML element
+         * @param bool $bReturn Optional; Controls whether or not to return the HTML, otherwise
+         *      echo it. Default: false
+         * @return mixed If bReturn is true, returns a string with the XHTML, otherwise void
          */
         public static function Select( $aAttributes, $bReturn = false )
         {
@@ -241,9 +251,10 @@
          * validated to be valid attributes for the element. Each element provided is added to the 
          * XHTML tag.         
          * 
-         * @argument array An array of attributes for the HTML element
-         * @argument bool Controls whether or not to return the HTML, otherwise echo it, default false
-         * @returns void/string If bReturn is true, returns a string with the XHTML, otherwise void
+         * @param array $aAttributes An array of attributes for the HTML element
+         * @param bool $bReturn Optional; Controls whether or not to return the HTML, otherwise
+         *      echo it. Default: false
+         * @return mixed If bReturn is true, returns a string with the XHTML, otherwise void
          */
         public static function TextArea( $aAttributes, $bReturn = false )
         {       
@@ -275,7 +286,15 @@
         
         
         /**
+         * Takes a form element name and translates it into a path to load data from the data
+         * array. The purpose of this method is to get the value of an array of form elements, ie:
          *
+         *      input name="projects[customer][name]"
+         *
+         * Is translated, and the value loaded from self::$aData["projects"]["customer"]["name"]
+         *
+         * @param string $sName The name of the form field to traverse and load
+         * @return mixed The value of the form element if found
          */             
         private static function TranslatePathForValue( $sName )
         {

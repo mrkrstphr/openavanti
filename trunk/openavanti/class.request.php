@@ -5,12 +5,10 @@
  * OpenAvanti is an open source, object oriented framework for PHP 5+
  *
  * @author          Kristopher Wilson
- * @dependencies    
  * @copyright       Copyright (c) 2007-2009, Kristopher Wilson
+ * @package         openavanti
  * @license         http://www.openavanti.com/license
  * @link            http://www.openavanti.com
- * @version         1.0
- *
  */
 
     /**
@@ -19,26 +17,59 @@
      *
      * @category    Database
      * @author      Kristopher Wilson
-     * @link        http://www.openavanti.com/docs/request
+     * @package     openavanti
+     * @link        http://www.openavanti.com/documentation/docs/1.0.3/Request
      */
     class Request
     {
+        /**
+         * The URI of the Request
+         */
         public $sURI = null;
+        
+        /**
+         * The URI after custom route rules have written the original
+         */
         public $sRewrittenURI = null;
         
+        /**
+         * The name of the controller handling this request
+         */;
         public $sControllerName = null;
+        
+        /**
+         * A copy of the controller handling this request
+         */
         public $oController = null;
         
+        /**
+         * The controller action method being invoked for this request
+         */
         public $sAction = null;
         
+        /**
+         * Arguments supplied with this request that are passed to the action method
+         */
         public $aArguments = array();
         
+        /**
+         * Data loaded by the controller and utilized by the view file
+         */
         public $aLoadedData = array();
         
+        /**
+         * The name of the view file loaded for this request
+         */
         public $sView = null;
         
+        /**
+         * The request type (GET, POST, etc)
+         */
         public $sRequestType = "";
         
+        /**
+         * Is this connection secure (HTTPS)?
+         */
         public $bSecureConnection = false;
         
         
@@ -58,7 +89,7 @@
         /**
          * Returns true if the current request came via a secure connection, or false otherwise.
          *
-         * @returns bool True if the current request is a secure connection, false otherwise
+         * @return bool True if the current request is a secure connection, false otherwise
          */                             
         public function IsSecureConnection()
         {
@@ -70,7 +101,7 @@
         /**
          * Returns true if the current request is a POST request, or false otherwise.
          *
-         * @returns bool True if the current request is a POST request, false otherwise
+         * @return bool True if the current request is a POST request, false otherwise
          */                             
         public function IsPostRequest()
         {
@@ -82,7 +113,7 @@
         /**
          * Returns true if the current request is a GET request, or false otherwise.
          *
-         * @returns bool True if the current request is a GET request, false otherwise
+         * @return bool True if the current request is a GET request, false otherwise
          */                             
         public function IsGetRequest()
         {

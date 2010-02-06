@@ -6,11 +6,11 @@
  *
  * @author          Kristopher Wilson
  * @copyright       Copyright (c) 2007-2009, Kristopher Wilson
+ * @package         openavanti
  * @license         http://www.openavanti.com/license
  * @link            http://www.openavanti.com
- * @version         1.0
- *
  */
+
 
     /**
      * Provides a method for debugging and logging information by specifying a callback function
@@ -18,17 +18,21 @@
      *
      * @category    Debugging
      * @author      Kristopher Wilson
-     * @link        http://www.openavanti.com/docs/debug
+     * @package     openavanti
+     * @link        http://www.openavanti.com/documentation/docs/1.0.3/Debug
      */
     class Debug
     {
+        /**
+         * The callback method which is called for each log message
+         */
         private static $cCallback = null;
+        
         
         /**
          * Sets the callback function for debug logs.
          *
-         * @argument callback The callback function to invoke when logging debug statements      
-         * @returns void
+         * @param callback $cCallback The callback function to invoke when logging debug statements      
          */
         public static function SetDebugHandler( $cCallback )
         {
@@ -41,8 +45,7 @@
          * If the debug callback funciton is set to a valid, callable function, this method passes
          * the debug message to that callback function.              
          *
-         * @argument string The debug message to send to the callback function       
-         * @returns void
+         * @param string $sMessage The debug message to send to the callback function       
          */
         public static function Log( $sMessage )
         {

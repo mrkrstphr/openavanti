@@ -7,10 +7,9 @@
  * @author          Kristopher Wilson
  * @dependencies    FileFunctions
  * @copyright       Copyright (c) 2007-2009, Kristopher Wilson
+ * @package         openavanti
  * @license         http://www.openavanti.com/license
  * @link            http://www.openavanti.com
- * @version         1.0
- *
  */
  
  
@@ -19,7 +18,8 @@
      *
      * @category    Images
      * @author      Kristopher Wilson
-     * @link            http://www.openavanti.com/docs/imagefunctions
+     * @package     openavanti
+     * @link        http://www.openavanti.com/documentation/docs/1.0.3/ImageFunctions
      */
     class ImageFunctions
     {
@@ -36,10 +36,10 @@
          * 3. If the ratio of the max width / current width is < current width, then
          *    an image is generated with a width of width * ratio and height of max height.                                                              
          * 
-         * @argument string The path and file name to the file to create a thumbnail from
-         * @argument string The path and file name of the thumbnail to create
-         * @argument array An array of width and height to limit the image to 0 => x, 1 => y
-         * @returns bool True if the thumbnail is created, false otherwise
+         * @param string $sFileName The path and file name to the file to create a thumbnail from
+         * @param string $sThumbName The path and file name of the thumbnail to create
+         * @param array $aSize An array of width and height to limit the image to 0 => x, 1 => y
+         * @return bool True if the thumbnail is created, false otherwise
          */
         public static function GenerateThumb( $sFileName, $sThumbName, $aSize )
         {

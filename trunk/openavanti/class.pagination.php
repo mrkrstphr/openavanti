@@ -6,10 +6,9 @@
  *
  * @author          Kristopher Wilson
  * @copyright       Copyright (c) 2007-2009, Kristopher Wilson
+ * @package         openavanti
  * @license         http://www.openavanti.com/license
  * @link            http://www.openavanti.com
- * @version         1.0
- *
  */
  
  
@@ -19,7 +18,8 @@
      *
      * @category    Pagination
      * @author      Kristopher Wilson
-     * @link        http://www.openavanti.com/docs/pagination
+     * @package     openavanti
+     * @link        http://www.openavanti.com/documentation/docs/1.0.3/Pagination
      */
     class Pagination
     {
@@ -55,13 +55,13 @@
          *    )
          * )                                                                      
          * 
-         * @argument string The URL for each pagination link, containing a %s to denote where to 
-         *       place the page number for each page
-         * @argument integer The starting page number
-         * @argument integer The number of elements to show per page
-         * @argument integer The total number of elements to be paginated
-         * @argument integer The number of pagination links shown at a given time
-         * @returns array An array of pagination data            
+         * @param string $sLink The URL for each pagination link, containing a %s to denote where to 
+         *      place the page number for each page
+         * @param integer $iStart The starting page number
+         * @param integer $iPerPage The number of elements to show per page
+         * @param integer $iTotalResults The total number of elements to be paginated
+         * @param integer $iLinksShown The number of pagination links shown at a given time
+         * @return array An array of pagination data            
          */
         public static function Generate( $sLink, $iStart, $iPerPage, $iTotalResults, $iLinksShown )
         {
@@ -155,7 +155,6 @@
             return( $aData );
 
         } // Generate()
-
 
     } // Pagination()
 
