@@ -34,7 +34,7 @@
         
         /**
          * The name of the controller handling this request
-         */;
+         */
         public $sControllerName = null;
         
         /**
