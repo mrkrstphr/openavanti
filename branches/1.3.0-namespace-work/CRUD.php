@@ -120,7 +120,7 @@ class CRUD implements \Iterator, \Countable
         
         $queryClauses = array();
         
-        if(is_numeric($data))
+        if(is_numeric($data) || is_string($data))
         {
             if(count($primaryKey) > 1)
             {
@@ -130,7 +130,7 @@ class CRUD implements \Iterator, \Countable
             $primaryKeyColumn = reset($primaryKey);
             
             $columnType = $this->_database->getColumnType($this->_tableIdentifier, $primaryKeyColumn);
-                
+            
             $queryClauses["where"] = "{$primaryKeyColumn} = " . 
                 $this->_database->formatData($columnType, $data); 
         }
