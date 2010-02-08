@@ -1071,7 +1071,7 @@ class PostgresDatabase extends Database
     {
         list($schemaName, $tableName) = $this->parseIdentifier($identifier);
 
-        $columns = $this->getTableColumns($schemaName, $tableName);
+        $columns = $this->getTableColumns(array($schemaName, $tableName));
         
         foreach($columns as $column)
         {
