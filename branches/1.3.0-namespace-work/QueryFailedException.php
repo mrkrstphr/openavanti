@@ -19,7 +19,7 @@ namespace OpenAvanti;
  * 
  * See http://www.php.net/Exception for more information.
  */         
-class QueryFailedException extends Exception
+class QueryFailedException extends \Exception
 {
 
 } // QueryFailedException()

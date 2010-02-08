@@ -2,7 +2,7 @@
 
 namespace OpenAvanti;
 
-class LayoutNotFoundException extends Exception
+class LayoutNotFoundException extends \Exception
 {
     
 } // LayoutNotFoundException()

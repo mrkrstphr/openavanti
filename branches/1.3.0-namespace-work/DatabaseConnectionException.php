@@ -20,7 +20,7 @@ namespace OpenAvanti;
  * 
  * See http://www.php.net/Exception for more information.
  */         
-class DatabaseConnectionException extends Exception
+class DatabaseConnectionException extends \Exception
 {
 
 } // DatabaseConnectionException()

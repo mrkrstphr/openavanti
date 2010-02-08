@@ -2,7 +2,7 @@
 
 namespace OpenAvanti;
 
-class ViewNotFoundException extends Exception
+class ViewNotFoundException extends \Exception
 {
     
 } // ViewNotFoundException()

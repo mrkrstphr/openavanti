@@ -20,7 +20,7 @@ namespace OpenAvanti;
  * 
  * See http://www.php.net/Exception for more information.
  */         
-class FileNotFoundException extends Exception
+class FileNotFoundException extends \Exception
 {
 
 } // FileNotFoundException()

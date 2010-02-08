@@ -20,7 +20,7 @@ namespace OpenAvanti;
  * 
  * See http://www.php.net/Exception for more information.
  */         
-class ExtensionNotInstalledException extends Exception
+class ExtensionNotInstalledException extends \Exception
 {
 
 } // DatabaseConnectionException()
