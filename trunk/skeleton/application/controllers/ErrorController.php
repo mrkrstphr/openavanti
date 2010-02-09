@@ -1,14 +1,14 @@
 <?php
 
 
-    class ErrorController extends Controller
+    class ErrorController extends OpenAvanti\Controller
     {
         
         public function error($errorCode)
         {
             switch($errorCode)
             {
-                case ErrorHandler::VIEW_NOT_FOUND:
+                case OpenAvanti\ErrorHandler::VIEW_NOT_FOUND:
                     //echo 'View Not Found!';
                     break;
                 
