@@ -10,7 +10,8 @@
  * @link            http://www.openavanti.com
  * @version         SVN: $Id$
  */
- 
+
+namespace OpenAvanti;
  
 /**
  * The Registry class is a simple way of storing and loading values within and across HTTP requests.

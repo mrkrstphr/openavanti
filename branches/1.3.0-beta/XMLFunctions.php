@@ -10,7 +10,8 @@
  * @link            http://www.openavanti.com
  * @version         SVN: $Id$
  */
- 
+
+namespace OpenAvanti;
  
 /**
  * A library for manipulating XML objects and/or strings

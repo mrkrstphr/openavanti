@@ -11,6 +11,7 @@
  * @version         SVN: $Id$
  */
 
+namespace OpenAvanti;
 
 /**
  * Data validation class helper

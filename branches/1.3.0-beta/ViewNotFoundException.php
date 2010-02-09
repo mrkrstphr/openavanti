@@ -1,6 +1,8 @@
 <?php
 
-class ViewNotFoundException extends Exception
+namespace OpenAvanti;
+
+class ViewNotFoundException extends \Exception
 {
     
 } // ViewNotFoundException()

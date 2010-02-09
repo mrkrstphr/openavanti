@@ -11,6 +11,7 @@
  * @version         SVN: $Id$
  */
  
+namespace OpenAvanti;
 
 /**
  * This exception extends the PHP Exception class and should be thrown when a query fails so 
@@ -18,7 +19,7 @@
  * 
  * See http://www.php.net/Exception for more information.
  */         
-class QueryFailedException extends Exception
+class QueryFailedException extends \Exception
 {
 
 } // QueryFailedException()

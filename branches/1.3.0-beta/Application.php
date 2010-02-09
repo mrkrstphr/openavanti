@@ -10,7 +10,8 @@
  * @link            http://www.openavanti.com
  * @version         SVN: $Id$
  */
- 
+
+namespace OpenAvanti;
  
 /**
  * Handles application execution, sets up an autoloader, provides a
@@ -62,7 +63,12 @@ class Application
      *
      */
     protected $_dispatcher = null;
-    
+
+    /**
+     *
+     */
+    protected $_environment = null;
+
     
     /**
      * Constructor; sets up default paths, adds layout and view paths to
@@ -79,7 +85,7 @@ class Application
         $this->_controllerPath = realpath("{$documentRoot}/../application/controllers");
         $this->_modelPath = realpath("{$documentRoot}/../application/models");
         $this->_formPath = realpath("{$documentRoot}/../application/forms");
-        $this->_libraryPath = realpath("{$documentRoot}/../application/library/openavanti");
+        $this->_libraryPath = realpath("{$documentRoot}/../library/openavanti");
         $this->_layoutPath = realpath("{$documentRoot}/../application/layouts");
         $this->_viewPath = realpath("{$documentRoot}/../application/views");
         
@@ -95,12 +101,19 @@ class Application
         
         $this->_dispatcher = new Dispatcher($this);
         
-        // Call user initialization:
-        
-        $this->init();
-        
     } // __construct()
+   
     
+    /**
+     *
+     *
+     */
+    public function setEnvironment($environment)
+    {
+        $this->_environment = $environment;
+    
+    } // setEnvironment()
+
     
     /**
      *
@@ -111,8 +124,7 @@ class Application
         
         
     } // init()
-    
-    
+   
     
     /**
      * Sets the path to the controllers directory, which is used by the
@@ -310,6 +322,14 @@ class Application
      */
     public function defaultAutoloader($className)
     {
+        // normalize the class name for namespaces:
+        $className = str_replace("\\", "/", $className);
+        
+        if(substr($className, 0, 11) == "OpenAvanti/")
+        {
+            $className = substr($className, 11);
+        }
+        
         $fileName = "{$className}.php";
         
         $paths = array(
@@ -331,7 +351,7 @@ class Application
             
             if(file_exists($candidate))
             {
-                include $candidate;
+                include_once $candidate;
                 return;
             }
         }
@@ -407,6 +427,14 @@ class Application
      */
     public function run()
     {
+        $this->init();
+        
+        if(!empty($this->_environment) && method_exists($this, "init" . $this->_environment))
+        {
+            $init = "init" . $this->_environment;
+            $this->$init();
+        }
+
         $uri = str_replace("?" . $_SERVER["QUERY_STRING"], "", $_SERVER["REQUEST_URI"]);
         $uri = $uri != "/" ? $uri : "index";
         

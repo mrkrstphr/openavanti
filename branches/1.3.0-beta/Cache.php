@@ -10,7 +10,12 @@
  * @link            http://www.openavanti.com
  * @version         SVN: $Id$
  */
- 
+
+
+namespace OpenAvanti;
+
+use \Exception;
+
  
 /**
  * A class to handle manipulation of cache files (or any file, really).
