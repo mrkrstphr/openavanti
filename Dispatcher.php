@@ -212,8 +212,9 @@ class Dispatcher
         }
         else
         {
-            // If we can't find the controller, we must throw an error:
-            return $this->handleError(ErrorHandler::CONTROLLER_NOT_FOUND);
+            // If we can't find the controller, we must throw an exception:
+            
+            throw new ControllerNotFoundException();
         }
         
         $this->postDispatch();
@@ -340,8 +341,9 @@ class Dispatcher
         }
         else
         {
-            // Action is not callable, throw an error:
-            return $this->handleError(ErrorHandler::ACTION_NOT_FOUND);
+            // Action is not callable, throw an exception:
+            
+            throw new ControllerActionNotFoundException();
         }
     
     } // invokeAction()
@@ -367,24 +369,6 @@ class Dispatcher
         }
         
     } // handleError()
-    
-    
-    /**
-     * Called to handle a 404 error
-     * 
-     * @deprecated Use handleError(ErrorHandler::FILE_NOT_FOUND);
-     * @returns void
-     */
-    protected function invoke404Error()
-    {
-        if(!headers_sent())
-        {
-            header("HTTP/1.0 404 Not Found", true, 404);
-        }
-        
-        $this->handleError(ErrorHandler::FILE_NOT_FOUND);
-    
-    } // Invoke404Error()
     
 } // Dispatcher()
 
