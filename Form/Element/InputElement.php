@@ -11,6 +11,7 @@
  * @version         SVN: $Id$
  */
 
+namespace OpenAvanti;
 
 /**
  * An abstract implementation of LabeledFormElement that encapsulates any

@@ -10,7 +10,11 @@
  * @link            http://www.openavanti.com
  * @version         SVN: $Id$
  */
- 
+
+namespace OpenAvanti;
+
+use \Exception;
+
  
 /**
  * Dispatcher to route URI request to appropriate controller / method, and loads view files

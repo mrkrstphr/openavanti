@@ -10,7 +10,9 @@
  * @link            http://www.openavanti.com
  * @version         SVN: $Id$
  */
- 
+
+
+namespace OpenAvanti;
  
 /**
  * A simple timer for various purposes

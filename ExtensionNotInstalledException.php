@@ -10,7 +10,9 @@
  * @link            http://www.openavanti.com
  * @version         SVN: $Id$
  */
- 
+
+
+namespace OpenAvanti;
 
 /**
  * This exception extends the PHP Exception class and should be thrown when a required PHP 
@@ -18,7 +20,7 @@
  * 
  * See http://www.php.net/Exception for more information.
  */         
-class ExtensionNotInstalledException extends Exception
+class ExtensionNotInstalledException extends \Exception
 {
 
 } // DatabaseConnectionException()

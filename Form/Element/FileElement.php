@@ -11,6 +11,7 @@
  * @version         SVN: $Id$
  */
 
+namespace OpenAvanti;
 
 /**
  * FormField for a file <input /> element.

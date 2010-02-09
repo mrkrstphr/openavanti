@@ -10,7 +10,9 @@
  * @link            http://www.openavanti.com
  * @version         SVN: $Id$
  */
- 
+
+
+namespace OpenAvanti;
  
 /**
  * Based on properties added, this class is responsible for building a list of elements,

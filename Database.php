@@ -12,6 +12,11 @@
  */
 
 
+namespace OpenAvanti;
+
+use \Exception;
+
+
 /**
  * Database interaction abstract class definition
  *
@@ -144,7 +149,7 @@ abstract class Database
             
         if(!isset(self::$_connectionStore[$profileName]))
         {                
-            $databaseDriver = $profile["driver"] . "Database";
+            $databaseDriver = "OpenAvanti\\" . $profile["driver"] . "Database";
             
             self::$_connectionStore[$profileName] = new $databaseDriver($profile);
         }
@@ -181,12 +186,12 @@ abstract class Database
         
         $driver = ucwords($profile["driver"]);
         
-        if(!class_exists("{$driver}Database", true))
+        if(!class_exists("OpenAvanti\\{$driver}Database", true))
         {
             throw new Exception("Unknown database driver specified: " . $profile["driver"]);
         }
         
-        if(!is_subclass_of("{$driver}Database", "Database"))
+        if(!is_subclass_of("OpenAvanti\\{$driver}Database", "OpenAvanti\\Database"))
         {
             throw new Exception("Database driver does not properly extend the Database class.");
         }

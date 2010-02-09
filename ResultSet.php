@@ -10,8 +10,10 @@
  * @link            http://www.openavanti.com
  * @version         SVN: $Id$
  */
- 
- 
+
+
+namespace OpenAvanti; 
+
 /**
  * Contains a set of database results, but is database indepenent, and allows the traversing
  * of the database records as well as access to the data.    
@@ -20,7 +22,7 @@
  * @author      Kristopher Wilson
  * @link        http://www.openavanti.com/docs/resultset
  */
-class ResultSet implements Iterator, Countable
+class ResultSet implements \Iterator, \Countable
 {
     private $_dbConnection = null;
     private $_queryResource = null;

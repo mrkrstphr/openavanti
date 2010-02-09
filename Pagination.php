@@ -10,7 +10,9 @@
  * @link            http://www.openavanti.com
  * @version         SVN: $Id$
  */
- 
+
+
+namespace OpenAvanti;
  
 /**
  * A simple library to handle calculating pagination values and returning a set of pagination

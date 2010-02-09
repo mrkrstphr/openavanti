@@ -11,6 +11,7 @@
  * @version         SVN: $Id$
  */
 
+namespace OpenAvanti;
 
 /**
  * 
@@ -45,7 +46,7 @@ class LabelElement extends FormElement
     {
         $label = "";
         
-        if(class_exists("Validation") && isset($this->_name) && 
+        if(class_exists("OpenAvanti\Validation") && isset($this->_name) && 
             Validation::fieldHasErrors($this->_name))
         {
             $this->_attributes["class"] = isset($this->_attributes["class"]) ? 

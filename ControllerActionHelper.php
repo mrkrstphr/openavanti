@@ -10,7 +10,8 @@
  * @link            http://www.openavanti.com
  * @version         SVN: $Id$
  */
- 
+
+namespace OpenAvanti;
  
 /**
  * Controller Helper abstract implementation

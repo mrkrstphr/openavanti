@@ -1,6 +1,8 @@
 <?php
 
-class LayoutNotFoundException extends Exception
+namespace OpenAvanti;
+
+class LayoutNotFoundException extends \Exception
 {
     
 } // LayoutNotFoundException()
