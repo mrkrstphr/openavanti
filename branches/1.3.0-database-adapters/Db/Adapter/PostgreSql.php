@@ -32,58 +32,8 @@ class PostgreSql extends DatabaseAdapter
     private static $_cacheDirectory = "";
     private static $_cacheSchemas = false;
     
+    protected $_dsnPrefix = "pgsql";
     
-    /**
-     * The constructor sets up a new connection to the PostgreSQL database. This method is
-     * protected, and can only be called from within the class, normally through the 
-     * GetConnection() method. This helps support the singleton methodology.
-     * 
-     * @param array The database profile array containing connection information                              
-     */
-    protected function __construct($profile)
-    {
-        // TODO cleanup
-        $connectionString = "";
-        
-        if(isset($profile["host"]))
-        {
-            $connectionString .= "host=" . $profile["host"] . " ";
-        }
-  
-        $connectionString .= !empty($connectionString) ? ";" : "";
-        $connectionString .= "dbname=" . $profile["name"];
-    
-        if(isset($profile["user"]))
-        {
-            $connectionString .= !empty($connectionString) ? ";" : "";
-            $connectionString .= "user=" . $profile["user"];
-        }
-        
-        if(isset($profile["password"]))
-        {
-            $connectionString .= !empty($connectionString) ? ";" : "";
-            $connectionString .= "password=" . $profile["password"];
-        }
-        
-        if(isset($profile["default_schema"]) && !empty($profile["default_schema"]))
-        {
-            $this->_defaultSchema = trim($profile["default_schema"]);
-        }
-        
-        $connectionString = "pgsql:{$connectionString}";
-        
-        $this->_databaseResource = //@pg_connect($connectionString);
-            new \PDO($connectionString);
-        
-        if(!$this->_databaseResource)
-        {
-            throw new DatabaseConnectionException("Failed to connect to Postgres server: " . 
-                $profile["host"] . "." . $profile["name"]);
-        }
-        
-    } // __construct()
-    
-
     /**
      * Advances the value of the supplied sequence and returns the new value.
      * 

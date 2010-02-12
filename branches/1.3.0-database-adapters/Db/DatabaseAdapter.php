@@ -42,18 +42,72 @@ abstract class DatabaseAdapter
     
     /**
      * Protected variables for storing database profiles and connections
-     */                 
+     */ 
     protected static $_profiles = array();
     protected static $_defaultProfile = "";
     
     protected static $_connectionStore = array();
     
    
+    protected $_dsnPrefix = "";
     protected $_databaseResource = null;
+
+
+    /**
+     * The constructor sets up a new connection to the database. This method is
+     * protected, and can only be called from within the class, normally through the
+     * GetConnection() method. This helps support the singleton methodology.
+     *
+     * @param array The database profile array containing connection information
+     */
+    protected function __construct($profile)
+    {
+        // TODO cleanup
+        $connectionString = "";
+
+        if(isset($profile["host"]))
+        {
+            $connectionString .= "host=" . $profile["host"] . " ";
+        }
+
+        $connectionString .= !empty($connectionString) ? ";" : "";
+        $connectionString .= "dbname=" . $profile["name"];
+
+        if(isset($profile["user"]))
+        {
+            $connectionString .= !empty($connectionString) ? ";" : "";
+            $connectionString .= "user=" . $profile["user"];
+        }
+
+        if(isset($profile["password"]))
+        {
+            $connectionString .= !empty($connectionString) ? ";" : "";
+            $connectionString .= "password=" . $profile["password"];
+        }
+
+        // TODO This is PostgreSQL only stuff
+        if(isset($profile["default_schema"]) && !empty($profile["default_schema"]))
+        {
+            $this->_defaultSchema = trim($profile["default_schema"]);
+        }
+
+        $connectionString = "{$this->_dsnPrefix}:{$connectionString}";
+
+        $this->_databaseResource = new \PDO($connectionString);
+
+        if(!$this->_databaseResource)
+        {
+            throw new DatabaseConnectionException("Failed to connect to database server: " .
+                $profile["adapter"] . ":" . $profile["host"] . "." . $profile["name"]);
+        }
+
+    } // __construct()
+
+
 
     /**
      * Adds a database profile to the list of known database profiles. These profiles contain
-     * connection information for the database, including driver, host, name, user and password.                                                 
+     * connection information for the database, including adapter, host, name, user and password.                                                 
      * 
      * @argument string A unique name for the profile used to get connections
      * @argument array The profile array with database connection information        
@@ -99,9 +153,9 @@ abstract class DatabaseAdapter
     
     
     /**
-     * As the constructor of the Database class and all derived database drivers is protected,
+     * As the constructor of the Database class and all derived database adapters is protected,
      * the database class cannot be instantiated directly. Instead, the GetConnection() method
-     * must be called, afterwhich a database driver object is returned. 
+     * must be called, afterwhich a database adapter object is returned. 
 
      *  A database profile array may be specified to control which database is connected to,
      * and with what driver. If no profile is passed to this method, it first checks to see
