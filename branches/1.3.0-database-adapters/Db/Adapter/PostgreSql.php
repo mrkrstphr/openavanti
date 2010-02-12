@@ -12,12 +12,9 @@
  */
 
 
-namespace OpenAvanti;
+namespace OpenAvanti\Db\Adapter;
 
-class Resulter
-{
-
-}
+use OpenAvanti\Db\DatabaseAdapter;
 
 /**
  * Database Interaction Class (PostgreSQL)
@@ -26,7 +23,7 @@ class Resulter
  * @author      Kristopher Wilson
  * @link        http://www.openavanti.com/docs/postgresdatabase
  */
-class PostgresDatabase extends Database
+class PostgreSql extends DatabaseAdapter
 {
     private $_databaseResource = null;
     
@@ -109,7 +106,7 @@ class PostgresDatabase extends Database
 
         $results = $statement->fetchAll();
 
-        $resultSet = new ResultSet($results);
+        $resultSet = new \OpenAvanti\Db\ResultSet($results);
         
         return $resultSet;
     
@@ -823,7 +820,7 @@ class PostgresDatabase extends Database
             $name = substr($localField, strlen($localField) - 3) == "_id" ? 
                 substr($localField, 0, strlen($localField) - 3) : $localField;
             
-            $name = StringFunctions::toSingular($name);
+            $name = \Openavanti\StringFunctions::toSingular($name);
                             
             self::$_schemas[$tableIdentifier]["foreign_key"][$name] = array(
                 "schema" => $foreignSchema,

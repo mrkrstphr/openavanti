@@ -12,7 +12,7 @@
  */
 
 
-namespace OpenAvanti; 
+namespace OpenAvanti\Db; 
 
 /**
  * Extends the ArrayIterator class to provide some extra functionality. This class 

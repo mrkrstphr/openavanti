@@ -60,7 +60,7 @@ class CRUD implements \Iterator, \Countable
             $this->_profileName = $profileName;
         }
         
-        $this->_database = Database::getConnection($this->_profileName);
+        $this->_database = Db\DatabaseAdapter::getConnection($this->_profileName);
         
         $this->_tableIdentifier = $identifier;
         

@@ -12,7 +12,7 @@
  */
 
 
-namespace OpenAvanti;
+namespace OpenAvanti\Db;
 
 use \Exception;
 
@@ -24,7 +24,7 @@ use \Exception;
  * @author      Kristopher Wilson
  * @link        http://www.openavanti.com/docs/database
  */
-abstract class Database
+abstract class DatabaseAdapter
 {
     /** 
      * Class constants for query join types (used for CRUD operations)
@@ -149,7 +149,7 @@ abstract class Database
             
         if(!isset(self::$_connectionStore[$profileName]))
         {                
-            $databaseDriver = "OpenAvanti\\" . $profile["driver"] . "Database";
+            $databaseDriver = "OpenAvanti\\Db\\Adapter\\" . $profile["driver"];
             
             self::$_connectionStore[$profileName] = new $databaseDriver($profile);
         }
@@ -186,12 +186,12 @@ abstract class Database
         
         $driver = ucwords($profile["driver"]);
         
-        if(!class_exists("OpenAvanti\\{$driver}Database", true))
+        if(!class_exists("OpenAvanti\\Db\\Adapter\\{$driver}", true))
         {
             throw new Exception("Unknown database driver specified: " . $profile["driver"]);
         }
         
-        if(!is_subclass_of("OpenAvanti\\{$driver}Database", "OpenAvanti\\Database"))
+        if(!is_subclass_of("OpenAvanti\\Db\\Adapter\\{$driver}", "OpenAvanti\\Db\\DatabaseAdapter"))
         {
             throw new Exception("Database driver does not properly extend the Database class.");
         }
