@@ -14,7 +14,7 @@
 
 namespace OpenAvanti\Db\Adapter;
 
-use OpenAvanti\Db\DatabaseAdapter;
+use OpenAvanti\Db\Adapter;
 
 /**
  * Database Interaction Class (PostgreSQL)
@@ -23,7 +23,7 @@ use OpenAvanti\Db\DatabaseAdapter;
  * @author      Kristopher Wilson
  * @link        http://www.openavanti.com/docs/postgresdatabase
  */
-class PostgreSql extends DatabaseAdapter
+class PostgreSql extends Adapter
 {
     protected static $_schemas = array();
     

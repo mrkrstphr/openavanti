@@ -24,7 +24,7 @@ use \Exception;
  * @author      Kristopher Wilson
  * @link        http://www.openavanti.com/docs/database
  */
-abstract class DatabaseAdapter
+abstract class Adapter
 {
     /** 
      * Class constants for query join types (used for CRUD operations)
@@ -40,15 +40,6 @@ abstract class DatabaseAdapter
         self::JoinTypeLeft => "LEFT JOIN"
     );
     
-    /**
-     * Protected variables for storing database profiles and connections
-     */ 
-    protected static $_profiles = array();
-    protected static $_defaultProfile = "";
-    
-    protected static $_connectionStore = array();
-    
-   
     protected $_dsnPrefix = "";
     protected $_databaseResource = null;
 
@@ -60,20 +51,20 @@ abstract class DatabaseAdapter
      *
      * @param array The database profile array containing connection information
      */
-    protected function __construct($profile)
+    public function __construct($profile)
     {
         // TODO cleanup
         $connectionString = "";
 
         if(isset($profile["host"]))
         {
-            $connectionString .= "host=" . $profile["host"] . " ";
+            $connectionString .= "host=" . $profile["host"];
         }
 
         $connectionString .= !empty($connectionString) ? ";" : "";
         $connectionString .= "dbname=" . $profile["name"];
 
-        if(isset($profile["user"]))
+        /*if(isset($profile["user"]))
         {
             $connectionString .= !empty($connectionString) ? ";" : "";
             $connectionString .= "user=" . $profile["user"];
@@ -83,7 +74,7 @@ abstract class DatabaseAdapter
         {
             $connectionString .= !empty($connectionString) ? ";" : "";
             $connectionString .= "password=" . $profile["password"];
-        }
+        }*/
 
         // TODO This is PostgreSQL only stuff
         if(isset($profile["default_schema"]) && !empty($profile["default_schema"]))
@@ -93,7 +84,7 @@ abstract class DatabaseAdapter
 
         $connectionString = "{$this->_dsnPrefix}:{$connectionString}";
 
-        $this->_databaseResource = new \PDO($connectionString);
+        $this->_databaseResource = new \PDO($connectionString, $profile["user"], $profile["password"]);
 
         if(!$this->_databaseResource)
         {

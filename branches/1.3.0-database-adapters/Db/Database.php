@@ -8,7 +8,7 @@
  * @copyright       Copyright (c) 2007-2010, Kristopher Wilson
  * @license         http://www.openavanti.com/license
  * @link            http://www.openavanti.com
- * @version         SVN: $Id$
+ * @version         SVN: $Id: DatabaseAdapter.php 282 2010-02-12 18:42:51Z kristopherwilson $
  */
 
 
@@ -18,7 +18,7 @@ use \Exception;
 
 
 /**
- * 
+ * Database interaction abstract class definition
  *
  * @category    Database
  * @author      Kristopher Wilson
@@ -28,16 +28,26 @@ class Database
 {
     /**
      * Protected variables for storing database profiles and connections
-     */                 
+     */ 
     protected static $_profiles = array();
     protected static $_defaultProfile = "";
     
     protected static $_connectionStore = array();
-    
-    
+
+
+    /**
+     * 
+     */
+    private function __construct()
+    {
+        
+    } // __construct()
+
+
+
     /**
      * Adds a database profile to the list of known database profiles. These profiles contain
-     * connection information for the database, including driver, host, name, user and password.                                                 
+     * connection information for the database, including adapter, host, name, user and password.                                                 
      * 
      * @argument string A unique name for the profile used to get connections
      * @argument array The profile array with database connection information        
@@ -83,9 +93,9 @@ class Database
     
     
     /**
-     * As the constructor of the Database class and all derived database drivers is protected,
+     * As the constructor of the Database class and all derived database adapters is protected,
      * the database class cannot be instantiated directly. Instead, the GetConnection() method
-     * must be called, afterwhich a database driver object is returned. 
+     * must be called, afterwhich a database adapter object is returned. 
 
      *  A database profile array may be specified to control which database is connected to,
      * and with what driver. If no profile is passed to this method, it first checks to see
@@ -135,7 +145,7 @@ class Database
             
         if(!isset(self::$_connectionStore[$profileName]))
         {                
-            $databaseDriver = "OpenAvanti\\" . $profile["driver"] . "Database";
+            $databaseDriver = "OpenAvanti\\Db\\Adapter\\" . $profile["driver"];
             
             self::$_connectionStore[$profileName] = new $databaseDriver($profile);
         }
@@ -172,17 +182,18 @@ class Database
         
         $driver = ucwords($profile["driver"]);
         
-        if(!class_exists("OpenAvanti\\{$driver}Database", true))
+        if(!class_exists("OpenAvanti\\Db\\Adapter\\{$driver}", true))
         {
             throw new Exception("Unknown database driver specified: " . $profile["driver"]);
         }
         
-        if(!is_subclass_of("OpenAvanti\\{$driver}Database", "OpenAvanti\\Database"))
+        if(!is_subclass_of("OpenAvanti\\Db\\Adapter\\{$driver}", "OpenAvanti\\Db\\Adapter"))
         {
-            throw new Exception("Database driver does not properly extend the Database class.");
+            throw new Exception("Database driver does not properly extend the Adapter class.");
         }
         
     } // validateProfile()
+    
 
 } // Database()
 
