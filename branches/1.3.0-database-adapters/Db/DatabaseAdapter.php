@@ -48,7 +48,9 @@ abstract class DatabaseAdapter
     
     protected static $_connectionStore = array();
     
-    
+   
+    protected $_databaseResource = null;
+
     /**
      * Adds a database profile to the list of known database profiles. These profiles contain
      * connection information for the database, including driver, host, name, user and password.                                                 
@@ -201,57 +203,90 @@ abstract class DatabaseAdapter
 
     /**
      * Queries the database using the supplied SQL query.
-     * 
-     * @argument string The SQL query to execute
-     * @returns ResultSet A ResultSet object containing the results of the database query
+     *
+     * @param string The query to execute
+     * @returns string|false A ResultSet object containing the results of
+     *      the database query or false on failure
      */
-    abstract public function &query($sql);
-    
+    public function &query($sql)
+    {
+        $statement = $this->_databaseResource->query($sql);
+
+        if(!$statement)
+        {
+            return $statement;
+        }
+
+        $statement->setFetchMode(\PDO::FETCH_OBJ);
+
+        $results = $statement->fetchAll();
+
+        $resultSet = new \OpenAvanti\Db\ResultSet($results);
+
+        return $resultSet;
+
+    } // query()
+
     
     /**
-     * The Begin() method begins a database transaction which persists until either Commit() or 
-     * Rollback() is called, or the request ends. If Commit() is not called before the end of the 
+     * The Begin() method begins a database transaction which persists until either Commit() or
+     * Rollback() is called, or the request ends. If Commit() is not called before the end of the
      * request, the database transaction will automatically roll back.
-     *       
+     *
      * @returns void
      */
-    abstract public function begin();
-    
+    public function begin()
+    {
+        $resultResource = $this->_databaseResource->beginTransaction();
+
+        return $resultResource;
+
+    } // begin()
+
 
     /**
-     * The Commit() method commits a database transaction (assuming one was started with 
-     * Begin()). If Commit() is not called before the end of the request, the database 
+     * The Commit() method commits a database transaction (assuming one was started with
+     * Begin()). If Commit() is not called before the end of the request, the database
      * transaction will automatically roll back.
-     * 
-     * @returns void                 
+     *
+     * @returns void
      */
-    abstract public function commit();
-    
+    public function commit()
+    {
+        $resultResource = $this->_databaseResource->commit();
+
+        return $resultResource;
+
+    } // commit()
+
 
     /**
-     * The Rollback() method rolls back a database transaction (assuming one was started with 
+     * The Rollback() method rolls back a database transaction (assuming one was started with
      * Begin()). The database transaction is automatically rolled back if Commit() is not called.
-     * 
-     * @returns void                 
+     *
+     * @returns void
      */
-    abstract public function rollback();
-    
+    public function rollback()
+    {
+        $resultResource = $this->_databaseResource->rollback();
+
+        return $resultResource;
+
+    } // rollback()
+
 
     /**
      * Returns the last database error, if any.
-     * 
-     * @returns string A string representation of the last error                 
+     *
+     * @returns string A string representation of the last error
      */
-    abstract public function getLastError();
-    
-    
-    /**
-     * 
-     * 
-     */
-    //abstract public function getDefaultSchema();
-    
+    public function getLastError()
+    {
+        return implode(": ", $this->_databaseResource->errorInfo());
 
+    } // getLastError()
+    
+    
     /**
      * The SetCacheDirectory() method stores which directory should be used to load and store 
      * database schema cache files. If the directory does not exist, an exception will be thrown.

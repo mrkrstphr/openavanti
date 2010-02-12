@@ -25,8 +25,6 @@ use OpenAvanti\Db\DatabaseAdapter;
  */
 class PostgreSql extends DatabaseAdapter
 {
-    private $_databaseResource = null;
-    
     protected static $_schemas = array();
     
     protected $_defaultSchema = "";
@@ -84,80 +82,6 @@ class PostgreSql extends DatabaseAdapter
         }
         
     } // __construct()
-    
-
-    /**
-     * Queries the PostgreSQL database using the supplied SQL query.
-     * 
-     * @param string The PostgreSQL query to execute
-     * @returns string|false A ResultSet object containing the results of
-     *      the database query or false on failure
-     */
-    public function &query($sql)
-    {
-        $statement = $this->_databaseResource->query($sql);
-        
-        if(!$statement)
-        {
-            return $statement;
-        }
-        
-        $statement->setFetchMode(\PDO::FETCH_OBJ);
-
-        $results = $statement->fetchAll();
-
-        $resultSet = new \OpenAvanti\Db\ResultSet($results);
-        
-        return $resultSet;
-    
-    } // query()
-    
-    
-    /**
-     * The Begin() method begins a database transaction which persists until either Commit() or 
-     * Rollback() is called, or the request ends. If Commit() is not called before the end of the 
-     * request, the database transaction will automatically roll back.
-     * 
-     * @returns void                 
-     */
-    public function begin()
-    {
-        $resultResource = $this->_databaseResource->beginTransaction();
-
-        return $resultResource;
-
-    } // begin()
-    
-
-    /**
-     * The Commit() method commits a database transaction (assuming one was started with 
-     * Begin()). If Commit() is not called before the end of the request, the database 
-     * transaction will automatically roll back.
-     * 
-     * @returns void         
-     */
-    public function commit()
-    {
-        $resultResource = $this->_databaseResource->commit();
-    
-        return $resultResource;
-    
-    } // commit()
-    
-
-    /**
-     * The Rollback() method rolls back a database transaction (assuming one was started with 
-     * Begin()). The database transaction is automatically rolled back if Commit() is not called.
-     *       
-     * @returns void         
-     */
-    public function rollback()
-    {
-        $resultResource = $this->_databaseResource->rollback();
-    
-        return $resultResource;
-    
-    } // rollback()
     
 
     /**
@@ -270,18 +194,6 @@ class PostgreSql extends DatabaseAdapter
     } // serialNextVal()
     
 
-    /**
-     * Returns the last PostgreSQL database error, if any.
-     * 
-     * @returns string A string representation of the last PostgreSQL error              
-     */
-    public function getLastError()
-    {
-        return implode(": ", $this->_databaseResource->errorInfo());
-    
-    } // getLastError()
-    
-    
     /**
      * 
      * 
