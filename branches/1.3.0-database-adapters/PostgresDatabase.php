@@ -14,6 +14,11 @@
 
 namespace OpenAvanti;
 
+class Resulter
+{
+
+}
+
 /**
  * Database Interaction Class (PostgreSQL)
  *
@@ -42,23 +47,27 @@ class PostgresDatabase extends Database
      */
     protected function __construct($profile)
     {
+        // TODO cleanup
         $connectionString = "";
         
         if(isset($profile["host"]))
         {
-            $connectionString .= " host=" . $profile["host"] . " ";
+            $connectionString .= "host=" . $profile["host"] . " ";
         }
   
-        $connectionString .= " dbname=" . $profile["name"] . " ";
+        $connectionString .= !empty($connectionString) ? ";" : "";
+        $connectionString .= "dbname=" . $profile["name"];
     
         if(isset($profile["user"]))
         {
-            $connectionString .= " user=" . $profile["user"] . " ";
+            $connectionString .= !empty($connectionString) ? ";" : "";
+            $connectionString .= "user=" . $profile["user"];
         }
         
         if(isset($profile["password"]))
         {
-            $connectionString .= " password=" . $profile["password"] . " ";
+            $connectionString .= !empty($connectionString) ? ";" : "";
+            $connectionString .= "password=" . $profile["password"];
         }
         
         if(isset($profile["default_schema"]) && !empty($profile["default_schema"]))
@@ -66,7 +75,10 @@ class PostgresDatabase extends Database
             $this->_defaultSchema = trim($profile["default_schema"]);
         }
         
-        $this->_databaseResource = @pg_connect($connectionString);
+        $connectionString = "pgsql:{$connectionString}";
+        
+        $this->_databaseResource = //@pg_connect($connectionString);
+            new \PDO($connectionString);
         
         if(!$this->_databaseResource)
         {
@@ -86,75 +98,24 @@ class PostgresDatabase extends Database
      */
     public function &query($sql)
     {
-        $resultResource = @pg_query($this->_databaseResource, $sql);
+        $statement = $this->_databaseResource->query($sql);
         
-        if(!$resultResource)
+        if(!$statement)
         {
-            return $resultResource;
+            return $statement;
         }
+        
+        $statement->setFetchMode(\PDO::FETCH_OBJ);
 
-        $resultSet = new ResultSet($this, $resultResource);
+        $results = $statement->fetchAll();
+
+        $resultSet = new ResultSet($results);
         
         return $resultSet;
     
     } // query()
     
     
-    /**
-     * Pulls the next record from specified database resource and returns it as an object.
-     *              
-     * @param resource The database connection resource to pull the next record from
-     * @returns object The next record from the database, or null if there are no more records
-     */      
-    public function pullNextResult(&$resultResource)
-    {
-        if(!is_null($resultResource))
-        {                
-            return pg_fetch_object($resultResource);
-        }
-        else
-        {
-            return null;
-        }
-        
-    } // pullNextResult()
-    
-    
-    /**
-     * Returns the number of results from the last query performed on the specified database
-     * resource object.      
-     *              
-     * @param resource The database connection resource
-     * @returns int The number of rows in the specified database resource
-     */ 
-    public function countFromResult(&$resultResource)
-    {
-        if($resultResource)
-        {
-            return pg_num_rows($resultResource);
-        }
-        else
-        {
-            return 0;
-        }
-        
-    } // countFromResult()
-    
-    
-    /**
-     * Attempts to return the internal pointer of the specified database resource to the
-     * first row. 
-     * 
-     * @param resource The database connection resource to pull the next record from
-     * @returns bool True if the operation was successful, false otherwise                                   
-     */
-    public function resetResult(&$resultResource)
-    {
-        return @pg_result_seek($resultResource, 0);
-    
-    } // resetResult()
-    
-
     /**
      * The Begin() method begins a database transaction which persists until either Commit() or 
      * Rollback() is called, or the request ends. If Commit() is not called before the end of the 
@@ -164,10 +125,9 @@ class PostgresDatabase extends Database
      */
     public function begin()
     {
-        $resultResource = @pg_query($this->_databaseResource, "BEGIN") or
-            trigger_error("Failed to begin transaction", E_USER_ERROR);
+        $resultResource = $this->_databaseResource->beginTransaction();
 
-        return $resultResource ? true : false;
+        return $resultResource;
 
     } // begin()
     
@@ -181,10 +141,9 @@ class PostgresDatabase extends Database
      */
     public function commit()
     {
-        $resultResource = @pg_query($this->_databaseResource, "COMMIT") or
-            trigger_error("Failed to commit transaction", E_USER_ERROR);
+        $resultResource = $this->_databaseResource->commit();
     
-        return $resultResource ? true : false;
+        return $resultResource;
     
     } // commit()
     
@@ -197,10 +156,9 @@ class PostgresDatabase extends Database
      */
     public function rollback()
     {
-        $resultResource = @pg_query($this->_databaseResource, "ROLLBACK") or
-            trigger_error("Failed to rollback transaction", E_USER_ERROR);
+        $resultResource = $this->_databaseResource->rollback();
     
-        return $resultResource ? true : false;
+        return $resultResource;
     
     } // rollback()
     
@@ -211,24 +169,16 @@ class PostgresDatabase extends Database
      * @param string The name of the database sequence to advance and get the current value of
      * @returns integer An integer representation of the next value of the sequence
      */
-    public function nextVal($sequenceName)
+    public function nextVal($identifier)
     {
-        // TODO: Schema Support
-        $sql = "SELECT
-            NEXTVAL('{$sequenceName}')
-        AS
-            next_val";
+        list($schemaName, $seqName) = $this->parseIdentifier($identifier);
         
-        $resultResource = @pg_query($this->_databaseResource, $sql) or
-            trigger_error("Failed to query sequence value: " . $this->getLastError(), 
-                E_USER_ERROR);
+        $sql = "SELECT NEXTVAL('{$schemaName}.{$seqName}') AS next_val";
         
-        $record = pg_fetch_object($resultResource);
-    
-        if($record)
-        {
-            return $record->next_val;
-        }
+        $result = $this->query($sql);
+
+        if($result)
+            return $result->next_val;
     
         return null;
     
@@ -247,24 +197,16 @@ class PostgresDatabase extends Database
      * @param string The name of the database sequence to get the current value of
      * @returns integer An integer representation of the current value of the sequence.
      */
-    public function currVal($sequenceName)
+    public function currVal($identifier)
     {
-        // TODO: Schema Support
-        $sql = "SELECT
-            CURRVAL('{$sequenceName}')
-        AS
-            current_value";
+        list($schemaName, $seqName) = $this->parseIdentifier($identifier);
         
-        $resultResource = @pg_query($this->_databaseResource, $sql) or
-            trigger_error("Failed to query sequence value: " . $this->getLastError(), 
-                    E_USER_ERROR);
+        $sql = "SELECT CURRVAL('{$schemaName}.{$seqName}') AS current_value";
+        
+        $result = $this->query($sql);
             
-        $record = pg_fetch_object($resultResource);
-        
-        if($record)
-        {
-            return $record->current_value;
-        }
+        if($result)
+            return $result->current_value;
         
         return null;
     
@@ -287,29 +229,17 @@ class PostgresDatabase extends Database
      * @param string The name of the database table column with the sequence as a default value
      * @returns integer An integer representation of the current value of the sequence
      */
-    public function serialCurrVal($tableName, $columnName)
+    public function serialCurrVal($identifier, $columnName)
     {
-        // TODO: Schema Support
-        $sql = "SELECT
-            CURRVAL(
-                PG_GET_SERIAL_SEQUENCE(
-                    '{$tableName}', 
-                    '{$columnName}'
-                )
-            )
-        AS
-            current_value";
+        list($schemaName, $seqName) = $this->parseIdentifier($identifier);
         
-        $resultResource = @pg_query($this->_databaseResource, $sql) or
-            trigger_error("Failed to query sequence value: " . $this->getLastError(), 
-            E_USER_ERROR);
-            
-        $record = pg_fetch_object($resultResource);
+        $sql = "SELECT CURRVAL(PG_GET_SERIAL_SEQUENCE('{$schemaName}.{$seqName}'," . 
+            "'{$columnName}')) AS current_value";
         
-        if( $record )
-        {
-            return $record->current_value;
-        }
+        $result = $this->query($sql);
+        
+        if($result)
+            return $result->current_value;
         
         return null;
     
@@ -326,29 +256,17 @@ class PostgresDatabase extends Database
      * @param string The name of the database table column with the sequence as a default value
      * @returns integer An integer representation of the next value of the sequence                  
      */
-    public function serialNextVal($tableName, $columnName)
+    public function serialNextVal($identifier, $columnName)
     {
-        // TODO: Schema Support
-        $sql = "SELECT
-            NEXTVAL(
-                PG_GET_SERIAL_SEQUENCE(
-                    '{$tableName}', 
-                    '{$columnName}'
-                )
-            )
-        AS
-            next_value";
+        list($schemaName, $seqName) = $this->parseIdentifier($identifier);
         
-      $resultResource = @pg_query($this->_databaseResource, $sql) or
-         trigger_error("Failed to query sequence value: " . $this->getLastError(), 
-                E_USER_ERROR);
-            
-        $record = pg_fetch_object($resultResource);
+        $sql = "SELECT NEXTVAL(PG_GET_SERIAL_SEQUENCE('{$schemaName}.{$seqName}'," . 
+            "'{$columnName}')) AS next_value";
         
-        if($record)
-        {
-            return $record->next_value;
-        }
+        $result = $this->query($sql);
+        
+        if($result)
+            return $result->next_value;
         
         return null;
     
@@ -362,7 +280,7 @@ class PostgresDatabase extends Database
      */
     public function getLastError()
     {
-        return pg_last_error();
+        return implode(": ", $this->_databaseResource->errorInfo());
     
     } // getLastError()
     
@@ -709,7 +627,8 @@ class PostgresDatabase extends Database
         }
         
         foreach($columns as $columnCount => $column)
-        {           
+        {
+            
             // When dropping a column with PostgreSQL, you get a lovely .pg.dropped. column
             // in the PostgreSQL catalog
             
@@ -782,18 +701,16 @@ class PostgresDatabase extends Database
         AND
             pn.nspname = '{$schemaName}'
         AND 
-            pi.indisprimary = true";            
-        
+            pi.indisprimary = true";
+            
         if(!($primaryKeys = $this->query($sql)))
         {
             throw new QueryFailedException($this->getLastError());
         }
         
-        if($primaryKeys->Count() != 0)
-        {             
-            $primaryKey = $primaryKeys->Current();
-            
-            $indedColumns = explode(" ", $primaryKey->indkey);
+        if(count($primaryKeys) != 0)
+        {
+            $indedColumns = explode(" ", $primaryKeys->indkey);
             
             foreach($indedColumns as $columnNumber)
             {

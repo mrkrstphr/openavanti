@@ -1247,7 +1247,6 @@ class CRUD implements \Iterator, \Countable
         protected function recordExists()
         {
             $primaryKeys = $this->_database->getTablePrimaryKey($this->_tableIdentifier);
-            
             $tableIdentifier = $this->_database->getIdentifier($this->_tableIdentifier);
             
             $sql = "SELECT

@@ -209,35 +209,6 @@ abstract class Database
     
     
     /**
-     * Pulls the next record from specified database resource and returns it as an object.
-     *              
-     * @argument resource The database connection resource to pull the next record from
-     * @returns object The next record from the database, or null if there are no more records
-     */              
-    abstract public function pullNextResult(&$resultResource);
-    
-    
-    /**
-     * Returns the number of results from the last query performed on the specified database
-     * resource object.      
-     *              
-     * @argument resource The database connection resource
-     * @returns int The number of rows in the specified database resource
-     */ 
-    abstract public function countFromResult(&$resultResource);
-    
-    
-    /**
-     * Attempts to return the internal pointer of the specified database resource to the
-     * first row. 
-     * 
-     * @argument resource The database connection resource to pull the next record from
-     * @returns bool True if the operation was successful, false otherwise                                   
-     */
-    abstract public function resetResult(&$resultResource);
-    
-
-    /**
      * The Begin() method begins a database transaction which persists until either Commit() or 
      * Rollback() is called, or the request ends. If Commit() is not called before the end of the 
      * request, the database transaction will automatically roll back.
