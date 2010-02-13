@@ -150,7 +150,7 @@ class CRUD implements \Iterator, \Countable
         }
         else
         {
-            // FIXME: This is borked
+            // FIXME: This is borked -- why?
             $singularIdentifier = StringFunctions::toSingular($this->_tableIdentifier);
             $tableAlias = $this->_database->getIdentifier($singularIdentifier, "_", false);
         }
@@ -370,7 +370,7 @@ class CRUD implements \Iterator, \Countable
         
         if(isset($queryClauses["count"]) && $queryClauses["count"] === true)
         {
-            $selectColumns = "COUNT({$selectColumns})";
+            $selectColumns = "COUNT(*) AS count";
         }
         
         
@@ -387,8 +387,7 @@ class CRUD implements \Iterator, \Countable
         
         if(!($this->_dataSet = $this->_database->query($sql)))
         {
-            throw new Exception("Failed on Query: " .
-                $this->_database->getLastError());
+            throw new Exception("Failed on Query: " . $this->_database->getLastError());
         }
 
         // Loop the data and create member variables
@@ -1116,21 +1115,22 @@ class CRUD implements \Iterator, \Countable
                 {$columnsList}
             ) VALUES (
                 {$valuesList}
-            ) RETURNING *"; // FIXME PostgreSQL Specific Syntax
+            )";
             
-            $resultData = null;
+            $result = null;
             
-            if(($resultData = $this->_database->query($sql)) === false)
+            if(($result = $this->_database->query($sql)) === false)
             {
                 throw new Exception($this->_database->getLastError());
             }
             
-            if($resultData->valid())
-            {                
-                foreach($resultData->getRecord() as $key => $value)
-                {
-                    $this->_data[$key] = $value;
-                }
+            // For singular primary keys, let's grab the autoincrement or serial value
+            
+            if(count($primaryKeys) == 1)
+            {
+                $pk = current($primaryKeys);
+            
+                $this->_data[$pk] = $this->_database->lastInsertId($this->_tableIdentifier, $pk);
             }
             
             return true;
@@ -1151,20 +1151,12 @@ class CRUD implements \Iterator, \Countable
             
             $resultData = null;
             
-            if(($resultData = $this->_database->query($sql)) === null)
+            if(($resultData = $this->_database->query($sql)) === false)
             {
                 throw new Exception($this->_database->getLastError());
             }
             
-            if($resultData->valid())
-            {                
-                foreach($resultData->getRecord() as $key => $value)
-                {
-                    $this->_data[$key] = $value;
-                }
-            }
-            
-            return( true );
+            return true;
             
         } // update()
         
@@ -1231,8 +1223,9 @@ class CRUD implements \Iterator, \Countable
             SET
                 {$setClause}
             WHERE
-                {$whereClause}
-            RETURNING *";    // FIXME PostgreSQL Specific Syntax
+                {$whereClause}";
+                
+            //RETURNING *";    // FIXME PostgreSQL Specific Syntax
 
             return $sql;
             

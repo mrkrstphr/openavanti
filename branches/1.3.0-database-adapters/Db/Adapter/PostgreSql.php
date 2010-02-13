@@ -35,6 +35,17 @@ class PostgreSql extends Adapter
     protected $_dsnPrefix = "pgsql";
     
     /**
+     *
+     *
+     */
+    public function lastInsertId($tableName = null, $primaryKey = null)
+    {
+        return $this->serialCurrVal($tableName, $primaryKey);
+    
+    } // lastInsertId()
+    
+    
+    /**
      * Advances the value of the supplied sequence and returns the new value.
      * 
      * @param string The name of the database sequence to advance and get the current value of

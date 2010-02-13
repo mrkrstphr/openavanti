@@ -332,6 +332,9 @@ abstract class Adapter
     } // getLastError()
     
     
+    abstract public function lastInsertId($tableName = null, $primaryKey = null);
+    
+    
     /**
      * The SetCacheDirectory() method stores which directory should be used to load and store 
      * database schema cache files. If the directory does not exist, an exception will be thrown.
