@@ -49,19 +49,20 @@ class Database
      * Adds a database profile to the list of known database profiles. These profiles contain
      * connection information for the database, including adapter, host, name, user and password.                                                 
      * 
-     * @argument string A unique name for the profile used to get connections
-     * @argument array The profile array with database connection information        
+     * @param string $profileName A unique name for the profile used to get connections
+     * @param string $dsn The profile array with database connection information        
      * @returns void 
      */ 
-    final public static function addProfile($profileName, $profile)
+    final public static function addProfile($profileName, $dsn, $user = null, $password = null)
     {
+        $profile = array(
+            "dsn" => $dsn,
+            "user" => $user,
+            "password" => $password
+        );
+        
         self::ValidateProfile($profile);
         
-        if(!isset($profile["host"]))
-        {
-            $profile["host"] = "localhost";
-        }
-            
         if(isset(self::$_profiles[$profileName]))
         {
             throw new Exception("Profile [{$profileName}] already in use.");
@@ -145,12 +146,12 @@ class Database
             
         if(!isset(self::$_connectionStore[$profileName]))
         {                
-            $databaseDriver = "OpenAvanti\\Db\\Adapter\\" . $profile["driver"];
+            $databaseDriver = "OpenAvanti\\Db\\Adapter\\" . $profile["driverClass"];
             
             self::$_connectionStore[$profileName] = new $databaseDriver($profile);
         }
         
-        return self::$_connectionStore[$profileName];         
+        return self::$_connectionStore[$profileName];
         
     } // getConnection()
     
@@ -168,9 +169,9 @@ class Database
      * @argument array The profile array with database connection information to validate                
      * @returns Void     
      */
-    private static function validateProfile($profile)
+    private static function validateProfile(&$profile)
     {
-        if(!isset($profile["driver"]))
+        /*if(!isset($profile["driver"]))
         {
             throw new Exception("No database driver specified in database profile");
         }
@@ -178,19 +179,24 @@ class Database
         if(!isset($profile["name"]))
         {
             throw new Exception("No database name specified in database profile");
-        }
+        }*/
         
-        $driver = ucwords($profile["driver"]);
+        list($driver, $dsn) = explode(":", $profile["dsn"], 2);
+        
+        $driver = ucwords($driver);
+        $driver = str_ireplace("sql", "Sql", $driver);
         
         if(!class_exists("OpenAvanti\\Db\\Adapter\\{$driver}", true))
         {
-            throw new Exception("Unknown database driver specified: " . $profile["driver"]);
+            throw new Exception("Unknown database driver specified: " . $driver);
         }
         
         if(!is_subclass_of("OpenAvanti\\Db\\Adapter\\{$driver}", "OpenAvanti\\Db\\Adapter"))
         {
             throw new Exception("Database driver does not properly extend the Adapter class.");
         }
+        
+        $profile["driverClass"] = $driver;
         
     } // validateProfile()
     

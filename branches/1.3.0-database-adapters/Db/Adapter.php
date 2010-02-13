@@ -53,39 +53,14 @@ abstract class Adapter
      */
     public function __construct($profile)
     {
-        // TODO cleanup
-        $connectionString = "";
-
-        if(isset($profile["host"]))
-        {
-            $connectionString .= "host=" . $profile["host"];
-        }
-
-        $connectionString .= !empty($connectionString) ? ";" : "";
-        $connectionString .= "dbname=" . $profile["name"];
-
-        /*if(isset($profile["user"]))
-        {
-            $connectionString .= !empty($connectionString) ? ";" : "";
-            $connectionString .= "user=" . $profile["user"];
-        }
-
-        if(isset($profile["password"]))
-        {
-            $connectionString .= !empty($connectionString) ? ";" : "";
-            $connectionString .= "password=" . $profile["password"];
-        }*/
-
         // TODO This is PostgreSQL only stuff
         if(isset($profile["default_schema"]) && !empty($profile["default_schema"]))
         {
             $this->_defaultSchema = trim($profile["default_schema"]);
         }
-
-        $connectionString = "{$this->_dsnPrefix}:{$connectionString}";
-
-        $this->_databaseResource = new \PDO($connectionString, $profile["user"], $profile["password"]);
-
+        
+        $this->_databaseResource = new \PDO($profile["dsn"], $profile["user"], $profile["password"]);
+        
         if(!$this->_databaseResource)
         {
             throw new DatabaseConnectionException("Failed to connect to database server: " .
