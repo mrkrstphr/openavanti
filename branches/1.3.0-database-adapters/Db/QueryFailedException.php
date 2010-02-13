@@ -11,7 +11,7 @@
  * @version         SVN: $Id$
  */
  
-namespace OpenAvanti;
+namespace OpenAvanti\Db;
 
 /**
  * This exception extends the PHP Exception class and should be thrown when a query fails so 
