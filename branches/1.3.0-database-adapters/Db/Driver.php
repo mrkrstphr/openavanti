@@ -24,7 +24,7 @@ use \Exception;
  * @author      Kristopher Wilson
  * @link        http://www.openavanti.com/docs/database
  */
-abstract class Adapter
+abstract class Driver
 {
     /** 
      * Class constants for query join types (used for CRUD operations)
@@ -78,7 +78,7 @@ abstract class Adapter
         if(!$this->_databaseResource)
         {
             throw new DatabaseConnectionException("Failed to connect to database server: " .
-                $profile["adapter"] . ":" . $profile["host"] . "." . $profile["name"]);
+                $profile["driver"] . ":" . $profile["host"] . "." . $profile["name"]);
         }
 
     } // __construct()
@@ -87,7 +87,7 @@ abstract class Adapter
 
     /**
      * Adds a database profile to the list of known database profiles. These profiles contain
-     * connection information for the database, including adapter, host, name, user and password.                                                 
+     * connection information for the database, including driver, host, name, user and password.                                                 
      * 
      * @argument string A unique name for the profile used to get connections
      * @argument array The profile array with database connection information        
@@ -133,9 +133,9 @@ abstract class Adapter
     
     
     /**
-     * As the constructor of the Database class and all derived database adapters is protected,
+     * As the constructor of the Database class and all derived database drivers is protected,
      * the database class cannot be instantiated directly. Instead, the GetConnection() method
-     * must be called, afterwhich a database adapter object is returned. 
+     * must be called, afterwhich a database driver object is returned. 
 
      *  A database profile array may be specified to control which database is connected to,
      * and with what driver. If no profile is passed to this method, it first checks to see
@@ -185,7 +185,7 @@ abstract class Adapter
             
         if(!isset(self::$_connectionStore[$profileName]))
         {                
-            $databaseDriver = "OpenAvanti\\Db\\Adapter\\" . $profile["driver"];
+            $databaseDriver = "OpenAvanti\\Db\\Driver\\" . $profile["driver"];
             
             self::$_connectionStore[$profileName] = new $databaseDriver($profile);
         }
@@ -222,12 +222,12 @@ abstract class Adapter
         
         $driver = ucwords($profile["driver"]);
         
-        if(!class_exists("OpenAvanti\\Db\\Adapter\\{$driver}", true))
+        if(!class_exists("OpenAvanti\\Db\\Driver\\{$driver}", true))
         {
             throw new Exception("Unknown database driver specified: " . $profile["driver"]);
         }
         
-        if(!is_subclass_of("OpenAvanti\\Db\\Adapter\\{$driver}", "OpenAvanti\\Db\\DatabaseAdapter"))
+        if(!is_subclass_of("OpenAvanti\\Db\\Driver\\{$driver}", "OpenAvanti\\Db\\Driver"))
         {
             throw new Exception("Database driver does not properly extend the Database class.");
         }

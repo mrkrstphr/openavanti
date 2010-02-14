@@ -12,9 +12,9 @@
  */
 
 
-namespace OpenAvanti\Db\Adapter;
+namespace OpenAvanti\Db\Driver;
 
-use OpenAvanti\Db\Adapter;
+use OpenAvanti\Db\Driver;
 
 /**
  * Database Interaction Class (sqlite)
@@ -23,7 +23,7 @@ use OpenAvanti\Db\Adapter;
  * @author      Kristopher Wilson
  * @link        http://www.openavanti.com/docs/postgresdatabase
  */
-class Sqlite extends Adapter
+class Sqlite extends Driver
 {
     private static $_cacheDirectory = "";
     private static $_cacheSchemas = false;

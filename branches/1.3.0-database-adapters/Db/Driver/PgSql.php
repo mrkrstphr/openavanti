@@ -12,9 +12,9 @@
  */
 
 
-namespace OpenAvanti\Db\Adapter;
+namespace OpenAvanti\Db\Driver;
 
-use OpenAvanti\Db\Adapter;
+use OpenAvanti\Db\Driver;
 
 /**
  * Database Interaction Class (PostgreSQL)
@@ -23,7 +23,7 @@ use OpenAvanti\Db\Adapter;
  * @author      Kristopher Wilson
  * @link        http://www.openavanti.com/docs/postgresdatabase
  */
-class PgSql extends Adapter
+class PgSql extends Driver
 {
     protected static $_schemas = array();
     
@@ -693,7 +693,7 @@ class PgSql extends Adapter
             $name = substr($localField, strlen($localField) - 3) == "_id" ? 
                 substr($localField, 0, strlen($localField) - 3) : $localField;
             
-            $name = \Openavanti\StringFunctions::toSingular($name);
+            $name = \OpenAvanti\StringFunctions::toSingular($name);
                             
             self::$_schemas[$tableIdentifier]["foreign_key"][$name] = array(
                 "schema" => $foreignSchema,

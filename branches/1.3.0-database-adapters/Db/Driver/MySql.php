@@ -12,18 +12,18 @@
  */
 
 
-namespace OpenAvanti\Db\Adapter;
+namespace OpenAvanti\Db\Driver;
 
-use OpenAvanti\Db\Adapter;
+use OpenAvanti\Db\Driver;
 
 /**
- * Database Interaction Class (PostgreSQL)
+ * Database Interaction Class (MySQL)
  *
  * @category    Database
  * @author      Kristopher Wilson
- * @link        http://www.openavanti.com/docs/postgresdatabase
+ * @link        http://www.openavanti.com/docs/mysqldatabase
  */
-class MySql extends Adapter
+class MySql extends Driver
 {
     private static $_cacheDirectory = "";
     private static $_cacheSchemas = false;
@@ -33,6 +33,9 @@ class MySql extends Adapter
     protected $_dsnPrefix = "mysql";
     
     
+    /**
+     *
+     */
     public function lastInsertId($tableName = null, $primaryKey = null)
     {
         return $this->_databaseResource->lastInsertId();
@@ -109,6 +112,7 @@ class MySql extends Adapter
      */
     public function FormatData( $sType, $sValue )
     {
+        // TODO This is for PostgreSQL; fix for MySQL
         if( $sType == "tinyint(1)" && in_array( strtolower( $sValue ),
             array( "true", "t" ) ) )
         {
@@ -149,6 +153,21 @@ class MySql extends Adapter
      */      
     public function getDatabases()
     {
+        $sql = "SHOW DATABASES";
+            
+        if(!($databasesObj = $this->query($sql)))
+        {
+            throw new QueryFailedException($this->getLastError());
+        }
+        
+        $databases = array();
+        
+        foreach($databasesObj as $database)
+        {
+            $databases[$database->Database] = $database->Database;
+        }
+        
+        return $databases;
     
     } // getDatabases()
     
@@ -161,7 +180,24 @@ class MySql extends Adapter
      */ 
     public function getTables()
     {
-    
+        $tables = array();
+
+        $sql = "SHOW TABLES";
+        
+        if(!($tablesObj = $this->query($sql)))
+        {
+            throw new QueryFailedException($this->getLastError());
+        }
+
+        foreach($tablesObj as $table) 
+        {
+            $table = current((array)$table);
+            
+            $tables[$table] = $table;
+        }
+
+        return $tables;
+        
     } // getTables()
     
 
@@ -264,25 +300,25 @@ class MySql extends Adapter
         {
             return self::$_schemas[$identifier]["primary_key"];
         }
-    
+        
         $localTable = $this->getTableColumns($identifier);
         
         self::$_schemas[$identifier]["primary_key"] = array();
-                
+        
         $sql = "SHOW KEYS FROM {$identifier} WHERE Key_name = 'PRIMARY'";       
         
         if(!($primaryKeys = $this->query($sql)))
         {
             throw new QueryFailedException($this->getLastError());
         }
-
+        
         foreach($primaryKeys as $key)
         {
             self::$_schemas[$identifier]["primary_key"][] = $key->Column_name;
         }
-
+        
         return self::$_schemas[$identifier]["primary_key"];
-
+        
     } // getTablePrimaryKey()
     
     
@@ -299,7 +335,112 @@ class MySql extends Adapter
      */
     public function getTableForeignKeys($identifier)
     {
-        return array();
+        if(isset(self::$_schemas[$identifier]["foreign_key"]))
+        {
+            return self::$_schemas[$identifier]["foreign_key"];
+        }
+        
+        //
+        // This method needs to be cleaned up and consolidated
+        //
+        
+        
+        self::$_schemas[$identifier]["foreign_key"] = array();
+        
+
+        $sql = "SELECT 
+            *
+        FROM 
+            INFORMATION_SCHEMA.KEY_COLUMN_USAGE 
+        WHERE 
+            CONSTRAINT_SCHEMA = '" . $this->_databaseName . "' 
+        AND 
+            REFERENCED_TABLE_NAME IS NOT NULL
+        AND
+            TABLE_NAME = '{$identifier}'";
+        
+        if(!($foreignKeys = $this->query($sql)))
+        {
+            throw new QueryFailedException($this->getLastError());
+        }
+        
+        foreach($foreignKeys as $foreignKey)
+        {
+            // we currently do not handle references to multiple fields:
+            
+            $localField = $foreignKey->COLUMN_NAME;
+            
+            $relName = substr($localField, strlen($localField) - 3) == "_id" ? 
+                substr($localField, 0, strlen($localField) - 3) : $localField;
+            
+            $relName = \OpenAvanti\StringFunctions::toSingular($relName);
+            
+            self::$_schemas[$identifier]["foreign_key"][$relName] = array(
+                "table" => $foreignKey->REFERENCED_TABLE_NAME,
+                "name" => $relName,
+                "local" => array($foreignKey->COLUMN_NAME),
+                "foreign" => array($foreignKey->REFERENCED_COLUMN_NAME),
+                "type" => "m-1",
+                "dependency" => true
+            );
+        }
+        
+        
+        // find tables that reference us:
+        
+        $sql = "SELECT 
+            *
+        FROM 
+            INFORMATION_SCHEMA.KEY_COLUMN_USAGE 
+        WHERE 
+            CONSTRAINT_SCHEMA = '" . $this->_databaseName . "' 
+        AND 
+            CONSTRAINT_NAME != 'PRIMARY'
+        AND
+            REFERENCED_TABLE_NAME = '{$identifier}'";
+        
+        if(!( $foreignKeys = $this->query($sql)))
+        {
+            throw new QueryFailedException($this->getLastError());
+        }
+
+        foreach($foreignKeys as $foreignKey)
+        {
+            $localField = $foreignKey->COLUMN_NAME;
+            $foreignField = $foreignKey->REFERENCED_COLUMN_NAME;
+            
+            // if foreign_table.local_field == foreign_table.primary_key AND
+            // if local_table.foreign_key == local_table.primary_key THEN
+            //      Relationship = 1-1
+            // end
+            
+            $tmpForeignPrimaryKey = &self::$_schemas[$foreignKey->TABLE_NAME]["primary_key"];
+            $tmpLocalPrimaryKey = &self::$_schemas[$identifier][ "primary_key" ];
+            
+            $foreignFieldIsPrimary = count($tmpForeignPrimaryKey) == 1 &&
+                reset($tmpForeignPrimaryKey) == $foreignField;
+            $localFieldIsPrimary = count($tmpLocalPrimaryKey) &&
+                reset($tmpLocalPrimaryKey) == $localField;
+            $foreignIsSingular = true; // count( $aForeignFields ) == 1; // TODO: FIX
+            
+            $type = "1-m";
+            
+            if($foreignFieldIsPrimary && $localFieldIsPrimary && $foreignIsSingular)
+            {
+                $type = "1-1";
+            }
+            
+            self::$_schemas[$identifier]["foreign_key"][$foreignKey->TABLE_NAME] = array(
+                "table" => $foreignKey->TABLE_NAME,
+                "name" => $foreignKey->TABLE_NAME,
+                "local" => array($foreignKey->REFERENCED_COLUMN_NAME),
+                "foreign" => array($foreignKey->COLUMN_NAME),
+                "type" => $type,
+                "dependency" => false
+            );
+        }
+        
+        return self::$_schemas[$identifier]["foreign_key"];
         
     } // getTableForeignKeys()
     
@@ -314,6 +455,13 @@ class MySql extends Adapter
      */
     public function isPrimaryKeyReference($identifier, $columnName)
     {
+        $foreignKeys = $this->getTableForeignKeys($identifier);
+        
+        foreach($foreignKeys as $foreignKey)
+            if($foreignKey["dependency"] && reset($foreignKey["local"]) == $columnName)
+                return true;
+        
+        return false;
         
     } // isPrimaryKeyReference()
     
@@ -327,6 +475,13 @@ class MySql extends Adapter
      */
     public function getColumnType($identifier, $columnName)
     {
+        $columns = $this->getTableColumns($identifier);
+        
+        foreach($columns as $column)
+            if($columnName == $column["name"])
+                return $column[ "type" ];
+        
+        return null;
     
     } // getColumnType()
     
@@ -342,6 +497,13 @@ class MySql extends Adapter
      */
     public function tableExists($identifier)
     {
+        $tables = $this->getTables();
+        
+        foreach($tables as $table)
+            if($table == $identifier)
+                return true;
+            
+        return false;
     
     } // tableExists()
     
@@ -357,6 +519,13 @@ class MySql extends Adapter
      */
     protected function getColumnByNumber($identifier, $columnNumber)
     {
+        $this->getTableColumns($identifier);
+        
+        foreach(self::$_schemas[$identifier]["columns"] as $column)
+            if($column["number"] == $columnNumber)
+                return $column;
+        
+        return null;
     
     } // getColumnByNumber()
     
@@ -404,6 +573,7 @@ class MySql extends Adapter
      */
     public function getVersion()
     {
+        return $this->_databaseResource->getAttribute(constant("PDO::ATTR_SERVER_VERSION"));
         
     } // getVersion()
     

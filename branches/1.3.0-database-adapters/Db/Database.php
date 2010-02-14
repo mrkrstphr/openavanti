@@ -47,7 +47,7 @@ class Database
 
     /**
      * Adds a database profile to the list of known database profiles. These profiles contain
-     * connection information for the database, including adapter, host, name, user and password.                                                 
+     * connection information for the database, including driver, host, name, user and password.                                                 
      * 
      * @param string $profileName A unique name for the profile used to get connections
      * @param string $dsn The profile array with database connection information        
@@ -94,9 +94,9 @@ class Database
     
     
     /**
-     * As the constructor of the Database class and all derived database adapters is protected,
+     * As the constructor of the Database class and all derived database driverss is protected,
      * the database class cannot be instantiated directly. Instead, the GetConnection() method
-     * must be called, afterwhich a database adapter object is returned. 
+     * must be called, afterwhich a database driver object is returned. 
 
      *  A database profile array may be specified to control which database is connected to,
      * and with what driver. If no profile is passed to this method, it first checks to see
@@ -146,7 +146,7 @@ class Database
             
         if(!isset(self::$_connectionStore[$profileName]))
         {                
-            $databaseDriver = "OpenAvanti\\Db\\Adapter\\" . $profile["driverClass"];
+            $databaseDriver = "OpenAvanti\\Db\\Driver\\" . $profile["driverClass"];
             
             self::$_connectionStore[$profileName] = new $databaseDriver($profile);
         }
@@ -186,14 +186,14 @@ class Database
         $driver = ucwords($driver);
         $driver = str_ireplace("sql", "Sql", $driver);
         
-        if(!class_exists("OpenAvanti\\Db\\Adapter\\{$driver}", true))
+        if(!class_exists("OpenAvanti\\Db\\Driver\\{$driver}", true))
         {
             throw new Exception("Unknown database driver specified: " . $driver);
         }
         
-        if(!is_subclass_of("OpenAvanti\\Db\\Adapter\\{$driver}", "OpenAvanti\\Db\\Adapter"))
+        if(!is_subclass_of("OpenAvanti\\Db\\Driver\\{$driver}", "OpenAvanti\\Db\\Driver"))
         {
-            throw new Exception("Database driver does not properly extend the Adapter class.");
+            throw new Exception("Database driver does not properly extend the Driver class.");
         }
         
         $profile["driverClass"] = $driver;
