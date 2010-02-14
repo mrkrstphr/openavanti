@@ -494,14 +494,7 @@ class Sqlite extends Adapter
      */
     public function getVersion()
     {
-        $sql = "SELECT sqlite_version() AS version";
-        
-        if(($result = $this->query($sql)) === false)
-        {
-            throw new \OpenAvanti\Db\QueryFailedException($this->getLastError());
-        }
-        
-        return $result->version;
+        return $this->_databaseResource->getAttribute(constant("PDO::ATTR_SERVER_VERSION"));
         
     } // getVersion()
     
