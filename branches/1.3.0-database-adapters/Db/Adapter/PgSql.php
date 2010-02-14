@@ -23,7 +23,7 @@ use OpenAvanti\Db\Adapter;
  * @author      Kristopher Wilson
  * @link        http://www.openavanti.com/docs/postgresdatabase
  */
-class PostgreSql extends Adapter
+class PgSql extends Adapter
 {
     protected static $_schemas = array();
     
@@ -928,11 +928,13 @@ class PostgreSql extends Adapter
      * @param int The column number from the table (from the PostgreSQL catalog) 
      * @returns string The name of the column, if one is found, or null
      */
-    protected function getColumnByNumber($identifier, $columnNumber)
+    public function getColumnByNumber($identifier, $columnNumber)
     {
         list($schemaName, $tableName) = $this->parseIdentifier($identifier);
 
         $tableIdentifier = $schemaName . "_". $tableName;
+
+        $this->getTableColumns($identifier);
 
         foreach(self::$_schemas[$tableIdentifier]["columns"] as $column)
         {
@@ -1031,9 +1033,14 @@ class PostgreSql extends Adapter
      */
     public function getVersion()
     {
-        $versions = pg_version( $this->_databaseResource );
+        $sql = "SELECT version() AS version";
         
-        return $versions[ "server" ];
+        if(($result = $this->query($sql)) === false)
+        {
+            throw new \OpenAvanti\Db\QueryFailedException($this->getLastError());
+        }
+        
+        return $result->version;
         
     } // getVersion()
     
