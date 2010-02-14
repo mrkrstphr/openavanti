@@ -57,15 +57,13 @@ abstract class Driver
      * protected, and can only be called from within the class, normally through the
      * GetConnection() method. This helps support the singleton methodology.
      *
-     * @param array The database profile array containing connection information
+     * @param array $profile The database profile array containing connection information
      */
     public function __construct($profile)
     {
         // TODO This is PostgreSQL only stuff
         if(isset($profile["default_schema"]) && !empty($profile["default_schema"]))
-        {
             $this->_defaultSchema = trim($profile["default_schema"]);
-        }
         
         $this->_databaseResource = new \PDO($profile["dsn"], $profile["user"], $profile["password"]);
         
@@ -82,10 +80,8 @@ abstract class Driver
         }
         
         if(!$this->_databaseResource)
-        {
             throw new DatabaseConnectionException("Failed to connect to database server: " .
                 $profile["driver"] . ":" . $profile["host"] . "." . $profile["name"]);
-        }
 
     } // __construct()
     
@@ -93,27 +89,25 @@ abstract class Driver
     /**
      * Queries the database using the supplied SQL query.
      *
-     * @param string The query to execute
-     * @returns string|false A ResultSet object containing the results of
-     *      the database query or false on failure
+     * @param string $sql The query to execute
+     * @return string|false A ResultSet object containing the results of the database query or
+     *      false on failure
      */
     public function &query($sql)
     {
         $statement = $this->_databaseResource->query($sql);
-
+        
         if(!$statement)
-        {
             return $statement;
-        }
-
+        
         $statement->setFetchMode(\PDO::FETCH_OBJ);
-
+        
         $results = $statement->fetchAll();
-
+        
         $resultSet = new \OpenAvanti\Db\ResultSet($results);
-
+        
         return $resultSet;
-
+        
     } // query()
 
     
@@ -122,14 +116,12 @@ abstract class Driver
      * Rollback() is called, or the request ends. If Commit() is not called before the end of the
      * request, the database transaction will automatically roll back.
      *
-     * @returns void
+     * @return boolean True if the operation was successful, false otherwise
      */
     public function begin()
     {
-        $resultResource = $this->_databaseResource->beginTransaction();
-
-        return $resultResource;
-
+        return $this->_databaseResource->beginTransaction();
+        
     } // begin()
 
 
@@ -138,13 +130,11 @@ abstract class Driver
      * Begin()). If Commit() is not called before the end of the request, the database
      * transaction will automatically roll back.
      *
-     * @returns void
+     * @return boolean True if the operation was successful, false otherwise
      */
     public function commit()
     {
-        $resultResource = $this->_databaseResource->commit();
-
-        return $resultResource;
+        return $this->_databaseResource->commit();
 
     } // commit()
 
@@ -153,21 +143,19 @@ abstract class Driver
      * The Rollback() method rolls back a database transaction (assuming one was started with
      * Begin()). The database transaction is automatically rolled back if Commit() is not called.
      *
-     * @returns void
+     * @return boolean True if the operation was successful, false otherwise
      */
     public function rollback()
     {
-        $resultResource = $this->_databaseResource->rollback();
-
-        return $resultResource;
-
+        return $this->_databaseResource->rollback();
+        
     } // rollback()
 
 
     /**
      * Returns the last database error, if any.
      *
-     * @returns string A string representation of the last error
+     * @return string A string representation of the last error
      */
     public function getLastError()
     {
@@ -176,12 +164,19 @@ abstract class Driver
     } // getLastError()
     
     
-    abstract public function lastInsertId($tableName = null, $primaryKey = null);
-    
-    
+    /**
+     * Returns the ID from the last insert operation, either by sequence value or through
+     * the last insert id of an auto_increment column depending on the database driver.
+     * The parameters will be ignored for systems using auto_increment columns.
+     *
+     * @param string $tableName Optional; The name of the database table that the record was
+     *      inserted into
+     * @param string $columnName Optional; The name of the table column being inserted into
+     * @return int The ID of the last record inserted
+     */
+    abstract public function lastInsertId($tableName = null, $columnName = null);
 
-    
-    
+
     /**
      * The SetCacheDirectory() method stores which directory should be used to load and store 
      * database schema cache files. If the directory does not exist, an exception will be thrown.
@@ -192,9 +187,8 @@ abstract class Driver
      * Schema caching is primarily used by the CRUD object, which analyzes database schemas to 
      * automate database operations. 
      * 
-     * @param The absolute path to the directory in the system to store and read cached 
-     *       database schema files
-     * @returns void                         
+     * @param string $directoryName The absolute path to the directory in the system to store and
+     *      read cached database schema files                      
      */
     public function setCacheDirectory($directoryName)
     {
@@ -216,8 +210,7 @@ abstract class Driver
      * Schema caching is primarily used by the CRUD object, which analyzes database schemas to 
      * automate database operations. 
      * 
-     * @param boolean Toggles whether or not to cache discovered database schemas
-     * @returns void         
+     * @param boolean $enabled Toggles whether or not to cache discovered database schemas       
      */
     public function cacheSchemas($enabled)
     {
@@ -229,7 +222,7 @@ abstract class Driver
     /**
      * Returns the native PHP database resource
      * 
-     * @returns resource The native PHP database resource                
+     * @return resource The native PHP database resource                
      */
     public function &getResource()
     {
@@ -242,9 +235,9 @@ abstract class Driver
      * Returns a database-safe formatted representation of the supplied data, based on the 
      * supplied data type.
      * 
-     * @argument string The data type of the supplied value.
-     * @argument string The value to be formatted into a database-safe representation.
-     * @returns string A string of the formatted value supplied.                             
+     * @param string $dataType The data type of the supplied value.
+     * @param string $value The value to be formatted into a database-safe representation.
+     * @return string A string of the formatted value supplied.
      */
     abstract public function formatData($dataType, $value);
     
@@ -252,8 +245,7 @@ abstract class Driver
     /**
      * This method returns all tables for the database the class is currently connected to.
      * 
-     * @argument string Optional; The name of the schema to pull tables for
-     * @returns array Returns an array of all tables in the form of table_name => table_name.
+     * @return array Returns an array of all tables in the form of table_name => table_name.
      */ 
     abstract public function getTables();
     
@@ -261,7 +253,7 @@ abstract class Driver
     /**
      * This method returns all databases on the database server. 
      *       
-     * @returns array An array of all databases on the database server in the formation of 
+     * @return array An array of all databases on the database server in the formation of 
      *       database_name => database_name
      */ 
     abstract public function getDatabases();
@@ -276,12 +268,12 @@ abstract class Driver
      * 
      * If schema caching is on, this method can pull data from a schema cache. 
      * 
-     * @argument string The identifier for the table
-     * @returns array An array of schema information for the specified table     
+     * @param string $identifier The identifier for the table
+     * @return array An array of schema information for the specified table     
      */     
     abstract public function getTableDefinition($identifier);
     
-
+    
     /**
      * Returns an array of columns that belong to the specified table.
      * 
@@ -290,11 +282,12 @@ abstract class Driver
      * 
      * If schema caching is on, this method can pull data from a schema cache. 
      *
-     * @argument string The identifier for the table
-     * @returns array An array of columns that belong to the specified table
+     * @param string $identifier The identifier for the table
+     * @return array An array of columns that belong to the specified table
      */
     abstract public function getTableColumns($identifier);
 
+    
     /**
      * Returns an array of columns that belong to the primary key for the specified table.
      * 
@@ -303,8 +296,8 @@ abstract class Driver
      * 
      * If schema caching is on, this method can pull data from a schema cache. 
      * 
-     * @argument string The identifier for the table
-     * @returns array An array of columns that belong to the primary key for the specified table
+     * @param string $identifier The identifier for the table
+     * @return array An array of columns that belong to the primary key for the specified table
      */
     abstract public function getTablePrimaryKey($identifier);
     
@@ -317,8 +310,8 @@ abstract class Driver
      * 
      * If schema caching is on, this method can pull data from a schema cache.
      * 
-     * @argument string The identifier for the table
-     * @returns array An array of relationships for the specified table
+     * @param string $identifier The identifier for the table
+     * @return array An array of relationships for the specified table
      */
     abstract public function getTableForeignKeys($identifier);
     
@@ -327,9 +320,9 @@ abstract class Driver
      * This method determines if the specified tables primary key (or a single column from
      * a compound primary key) references another table.         
      *
-     * @param string The identifier for the table
-     * @param string The column that is, or is part of, the primary key for the table                 
-     * @returns boolean True if the primary key references another table, false otherwise                
+     * @param string $identifier The identifier for the table
+     * @param string $columnName The column that is, or is part of, the primary key for the table                 
+     * @return boolean True if the primary key references another table, false otherwise                
      */
     public function isPrimaryKeyReference($identifier, $columnName)
     {
@@ -347,9 +340,9 @@ abstract class Driver
     /**
      * Returns the data type of the specified column in the specified table. 
      * 
-     * @param string The identifier for the table
-     * @param string The name of the column that is desired to know the type of 
-     * @returns string The data type of the column, if one is found, or null.
+     * @param string $identifier The identifier for the table
+     * @param string $columName The name of the column that is desired to know the type of 
+     * @return string The data type of the column, if one is found, or null.
      */
     public function getColumnType($identifier, $columnName)
     {
@@ -367,8 +360,8 @@ abstract class Driver
     /**
      * Determines whether the specified table exists in the current database.
      * 
-     * @argument string The identifier for the table
-     * @returns bool True or false, depending on whether the table exists.                   
+     * @param string $identifier The identifier for the table
+     * @return bool True or false, depending on whether the table exists.                   
      */     
     abstract public function tableExists($identifier);
     
@@ -378,9 +371,9 @@ abstract class Driver
      * This method is primarily interally as, in the PostgreSQL catalog, table references, 
      * indexes, etc, are stored by column number in the catalog tables. 
      *
-     * @param string The identifier for the table
-     * @param int The column number from the table (from the PostgreSQL catalog) 
-     * @returns string The name of the column, if one is found, or null
+     * @param string $identifier The identifier for the table
+     * @param int $columnNumber The column number from the table (from the PostgreSQL catalog) 
+     * @return string The name of the column, if one is found, or null
      */
     public function getColumnByNumber($identifier, $columnNumber)
     {
@@ -400,7 +393,7 @@ abstract class Driver
     /**
      * Returns the version of the database server.
      *
-     * @returns string The database server version reported by the database server
+     * @return string The database server version reported by the database server
      */
     public function getVersion()
     {
@@ -408,6 +401,6 @@ abstract class Driver
         
     } // getVersion()
 
-} // Database()
+} // Driver()
 
 ?>

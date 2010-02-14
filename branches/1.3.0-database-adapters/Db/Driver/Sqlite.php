@@ -27,8 +27,14 @@ class Sqlite extends Driver
 {
     
     /**
+     * Returns the ID from the last insert operation, either by sequence value or through
+     * the last insert id of an auto_increment column depending on the database driver.
+     * The parameters will be ignored for systems using auto_increment columns.
      *
-     *
+     * @param string $tableName Optional; The name of the database table that the record was
+     *      inserted into
+     * @param string $columnName Optional; The name of the table column being inserted into
+     * @return int The ID of the last record inserted
      */
     public function lastInsertId($tableName = null, $primaryKey = null)
     {

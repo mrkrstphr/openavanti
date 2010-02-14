@@ -28,8 +28,14 @@ class PgSql extends Driver
     protected $_defaultSchema = "";
     
     /**
+     * Returns the ID from the last insert operation, either by sequence value or through
+     * the last insert id of an auto_increment column depending on the database driver.
+     * The parameters will be ignored for systems using auto_increment columns.
      *
-     *
+     * @param string $tableName Optional; The name of the database table that the record was
+     *      inserted into
+     * @param string $columnName Optional; The name of the table column being inserted into
+     * @return int The ID of the last record inserted
      */
     public function lastInsertId($tableName = null, $primaryKey = null)
     {
@@ -41,8 +47,9 @@ class PgSql extends Driver
     /**
      * Advances the value of the supplied sequence and returns the new value.
      * 
-     * @param string The name of the database sequence to advance and get the current value of
-     * @returns integer An integer representation of the next value of the sequence
+     * @param string $identifier The name of the database sequence to advance and get the current
+     *      value of
+     * @return integer An integer representation of the next value of the sequence
      */
     public function nextVal($identifier)
     {
@@ -69,8 +76,8 @@ class PgSql extends Driver
      * the current database transaction; meaning that you must call NextVal() or SerialNextVal() 
      * prior to using this method.
      *  
-     * @param string The name of the database sequence to get the current value of
-     * @returns integer An integer representation of the current value of the sequence.
+     * @param string $identifier The name of the database sequence to get the current value of
+     * @return integer An integer representation of the current value of the sequence.
      */
     public function currVal($identifier)
     {
@@ -99,10 +106,11 @@ class PgSql extends Driver
      * the current database transaction; meaning that you must call NextVal() or SerialNextVal() 
      * prior to using this method.
      * 
-     * @param string The name of the database table that holds the column with the sequence as 
-     *       a default value
-     * @param string The name of the database table column with the sequence as a default value
-     * @returns integer An integer representation of the current value of the sequence
+     * @param string $identifier The name of the database table that holds the column with the
+     *      sequence as a default value
+     * @param string $columnName The name of the database table column with the sequence as a
+     *      default value
+     * @return integer An integer representation of the current value of the sequence
      */
     public function serialCurrVal($identifier, $columnName)
     {
@@ -126,10 +134,11 @@ class PgSql extends Driver
      * table and the name of the column. This will only work if a sequence is defined as the 
      * default value of a table column.
      * 
-     * @param string The name of the database table that holds the column with the sequence as 
-     *       a default value
-     * @param string The name of the database table column with the sequence as a default value
-     * @returns integer An integer representation of the next value of the sequence                  
+     * @param string $identifier The name of the database table that holds the column with the
+     *      sequence as a default value
+     * @param string $columnName The name of the database table column with the sequence as a
+     *      default value
+     * @return integer An integer representation of the next value of the sequence                  
      */
     public function serialNextVal($identifier, $columnName)
     {
@@ -149,8 +158,21 @@ class PgSql extends Driver
     
 
     /**
-     * 
-     * 
+     * Sets the default schema for the database
+     *
+     * @param string $schema The default schema
+     */
+    public function setDefaultSchema($schema)
+    {
+        $this->_defaultSchema = $schema;
+        
+    } // setDefaultSchema()
+    
+    
+    /**
+     * Returns the default schema for the database
+     *
+     * @return string The default schema
      */
     public function getDefaultSchema()
     {
@@ -167,9 +189,9 @@ class PgSql extends Driver
      * 2. If the data type is of text, varchar, timestamp, or bool, this method returns that 
      *       value surrounded in single quotes.
      * 
-     * @param string The data type of the supplied value
-     * @param string The value to be formatted into a database-safe representation
-     * @returns string A string of the formatted value supplied                          
+     * @param string $dataType The data type of the supplied value
+     * @param string $value The value to be formatted into a database-safe representation
+     * @return string A string of the formatted value supplied                          
      */
     public function formatData($dataType, $value)
     {
@@ -177,26 +199,15 @@ class PgSql extends Driver
             "/timestamp/", "/time without time zone/");
         
         if(strlen($value) == 0)
-        {
             return "NULL";
-        }
         
         if(preg_replace($quotedTypes, "", $dataType) != $dataType)
-        {
             return "'" . addslashes($value) . "'";
-        }
         else if(strpos($dataType, "bool") !== false)
-        {
-            if($value === true || strtolower($value) == "true" || 
-                strtolower($value) == "t")
-            {
+            if($value === true || strtolower($value) == "true" || strtolower($value) == "t")
                 return "true";
-            }
             else
-            {
                 return "false";
-            }
-        }
         
         return $value;
     
@@ -206,29 +217,20 @@ class PgSql extends Driver
     /**
      * This method returns all databases on the database server. 
      *       
-     * @returns array An array of all databases on the database server in the formation of 
+     * @return array An array of all databases on the database server in the formation of 
      *       database_name => database_name
      */      
     public function getDatabases()
     {
-        $sql = "SELECT
-            datname
-        FROM
-            pg_database
-        ORDER BY
-            datname";
+        $sql = "SELECT datname FROM pg_database ORDER BY datname";
             
         if(!($databasesObj = $this->query($sql)))
-        {
             throw new QueryFailedException($this->getLastError());
-        }
         
         $databases = array();
         
         foreach($databasesObj as $database)
-        {
             $databases[$database->datname] = $database->datname;
-        }
         
         return $databases;
     
@@ -236,8 +238,13 @@ class PgSql extends Driver
     
 
     /**
+     * Parses a database entity identifier into schema.table format. 
      *
-     *
+     * @param mixed $identifier The database identifier, which can be a string or an array
+     *      containing the schema name and entity name
+     * @param string $defaultSchema Optional; The name schema to use by default if one is not
+     *      provided. Default: public
+     * @return array An array containing schema name and entity name
      */
     public function parseIdentifier($identifier, $defaultSchema = 'public')
     {
@@ -285,40 +292,27 @@ class PgSql extends Driver
     /**
      * This method returns all tables for the database the class is currently connected to.
      * 
-     * @param string Optional; The name of the schema to pull tables for
-     * @returns array Returns an array of all tables in the form of table_name => table_name.
+     * @param string $schemaName Optional; The name of the schema to pull tables for
+     * @return array Returns an array of all tables in the form of table_name => table_name.
      */ 
     public function getTables($schemaName = null)
     {
         $tables = array();
-
-        $sql = "SELECT 
-            pt.tablename, 
-            pp.typrelid 
-        FROM 
-            pg_tables AS pt 
-        INNER JOIN 
-            pg_type AS pp ON pp.typname = pt.tablename 
-        WHERE
-            pt.tablename NOT LIKE 'pg_%' 
-        AND
-            pt.tablename NOT LIKE 'sql_%'";
+        
+        $sql = "SELECT pt.tablename, pp.typrelid FROM pg_tables AS pt " . 
+            "INNER JOIN pg_type AS pp ON pp.typname = pt.tablename " . 
+            "WHERE pt.tablename NOT LIKE 'pg_%' " . 
+            "AND pt.tablename NOT LIKE 'sql_%'";
             
         if(!empty($schemaName))
-        {
             $sql .= " AND pt.schemaname = '" . addslashes($schemaName) . "'";
-        }
         
         if(!($tablesObj = $this->query($sql)))
-        {
             throw new QueryFailedException($this->getLastError());
-        }
-
+        
         foreach($tablesObj as $table) 
-        {
             $tables[ $table->typrelid ] = $table->tablename;
-        }
-
+        
         return $tables;
     
     } // getTables()
@@ -333,8 +327,8 @@ class PgSql extends Driver
      * 
      * If schema caching is on, this method can pull data from a schema cache. 
      * 
-     * @param string The identifier for the table
-     * @returns array An array of schema information for the specified table     
+     * @param mixed $identifier The identifier for the table
+     * @return array An array of schema information for the specified table     
      */  
     public function getTableDefinition($identifier)
     {
@@ -375,8 +369,8 @@ class PgSql extends Driver
      * 
      * If schema caching is on, this method can pull data from a schema cache. 
      *
-     * @param string The identifier for the table
-     * @returns array An array of columns that belong to the specified table
+     * @param string $identifier The identifier for the table
+     * @return array An array of columns that belong to the specified table
      */
     public function getTableColumns($identifier)
     {
@@ -391,58 +385,27 @@ class PgSql extends Driver
         
         $columnsReturn = array();
 
-        $sql = "SELECT 
-            pa.attname, 
-            pa.attnum,
-            pat.typname,
-            pa.atttypmod,
-            pa.attnotnull,
-            pg_get_expr( pad.adbin, pa.attrelid, true ) AS default_value,
-            format_type( pa.atttypid, pa.atttypmod ) AS data_type
-        FROM 
-            pg_attribute AS pa 
-        INNER JOIN 
-            pg_type AS pt 
-        ON 
-            pt.typrelid = pa.attrelid 
-        INNER JOIN  
-            pg_type AS pat 
-        ON 
-            pat.typelem = pa.atttypid
-        INNER JOIN 
-            pg_namespace AS pn 
-        ON 
-            pn.oid = pt.typnamespace
-        LEFT JOIN
-            pg_attrdef AS pad
-        ON
-            pad.adrelid = pa.attrelid
-        AND
-            pad.adnum = pa.attnum
-        WHERE  
-            pt.typname = '{$tableName}' 
-        AND 
-            pa.attnum > 0
-        AND
-            pn.nspname = '{$schemaName}'
-        ORDER BY 
-            pa.attnum";
+        $sql = "SELECT pa.attname, pa.attnum, pat.typname, pa.atttypmod, pa.attnotnull, " . 
+            "pg_get_expr(pad.adbin, pa.attrelid, true) AS default_value, " . 
+            "format_type(pa.atttypid, pa.atttypmod) AS data_type " . 
+            "FROM pg_attribute AS pa " . 
+            "INNER JOIN pg_type AS pt ON pt.typrelid = pa.attrelid " . 
+            "INNER JOIN pg_type AS pat ON pat.typelem = pa.atttypid " . 
+            "INNER JOIN pg_namespace AS pn ON pn.oid = pt.typnamespace " . 
+            "LEFT JOIN pg_attrdef AS pad ON pad.adrelid = pa.attrelid AND pad.adnum = pa.attnum " . 
+            "WHERE pt.typname = '{$tableName}' AND pa.attnum > 0 AND pn.nspname = '{$schemaName}' " . 
+            "ORDER BY pa.attnum";
         
         if(!($columns = $this->query($sql)))
-        {
             throw new QueryFailedException($this->getLastError());
-        }
         
         foreach($columns as $columnCount => $column)
         {
-            
             // When dropping a column with PostgreSQL, you get a lovely .pg.dropped. column
             // in the PostgreSQL catalog
             
             if(strpos($column->attname, ".pg.dropped.") !== false)
-            {
                 continue;
-            }
             
             $columnsReturn[$column->attname] = array(
                 "number" => $column->attnum,
@@ -453,13 +416,11 @@ class PgSql extends Driver
             );
              
             if($column->typname == "_varchar")
-            {
                 $columnsReturn[$column->attname]["size"] = $column->atttypmod - 4;
-            }
         }
         
         self::$_schemas[$tableIdentifier]["columns"] = $columnsReturn;
-
+        
         return $columnsReturn;
         
     } // getTableColumns()
@@ -473,8 +434,8 @@ class PgSql extends Driver
      * 
      * If schema caching is on, this method can pull data from a schema cache. 
      * 
-     * @param string The identifier for the table
-     * @returns array An array of columns that belong to the primary key for the specified table
+     * @param string $identifier The identifier for the table
+     * @return array An array of columns that belong to the primary key for the specified table
      */
     public function getTablePrimaryKey($identifier)
     {
@@ -483,9 +444,7 @@ class PgSql extends Driver
         $tableIdentifier = $schemaName . "_". $tableName;
         
         if(isset(self::$_schemas[$tableIdentifier]["primary_key"]))
-        {
             return self::$_schemas[$tableIdentifier]["primary_key"];
-        }
         
         $localTable = $this->getTableColumns($identifier);
         
@@ -511,9 +470,7 @@ class PgSql extends Driver
             pi.indisprimary = true";
             
         if(!($primaryKeys = $this->query($sql)))
-        {
             throw new QueryFailedException($this->getLastError());
-        }
         
         if(count($primaryKeys) != 0)
         {

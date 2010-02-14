@@ -27,7 +27,14 @@ class MySql extends Driver
 {
     
     /**
+     * Returns the ID from the last insert operation, either by sequence value or through
+     * the last insert id of an auto_increment column depending on the database driver.
+     * The parameters will be ignored for systems using auto_increment columns.
      *
+     * @param string $tableName Optional; The name of the database table that the record was
+     *      inserted into
+     * @param string $columnName Optional; The name of the table column being inserted into
+     * @return int The ID of the last record inserted
      */
     public function lastInsertId($tableName = null, $primaryKey = null)
     {
@@ -274,33 +281,21 @@ class MySql extends Driver
     public function getTableForeignKeys($identifier)
     {
         if(isset(self::$_schemas[$identifier]["foreign_key"]))
-        {
             return self::$_schemas[$identifier]["foreign_key"];
-        }
         
         //
         // This method needs to be cleaned up and consolidated
         //
         
-        
         self::$_schemas[$identifier]["foreign_key"] = array();
         
-
-        $sql = "SELECT 
-            *
-        FROM 
-            INFORMATION_SCHEMA.KEY_COLUMN_USAGE 
-        WHERE 
-            CONSTRAINT_SCHEMA = '" . $this->_databaseName . "' 
-        AND 
-            REFERENCED_TABLE_NAME IS NOT NULL
-        AND
-            TABLE_NAME = '{$identifier}'";
+        $sql = "SELECT * FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE " . 
+            "WHERE CONSTRAINT_SCHEMA = '{$this->_databaseName}' " . 
+            "AND REFERENCED_TABLE_NAME IS NOT NULL " . 
+            "AND TABLE_NAME = '{$identifier}'";
         
         if(!($foreignKeys = $this->query($sql)))
-        {
             throw new QueryFailedException($this->getLastError());
-        }
         
         foreach($foreignKeys as $foreignKey)
         {
@@ -338,9 +333,7 @@ class MySql extends Driver
             REFERENCED_TABLE_NAME = '{$identifier}'";
         
         if(!( $foreignKeys = $this->query($sql)))
-        {
             throw new QueryFailedException($this->getLastError());
-        }
 
         foreach($foreignKeys as $foreignKey)
         {
@@ -432,9 +425,7 @@ class MySql extends Driver
     public function getIdentifier($identifier, $separator = ".", $quote = true)
     {
         if($quote === true)
-        {
             $identifier = $this->quoteIdentifier($identifier);
-        }
         
         return $identifier;
         

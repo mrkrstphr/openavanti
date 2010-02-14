@@ -50,8 +50,9 @@ class Database
      * connection information for the database, including driver, host, name, user and password.                                                 
      * 
      * @param string $profileName A unique name for the profile used to get connections
-     * @param string $dsn The profile array with database connection information        
-     * @returns void 
+     * @param string $dsn The DSN connection string
+     * @param string $user Optional; The user to connect with
+     * @param string $password Optional; The password for the user to connect with
      */ 
     final public static function addProfile($profileName, $dsn, $user = null, $password = null)
     {
@@ -78,8 +79,7 @@ class Database
      * The default profile is used to create or return a database connection by GetConnection() 
      * when no connection is specified to that method.
      * 
-     * @argument string The name of the profile to be used as the default database profile
-     * @returns void 
+     * @param string $profileName The name of the profile to be used as the default database profile
      */ 
     final public static function setDefaultProfile($profileName)
     {
@@ -104,13 +104,13 @@ class Database
      * checks to see if there is only one profile stored. If so, that profile is used. If none
      * of these conditions are met, an exception is thrown.                                          
      * 
-     * @argument string The name of the profile to get a connection for. If not supplied,
-     *       and a profile is already loaded, that profile will be used. If no profile is 
-     *       supplied and more than one profile has been loaded, null is returned. 
-     * @argument bool Optional; Should this connection be unique, in other words, not 
+     * @param string $profileName The name of the profile to get a connection for. If not supplied,
+     *      and a profile is already loaded, that profile will be used. If no profile is 
+     *      supplied and more than one profile has been loaded, null is returned. 
+     * @param bool $unique Optional; Should this connection be unique, in other words, not 
      *      reused on subsequent calls for a connection to this profile?                   
-     * @returns Database A database object; the type depends on the database driver being used. 
-     *       This object contains an active connection to the database.      
+     * @return Database A database object; the type depends on the database driver being used. 
+     *      This object contains an active connection to the database.      
      */ 
     final public static function getConnection($profileName = null, $unique = false)
     {
@@ -157,30 +157,12 @@ class Database
     
     
     /**
-     * Validates a database connection profile:
-     *  1. Must have a driver specified
-     *      a. Driver must reference a valid class [DriverName]Database
-     *      b. [DriverName]Database must be a subclass of Database
-     *  2. Must contain a database name.                                                                     
-     * 
-     * Exceptions are thrown when any of the above criteria are not met describing the
-     * nature of the failed validation       
+     * Validates a database connection profile. Exceptions are thrown if the profile is not valid.
      *               
-     * @argument array The profile array with database connection information to validate                
-     * @returns Void     
+     * @param array $profile The profile array with database connection information to validate
      */
     private static function validateProfile(&$profile)
     {
-        /*if(!isset($profile["driver"]))
-        {
-            throw new Exception("No database driver specified in database profile");
-        }
-        
-        if(!isset($profile["name"]))
-        {
-            throw new Exception("No database name specified in database profile");
-        }*/
-        
         list($driver, $dsn) = explode(":", $profile["dsn"], 2);
         
         $driver = ucwords($driver);
@@ -200,7 +182,6 @@ class Database
         
     } // validateProfile()
     
-
 } // Database()
 
 ?>
