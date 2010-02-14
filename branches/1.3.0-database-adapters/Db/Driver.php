@@ -40,6 +40,11 @@ abstract class Driver
         self::JoinTypeLeft => "LEFT JOIN"
     );
     
+    
+    protected static $_cacheDirectory = "";
+    protected static $_cacheSchemas = false;
+   
+    
     protected $_dsnPrefix = "";
     protected $_databaseResource = null;
 
@@ -324,37 +329,63 @@ abstract class Driver
     abstract public function lastInsertId($tableName = null, $primaryKey = null);
     
     
+
+    
+    
     /**
      * The SetCacheDirectory() method stores which directory should be used to load and store 
      * database schema cache files. If the directory does not exist, an exception will be thrown.
+     * 
      * Setting the cache directory is useless unless schema caching is turned on using 
      * CacheSchemas().
      * 
-     * @argument string The absolute path to the directory in the system to store and read cached 
-     *       database schema files.
-     * @returns void                 
-     */        
-    abstract public function setCacheDirectory($directoryName);
+     * Schema caching is primarily used by the CRUD object, which analyzes database schemas to 
+     * automate database operations. 
+     * 
+     * @param The absolute path to the directory in the system to store and read cached 
+     *       database schema files
+     * @returns void                         
+     */
+    public function setCacheDirectory($directoryName)
+    {
+        self::$_cacheDirectory = $directoryName;
+    
+    } // setCacheDirectory()
     
 
     /**
      * The CacheSchemas() method toggles whether or not database schemas discovered through the 
-     * getTableDefinition(), GetTableColumns(), GetTableForeignKeys() and GetTablePrimaryKey() methods 
+     * GetSchema(), GetTableColumns(), GetTableForeignKeys() and GetTablePrimaryKey() methods 
      * should be cached, and also whether or not those methods will pull their information from a 
      * cache, if available.
      * 
-     * @argument boolean Toggles whether or not to cache discovered database schemas
+     * Attempting to cache schemas without properly setting the cache directory using 
+     * SetCacheDirectory(). If caching is attempted without setting the directory, an exception 
+     * will be thrown.
+     * 
+     * Schema caching is primarily used by the CRUD object, which analyzes database schemas to 
+     * automate database operations. 
+     * 
+     * @param boolean Toggles whether or not to cache discovered database schemas
      * @returns void         
      */
-    abstract public function cacheSchemas($enable);
+    public function cacheSchemas($enabled)
+    {
+        self::$_cacheSchemas = $enabled;
+
+    } // cacheSchemas()
     
 
     /**
-     * Returns the PHP native database connection resource.
+     * Returns the native PHP database resource
      * 
-     * @returns resource A database connection resource.
+     * @returns resource The native PHP database resource                
      */
-    abstract public function &getResource();
+    public function &getResource()
+    {
+        return $this->_databaseResource;
+    
+    } // getResource()
     
 
     /**
