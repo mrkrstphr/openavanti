@@ -40,6 +40,7 @@ abstract class Driver
         self::JoinTypeLeft => "LEFT JOIN"
     );
     
+    protected static $_schemas = array();
     
     protected static $_cacheDirectory = "";
     protected static $_cacheSchemas = false;
@@ -87,157 +88,6 @@ abstract class Driver
         }
 
     } // __construct()
-
-
-
-    /**
-     * Adds a database profile to the list of known database profiles. These profiles contain
-     * connection information for the database, including driver, host, name, user and password.                                                 
-     * 
-     * @argument string A unique name for the profile used to get connections
-     * @argument array The profile array with database connection information        
-     * @returns void 
-     */ 
-    final public static function addProfile($profileName, $profile)
-    {
-        self::ValidateProfile($profile);
-        
-        if(!isset($profile["host"]))
-        {
-            $profile["host"] = "localhost";
-        }
-            
-        if(isset(self::$_profiles[$profileName]))
-        {
-            throw new Exception("Profile [{$profileName}] already in use.");
-        }
-        
-        self::$_profiles[$profileName] = $profile;
-        
-    } // addProfile()
-    
-    
-    /**
-     * Sets the default database connection profile to the one specified in the first argument. 
-     * The default profile is used to create or return a database connection by GetConnection() 
-     * when no connection is specified to that method.
-     * 
-     * @argument string The name of the profile to be used as the default database profile
-     * @returns void 
-     */ 
-    final public static function setDefaultProfile($profileName)
-    {
-        if(!isset(self::$_profiles[$profileName]))
-        {
-            throw new DatabaseConnectionException("Unknown database profile: {$profileName}");
-        }
-    
-        self::$_defaultProfile = self::$profileName;
-    
-    } // setDefaultProfile()
-    
-    
-    /**
-     * As the constructor of the Database class and all derived database drivers is protected,
-     * the database class cannot be instantiated directly. Instead, the GetConnection() method
-     * must be called, afterwhich a database driver object is returned. 
-
-     *  A database profile array may be specified to control which database is connected to,
-     * and with what driver. If no profile is passed to this method, it first checks to see
-     * if there is a default database profile set up. If so, it uses that, if not, it then
-     * checks to see if there is only one profile stored. If so, that profile is used. If none
-     * of these conditions are met, an exception is thrown.                                          
-     * 
-     * @argument string The name of the profile to get a connection for. If not supplied,
-     *       and a profile is already loaded, that profile will be used. If no profile is 
-     *       supplied and more than one profile has been loaded, null is returned. 
-     * @argument bool Optional; Should this connection be unique, in other words, not 
-     *      reused on subsequent calls for a connection to this profile?                   
-     * @returns Database A database object; the type depends on the database driver being used. 
-     *       This object contains an active connection to the database.      
-     */ 
-    final public static function getConnection($profileName = null, $unique = false)
-    {
-        if(!empty($profileName))
-        {
-            if(!isset(self::$_profiles[$profileName]))
-            {
-                return null;
-            }
-        }
-        else if(!empty(self::$_defaultProfile))
-        {
-            $profileName = self::$_defaultProfile;
-        }
-        else if(empty($profileName) && count(self::$_profiles) != 1)
-        {
-            return null;
-        }
-        else
-        {
-            $profileName = key(self::$_profiles);
-        }
-        
-        $profile = self::$_profiles[$profileName];
-        
-        if($unique)
-        {
-            // Let's create a timestamped profile name to prevent reuse
-            // of this connection:
-            
-            $profileName = md5(microtime());
-        }
-            
-        if(!isset(self::$_connectionStore[$profileName]))
-        {                
-            $databaseDriver = "OpenAvanti\\Db\\Driver\\" . $profile["driver"];
-            
-            self::$_connectionStore[$profileName] = new $databaseDriver($profile);
-        }
-        
-        return self::$_connectionStore[$profileName];         
-        
-    } // getConnection()
-    
-    
-    /**
-     * Validates a database connection profile:
-     *  1. Must have a driver specified
-     *      a. Driver must reference a valid class [DriverName]Database
-     *      b. [DriverName]Database must be a subclass of Database
-     *  2. Must contain a database name.                                                                     
-     * 
-     * Exceptions are thrown when any of the above criteria are not met describing the
-     * nature of the failed validation       
-     *               
-     * @argument array The profile array with database connection information to validate                
-     * @returns Void     
-     */
-    private static function validateProfile($profile)
-    {
-        if(!isset($profile["driver"]))
-        {
-            throw new Exception("No database driver specified in database profile");
-        }
-        
-        if(!isset($profile["name"]))
-        {
-            throw new Exception("No database name specified in database profile");
-        }
-        
-        $driver = ucwords($profile["driver"]);
-        
-        if(!class_exists("OpenAvanti\\Db\\Driver\\{$driver}", true))
-        {
-            throw new Exception("Unknown database driver specified: " . $profile["driver"]);
-        }
-        
-        if(!is_subclass_of("OpenAvanti\\Db\\Driver\\{$driver}", "OpenAvanti\\Db\\Driver"))
-        {
-            throw new Exception("Database driver does not properly extend the Database class.");
-        }
-        
-    } // validateProfile()
     
 
     /**
@@ -472,15 +322,46 @@ abstract class Driver
      */
     abstract public function getTableForeignKeys($identifier);
     
-
+    
     /**
-     * Returns the data type of the specified column in the specified table.
-     * 
-     * @argument string The identifier for the table
-     * @argument string The name of the column that is desired to know the type of
-     * @return string The data type of the column, if one is found, or null.
+     * This method determines if the specified tables primary key (or a single column from
+     * a compound primary key) references another table.         
+     *
+     * @param string The identifier for the table
+     * @param string The column that is, or is part of, the primary key for the table                 
+     * @returns boolean True if the primary key references another table, false otherwise                
      */
-    abstract public function getColumnType($identifier, $columnName);
+    public function isPrimaryKeyReference($identifier, $columnName)
+    {
+        $foreignKeys = $this->getTableForeignKeys($identifier);
+        
+        foreach($foreignKeys as $foreignKey)
+            if($foreignKey["dependency"] && reset($foreignKey["local"]) == $columnName)
+                return true;
+        
+        return false;
+        
+    } // isPrimaryKeyReference()
+    
+    
+    /**
+     * Returns the data type of the specified column in the specified table. 
+     * 
+     * @param string The identifier for the table
+     * @param string The name of the column that is desired to know the type of 
+     * @returns string The data type of the column, if one is found, or null.
+     */
+    public function getColumnType($identifier, $columnName)
+    {
+        $columns = $this->getTableColumns($identifier);
+        
+        foreach($columns as $column)
+            if($columnName == $column["name"])
+                return $column[ "type" ];
+        
+        return null;
+    
+    } // getColumnType()
     
 
     /**
@@ -490,15 +371,42 @@ abstract class Driver
      * @returns bool True or false, depending on whether the table exists.                   
      */     
     abstract public function tableExists($identifier);
+    
 
+    /**
+     * Returns the name of the column at the specified position from the specified table. 
+     * This method is primarily interally as, in the PostgreSQL catalog, table references, 
+     * indexes, etc, are stored by column number in the catalog tables. 
+     *
+     * @param string The identifier for the table
+     * @param int The column number from the table (from the PostgreSQL catalog) 
+     * @returns string The name of the column, if one is found, or null
+     */
+    public function getColumnByNumber($identifier, $columnNumber)
+    {
+        $tableIdentifier = $this->getIdentifier($identifier, "_", false);
 
+        $this->getTableColumns($identifier);
 
+        foreach(self::$_schemas[$tableIdentifier]["columns"] as $column)
+            if($column["number"] == $columnNumber)
+                return $column;
+    
+        return null;
+    
+    } // getColumnByNumber()
+    
+    
     /**
      * Returns the version of the database server.
      *
      * @returns string The database server version reported by the database server
      */
-    abstract public function getVersion();
+    public function getVersion()
+    {
+        return $this->_databaseResource->getAttribute(constant("PDO::ATTR_SERVER_VERSION"));
+        
+    } // getVersion()
 
 } // Database()
 

@@ -25,10 +25,6 @@ use OpenAvanti\Db\Driver;
  */
 class MySql extends Driver
 {
-    protected static $_schemas = array();
-
-    protected $_dsnPrefix = "mysql";
-    
     
     /**
      *
@@ -386,47 +382,6 @@ class MySql extends Driver
         
     } // getTableForeignKeys()
     
-    
-    /**
-     * This method determines if the specified tables primary key (or a single column from
-     * a compound primary key) references another table.         
-     *
-     * @param string The identifier for the table
-     * @param string The column that is, or is part of, the primary key for the table                 
-     * @returns boolean True if the primary key references another table, false otherwise                
-     */
-    public function isPrimaryKeyReference($identifier, $columnName)
-    {
-        $foreignKeys = $this->getTableForeignKeys($identifier);
-        
-        foreach($foreignKeys as $foreignKey)
-            if($foreignKey["dependency"] && reset($foreignKey["local"]) == $columnName)
-                return true;
-        
-        return false;
-        
-    } // isPrimaryKeyReference()
-    
-    
-    /**
-     * Returns the data type of the specified column in the specified table. 
-     * 
-     * @param string The identifier for the table
-     * @param string The name of the column that is desired to know the type of 
-     * @returns string The data type of the column, if one is found, or null.
-     */
-    public function getColumnType($identifier, $columnName)
-    {
-        $columns = $this->getTableColumns($identifier);
-        
-        foreach($columns as $column)
-            if($columnName == $column["name"])
-                return $column[ "type" ];
-        
-        return null;
-    
-    } // getColumnType()
-    
 
     /**
      * Determines whether the specified table exists in the current database.
@@ -448,28 +403,6 @@ class MySql extends Driver
         return false;
     
     } // tableExists()
-    
-
-    /**
-     * Returns the name of the column at the specified position from the specified table. 
-     * This method is primarily interally as, in the PostgreSQL catalog, table references, 
-     * indexes, etc, are stored by column number in the catalog tables. 
-     *
-     * @param string The identifier for the table
-     * @param int The column number from the table (from the PostgreSQL catalog) 
-     * @returns string The name of the column, if one is found, or null
-     */
-    protected function getColumnByNumber($identifier, $columnNumber)
-    {
-        $this->getTableColumns($identifier);
-        
-        foreach(self::$_schemas[$identifier]["columns"] as $column)
-            if($column["number"] == $columnNumber)
-                return $column;
-        
-        return null;
-    
-    } // getColumnByNumber()
     
     
     /**
@@ -506,18 +439,6 @@ class MySql extends Driver
         return $identifier;
         
     } // getIdentifier()
-    
-    
-    /**
-     * Returns the version of the database server.
-     *
-     * @returns string The database server version reported by the database server
-     */
-    public function getVersion()
-    {
-        return $this->_databaseResource->getAttribute(constant("PDO::ATTR_SERVER_VERSION"));
-        
-    } // getVersion()
     
 } // MySql()
 
