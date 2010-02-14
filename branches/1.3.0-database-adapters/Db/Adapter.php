@@ -43,6 +43,8 @@ abstract class Adapter
     protected $_dsnPrefix = "";
     protected $_databaseResource = null;
 
+    protected $_databaseName = null;
+
 
     /**
      * The constructor sets up a new connection to the database. This method is
@@ -60,6 +62,18 @@ abstract class Adapter
         }
         
         $this->_databaseResource = new \PDO($profile["dsn"], $profile["user"], $profile["password"]);
+        
+        list($dsnIdentifier, $information) = explode(":", $profile["dsn"], 2);
+                
+        $parts = explode(";", $information);
+        
+        foreach($parts as $part)
+        {
+            $nv = explode("=", $part, 2);
+            
+            if(count($nv) == 2 && $nv[0] == "dbname")
+                $this->_databaseName = $nv[1];
+        }
         
         if(!$this->_databaseResource)
         {
