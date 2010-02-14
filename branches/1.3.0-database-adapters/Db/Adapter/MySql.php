@@ -8,7 +8,7 @@
  * @copyright       Copyright (c) 2007-2010, Kristopher Wilson
  * @license         http://www.openavanti.com/license
  * @link            http://www.openavanti.com
- * @version         SVN: $Id: PostgreSql.php 282 2010-02-12 18:42:51Z kristopherwilson $
+ * @version         SVN: $Id$
  */
 
 
