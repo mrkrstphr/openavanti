@@ -248,7 +248,7 @@ class Nvp
         $curl = curl_init();
         
         curl_setopt($curl, CURLOPT_URL, $this->_environmentURIs[strtolower($this->_environment)]);
-        curl_setopt($curl, CURLOPT_VERBOSE, 1);
+        //curl_setopt($curl, CURLOPT_VERBOSE, 1);
         
         curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
