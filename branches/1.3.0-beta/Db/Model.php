@@ -12,7 +12,7 @@
  */
 
 
-namespace OpenAvanti;
+namespace OpenAvanti\Db;
 
 use \Exception;
 
@@ -46,7 +46,7 @@ class Model extends CRUD
             $tableName = ltrim(strtolower(preg_replace("/([A-Z])/", "_\$1", $className)), "_");
             $className = strtolower(get_class($this));
             
-            $this->_tableIdentifier = StringFunctions::toPlural($className);
+            $this->_tableIdentifier = \OpenAvanti\StringFunctions::toPlural($className);
         }
 
         if(is_array($data) || is_object($data))
