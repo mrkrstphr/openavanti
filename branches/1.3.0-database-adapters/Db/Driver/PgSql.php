@@ -182,39 +182,6 @@ class PgSql extends Driver
     
 
     /**
-     * Returns a database-safe formatted representation of the supplied data, based on the 
-     * supplied data type.
-     * 
-     * 1. If the supplied data is empty and does not equal zero, this method returns NULL.
-     * 2. If the data type is of text, varchar, timestamp, or bool, this method returns that 
-     *       value surrounded in single quotes.
-     * 
-     * @param string $dataType The data type of the supplied value
-     * @param string $value The value to be formatted into a database-safe representation
-     * @return string A string of the formatted value supplied                          
-     */
-    public function formatData($dataType, $value)
-    {
-        $quotedTypes = array("/text/", "/character varying/", "/date/", 
-            "/timestamp/", "/time without time zone/");
-        
-        if(strlen($value) == 0)
-            return "NULL";
-        
-        if(preg_replace($quotedTypes, "", $dataType) != $dataType)
-            return "'" . addslashes($value) . "'";
-        else if(strpos($dataType, "bool") !== false)
-            if($value === true || strtolower($value) == "true" || strtolower($value) == "t")
-                return "true";
-            else
-                return "false";
-        
-        return $value;
-    
-    } // formatData()
-
-
-    /**
      * This method returns all databases on the database server. 
      *       
      * @return array An array of all databases on the database server in the formation of 

@@ -44,53 +44,6 @@ class MySql extends Driver
     
 
     /**
-     * Returns a database-safe formatted representation of the supplied data, based on the 
-     * supplied data type.
-     * 
-     * 1. If the supplied data is empty and does not equal zero, this method returns NULL.
-     * 2. If the data type is of text, varchar, timestamp, or bool, this method returns that 
-     *       value surrounded in single quotes.
-     * 
-     * @param string The data type of the supplied value
-     * @param string The value to be formatted into a database-safe representation
-     * @returns string A string of the formatted value supplied                          
-     */
-    public function FormatData( $sType, $sValue )
-    {
-        // TODO This is for PostgreSQL; fix for MySQL
-        if( $sType == "tinyint(1)" && in_array( strtolower( $sValue ),
-            array( "true", "t" ) ) )
-        {
-            return( 1 );
-        }
-        else if( $sType == "tinyint(1)" && in_array( strtolower( $sValue ),
-            array( "false", "f" ) ) )
-        {
-            return( 0 );
-        }
-
-        $aQuoted_Types = array( "/text/", "/tinytext/", "/mediumtext/", "/longtext/",
-            "/char/", "/varchar/", "/date/", "/timestamp/", "/datetime/", "/time/",
-            "/binary/", "/varbinary/",
-            "/blob/", "/tinyblob/", "/mediumblob/", "/longblob/" );
-
-       if( strlen( $sValue ) == 0 )
-       {
-           return( "NULL" );
-       }
-
-       if( preg_replace( $aQuoted_Types, "", $sType ) != $sType )
-       {
-           return( "'" . addslashes( $sValue ) . "'" );
-       }
-
-       return( $sValue );
-
-    } // FormatData()
-
-
-
-    /**
      * This method returns all databases on the database server. 
      *       
      * @returns array An array of all databases on the database server in the formation of 

@@ -119,7 +119,7 @@ class CRUD implements \Iterator, \Countable
         $primaryKey = $this->_database->getTablePrimaryKey($this->_tableIdentifier);
         
         $queryClauses = array();
-        
+         
         if(is_numeric($data) || is_string($data))
         {
             if(count($primaryKey) > 1)
@@ -129,10 +129,8 @@ class CRUD implements \Iterator, \Countable
             
             $primaryKeyColumn = reset($primaryKey);
             
-            $columnType = $this->_database->getColumnType($this->_tableIdentifier, $primaryKeyColumn);
-            
-            $queryClauses["where"] = "{$primaryKeyColumn} = " . 
-                $this->_database->formatData($columnType, $data); 
+            $queryClauses["where"] = "{$primaryKeyColumn} = ?"; 
+            $queryClauses["params"] = array($data);
         }
         else if(!is_array($data) && !is_null($data))
         {
@@ -364,42 +362,28 @@ class CRUD implements \Iterator, \Countable
         $selectColumns = "_" . $tableAlias . ".*";
         
         if(isset($queryClauses["distinct"]) && $queryClauses["distinct"] === true)
-        {
             $selectColumns = " DISTINCT {$selectColumns} ";
-        }
         
         if(isset($queryClauses["count"]) && $queryClauses["count"] === true)
-        {
             $selectColumns = "COUNT(*) AS count";
-        }
-        
+       
+        if(!isset($queryClauses["params"]) || !is_array($queryClauses["params"]))
+            $queryClauses["params"] = array();
         
         // Concatenate all the pieces of the query together:
-        $sql = "SELECT
-            {$selectColumns}
-        FROM
-            {$tableIdentifier} AS _{$tableAlias}
-        {$joinClause}
-        {$whereClause}
-        {$orderClause}
-        {$limitClause}
-        {$offsetClause}"; // FIXME PostgreSQL Specific Syntax
+        $sql = "SELECT {$selectColumns} FROM {$tableIdentifier} AS _{$tableAlias} " . 
+            "{$joinClause} {$whereClause} {$orderClause} {$limitClause} " . 
+            "{$offsetClause}"; // FIXME PostgreSQL Specific Syntax
         
-        if(!($this->_dataSet = $this->_database->query($sql)))
-        {
+        if(!($this->_dataSet = $this->_database->query($sql, $queryClauses["params"])))
             throw new Exception("Failed on Query: " . $this->_database->getLastError());
-        }
 
         // Loop the data and create member variables
         if($this->_dataSet->count() != 0)
-        {
             $this->load($this->_dataSet->current());
-        }
 
         if(isset($queryClauses["count"]) && $queryClauses["count"] == true)
-        {
             return $this->_dataSet->current()->count;
-        }
         
         return $this;
 
@@ -459,22 +443,16 @@ class CRUD implements \Iterator, \Countable
         }
         
         if(is_null($column))
-        {
             throw new Exception("Database column " . 
                 "{$this->_tableIdentifier}.{$columnName} does not exist.");
-        }
-        
-        $dataType = $column["type"];
         
         $selectClauses = array(
-            "where" => $column["field"] . " = " . 
-                $this->_database->formatData($dataType, $columnValue)
-        ); // FIXME (possible) PostgreSQL Specific Syntax
+            "where" => $column["field"] . " = ?", 
+            "params" => array($columnValue)
+        );
         
         if(!empty($orderBy))
-        {
             $selectClauses["order"] = $orderBy;
-        }
         
         $this->find($selectClauses);
         
@@ -523,13 +501,9 @@ class CRUD implements \Iterator, \Countable
         
         $tableIdentifier = $this->_database->getIdentifier($this->_tableIdentifier);
         
-        $sql = "DELETE FROM 
-            {$tableIdentifier}
-        WHERE
-            " . $column["field"] . " = " . $this->_database->FormatData($dataType, $columnValue);
-        // FIXME PostgreSQL Specific Syntax
+        $sql = "DELETE FROM {$tableIdentifier} WHERE " . $column["field"] . " = ?";
         
-        if(!$this->_database->Query($sql))
+        if(!$this->_database->Query($sql, array($columnValue)))
         {
             throw new QueryFailedException("Failed to delete data");
         }
@@ -1063,7 +1037,8 @@ class CRUD implements \Iterator, \Countable
         {
             $columnsList = "";
             $valuesList = "";
-            
+            $params = array();
+
             $primaryKeys = $this->_database->getTablePrimaryKey($this->_tableIdentifier);          
             $columns = $this->_database->getTableColumns($this->_tableIdentifier);
             
@@ -1096,12 +1071,13 @@ class CRUD implements \Iterator, \Countable
                     $column[ "name" ];
                 
                 // Get the value for the column (if present):
-                $sValue = isset($this->_data[$column["name"]]) ? 
+                $value = isset($this->_data[$column["name"]]) ? 
                     $this->_data[$column["name"]] : "";
                 
                 // Create a list of values to insert into the above columns:
-                $valuesList .= (!empty($valuesList) ? ", " : "") . 
-                    $this->_database->formatData($column[ "type" ], $sValue);
+                $params[] = $value;
+
+                $valuesList .= (!empty($valuesList) ? ", " : "") . "?";
             }
             
             if(empty($columnsList) || empty($valuesList))
@@ -1111,15 +1087,11 @@ class CRUD implements \Iterator, \Countable
             
             $tableIdentifier = $this->_database->getIdentifier($this->_tableIdentifier);
             
-            $sql = "INSERT INTO {$tableIdentifier} (
-                {$columnsList}
-            ) VALUES (
-                {$valuesList}
-            )";
+            $sql = "INSERT INTO {$tableIdentifier} ({$columnsList}) VALUES ({$valuesList})";
             
             $result = null;
             
-            if(($result = $this->_database->query($sql)) === false)
+            if(($result = $this->_database->query($sql, $params)) === false)
             {
                 throw new Exception($this->_database->getLastError());
             }
@@ -1149,12 +1121,8 @@ class CRUD implements \Iterator, \Countable
             // update the primary record:
             $sql = $this->updateQuery();
             
-            $resultData = null;
-            
-            if(($resultData = $this->_database->query($sql)) === false)
-            {
+            if(!$this->_database->query($sql['sql'], $sql['params']))
                 throw new Exception($this->_database->getLastError());
-            }
             
             return true;
             
@@ -1173,6 +1141,8 @@ class CRUD implements \Iterator, \Countable
             $primaryKeys = $definition["primary_key"];
                     
             $setClause = "";
+
+            $params = array();
 
             // loop each field in the table and specify it's data:
             foreach($definition["columns"] as $field)
@@ -1196,10 +1166,10 @@ class CRUD implements \Iterator, \Countable
                     continue;
                 }
                 
+                $params[] = $this->_data[$field["name"]];
+
                 // complete the query for this field:
-                $setClause .= (!empty($setClause) ? ", " : "") . 
-                    $field["name"] . " = " . 
-                        $this->_database->formatData($field["type"], $this->_data[$field["name"]]) . " ";
+                $setClause .= (!empty($setClause) ? ", " : "") . $field["name"] . " = ?"; 
             }
             
             // if we found no fields to update, return:
@@ -1209,25 +1179,19 @@ class CRUD implements \Iterator, \Countable
             }
             
             $whereClause = "";
-            
+
             foreach($primaryKeys as $key)
             {
+                $params[] = $this->_data[$key];
                 $whereClause .= !empty($whereClause) ? " AND " : "";
-                $whereClause .= "{$key} = " . intval($this->_data[$key]);
+                $whereClause .= "{$key} = ?";
             }
 
             $tableIdentifier = $this->_database->getIdentifier($this->_tableIdentifier);
 
-            $sql = "UPDATE 
-                {$tableIdentifier}
-            SET
-                {$setClause}
-            WHERE
-                {$whereClause}";
-                
-            //RETURNING *";    // FIXME PostgreSQL Specific Syntax
+            $sql = "UPDATE {$tableIdentifier} SET {$setClause} WHERE {$whereClause}";
 
-            return $sql;
+            return array('sql' => $sql, 'params' => $params);
             
         } // updateQuery()
         
@@ -1242,28 +1206,21 @@ class CRUD implements \Iterator, \Countable
             $primaryKeys = $this->_database->getTablePrimaryKey($this->_tableIdentifier);
             $tableIdentifier = $this->_database->getIdentifier($this->_tableIdentifier);
             
-            $sql = "SELECT
-                1
-            FROM
-                {$tableIdentifier} ";
+            $sql = "SELECT 1 FROM {$tableIdentifier} ";
             
             $whereClause = "";
-            
+            $queryParams = array();
+
             foreach($primaryKeys as $primaryKey)
             {
-                $columnType = $this->_database->getColumnType($this->_tableIdentifier, $primaryKey);
-                
-                $whereClause .= empty($whereClause) ? " WHERE " : " AND ";
-                $whereClause .= $primaryKey . " = " . 
-                    $this->_database->formatData($columnType, $this->_data[$primaryKey]) . " ";
+                $queryParams[] = $this->_data[$primaryKey];
+                $whereClause .= (empty($whereClause) ? " WHERE " : " AND ") . $primaryKey . " = ?"; 
             }
             
-            $sql .= $whereClause; // FIXME PostgreSQL Specific Syntax
+            $sql .= $whereClause;
             
-            if(!($resultSet = $this->_database->query($sql)))
-            {
+            if(!($resultSet = $this->_database->query($sql, $queryParams)))
                 throw new QueryFailedException($this->_database->getLastError());
-            }
             
             return $resultSet->count() != 0;
         
@@ -1282,26 +1239,21 @@ class CRUD implements \Iterator, \Countable
             
             $tableIdentifier = $this->_database->getIdentifier($this->_tableIdentifier);
             
-            $sql = "DELETE FROM
-                {$tableIdentifier}
-            WHERE ";
+            $sql = "DELETE FROM {$tableIdentifier} WHERE ";
             
             $whereClause = "";
-            
+            $queryParams = array();
+
             foreach($primaryKeys as $key)
             {
-                $columnType = $this->_database->getColumnType($this->_tableIdentifier, $key);
-                
-                $whereClause .= empty($whereClause) ? "" : " AND ";
-                $whereClause .= "{$key} = " . $this->_database->formatData($columnType, $this->_data[$key]);
+                $queryParams[] = $this->_data[$key];
+                $whereClause .= (empty($whereClause) ? "" : " AND ") . "{$key} = ?";
             }
             
-            $sql .= $whereClause; // FIXME PostgreSQL Specific Syntax
+            $sql .= $whereClause;
             
-            if(!$this->_database->query($sql))
-            {
+            if(!$this->_database->query($sql, $queryParams))
                 throw new QueryFailedException($this->_database->getLastError() );
-            }
         
         } // destroy()
         

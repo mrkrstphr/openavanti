@@ -93,14 +93,16 @@ abstract class Driver
      * @return string|false A ResultSet object containing the results of the database query or
      *      false on failure
      */
-    public function &query($sql)
+    public function &query($sql, Array $params = array(), $selMode = \PDO::FETCH_OBJ)
     {
-        $statement = $this->_databaseResource->query($sql);
+        $statement = $this->_databaseResource->prepare($sql);
         
         if(!$statement)
             return $statement;
         
-        $statement->setFetchMode(\PDO::FETCH_OBJ);
+        $statement->execute($params);
+
+        $statement->setFetchMode($selMode);
         
         $results = $statement->fetchAll();
         
@@ -231,17 +233,6 @@ abstract class Driver
     } // getResource()
     
 
-    /**
-     * Returns a database-safe formatted representation of the supplied data, based on the 
-     * supplied data type.
-     * 
-     * @param string $dataType The data type of the supplied value.
-     * @param string $value The value to be formatted into a database-safe representation.
-     * @return string A string of the formatted value supplied.
-     */
-    abstract public function formatData($dataType, $value);
-    
-    
     /**
      * This method returns all tables for the database the class is currently connected to.
      * 
