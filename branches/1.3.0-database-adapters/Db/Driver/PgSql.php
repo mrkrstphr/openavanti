@@ -417,24 +417,12 @@ class PgSql extends Driver
         
         self::$_schemas[$tableIdentifier]["primary_key"] = array();
          
-        $sql = "SELECT 
-            pi.indkey
-        FROM 
-            pg_index AS pi 
-        INNER JOIN
-            pg_type AS pt
-        INNER JOIN
-            pg_namespace AS pn
-        ON
-            pn.oid = pt.typnamespace
-        ON 
-            pt.typrelid = pi.indrelid 
-        WHERE 
-            pt.typname = '{$tableName}'
-        AND
-            pn.nspname = '{$schemaName}'
-        AND 
-            pi.indisprimary = true";
+        $sql = "SELECT pi.indkey " . 
+            "FROM pg_index AS pi " . 
+            "INNER JOIN pg_type AS pt ON pt.typrelid = pi.indrelid " . 
+            "INNER JOIN pg_namespace AS pn ON pn.oid = pt.typnamespace " . 
+            "WHERE pt.typname = '{$tableName}' AND pn.nspname = '{$schemaName}' " . 
+            "AND pi.indisprimary = true";
             
         if(!($primaryKeys = $this->query($sql)))
             throw new QueryFailedException($this->getLastError());
@@ -483,38 +471,14 @@ class PgSql extends Driver
         
         self::$_schemas[$tableIdentifier]["foreign_key"] = array();
     
-        $sql = "SELECT
-            rpn.nspname,
-            rpt.typname,
-            pc.confrelid,
-            pc.conkey,
-            pc.confkey
-        FROM 
-            pg_constraint AS pc 
-        INNER JOIN 
-            pg_type AS pt 
-        ON 
-            pt.typrelid = pc.conrelid
-        INNER JOIN
-            pg_namespace AS pn
-        ON
-            pn.oid = pt.typnamespace
-        INNER JOIN
-            pg_type AS rpt
-        ON
-            rpt.typrelid = confrelid
-        INNER JOIN
-            pg_namespace AS rpn
-        ON
-            rpn.oid = rpt.typnamespace 
-        WHERE
-            pt.typname = '{$tableName}'
-        AND
-            pn.nspname = '{$schemaName}'
-        AND
-            contype = 'f'
-        AND
-            confrelid IS NOT NULL";
+        $sql = "SELECT rpn.nspname, rpt.typname, pc.confrelid, pc.conkey, pc.confkey " . 
+            "FROM pg_constraint AS pc " . 
+            "INNER JOIN pg_type AS pt ON pt.typrelid = pc.conrelid " . 
+            "INNER JOIN pg_namespace AS pn ON pn.oid = pt.typnamespace " . 
+            "INNER JOIN pg_type AS rpt ON rpt.typrelid = confrelid " . 
+            "INNER JOIN pg_namespace AS rpn ON rpn.oid = rpt.typnamespace " .  
+            "WHERE pt.typname = '{$tableName}' AND pn.nspname = '{$schemaName}' " . 
+            "AND contype = 'f' AND confrelid IS NOT NULL";
         
         if(!($foreignKeys = $this->query($sql)))
         {
@@ -571,38 +535,14 @@ class PgSql extends Driver
         
         // find tables that reference us:
         
-        $sql = "SELECT
-            pnr.nspname,
-            ptr.typname,
-            pc.conrelid,
-            pc.conkey,
-            pc.confkey
-        FROM 
-            pg_constraint AS pc 
-        INNER JOIN 
-            pg_type AS pt 
-        ON 
-            pt.typrelid = pc.confrelid
-        INNER JOIN
-            pg_namespace AS pn
-        ON
-            pn.oid = pt.typnamespace
-        INNER JOIN
-            pg_type AS ptr
-        ON
-            ptr.typrelid = pc.conrelid
-        INNER JOIN
-            pg_namespace AS pnr
-        ON
-            pnr.oid = ptr.typnamespace
-        WHERE
-            pt.typname = '{$tableName}'
-        AND
-            pn.nspname = '{$schemaName}'
-        AND
-            contype = 'f'
-        AND
-            confrelid IS NOT NULL";
+        $sql = "SELECT pnr.nspname, ptr.typname, pc.conrelid, pc.conkey, pc.confkey " . 
+            "FROM pg_constraint AS pc " . 
+            "INNER JOIN pg_type AS pt ON pt.typrelid = pc.confrelid " . 
+            "INNER JOIN pg_namespace AS pn ON pn.oid = pt.typnamespace " . 
+            "INNER JOIN pg_type AS ptr ON ptr.typrelid = pc.conrelid " . 
+            "INNER JOIN pg_namespace AS pnr ON pnr.oid = ptr.typnamespace " . 
+            "WHERE pt.typname = '{$tableName}' AND pn.nspname = '{$schemaName}' " . 
+            "AND contype = 'f' AND confrelid IS NOT NULL";
         
         if(!($foreignKeys = $this->query($sql)))
         {
@@ -611,6 +551,9 @@ class PgSql extends Driver
         
         foreach($foreignKeys as $foreignKey)
         {
+            if($foreignKey->typname == $tableName && $foreignKey->nspname == $schemaName)
+                continue;
+
             $foreignSchema = $foreignKey->nspname;
             
             $localFields = explode(",", 
@@ -701,16 +644,9 @@ class PgSql extends Driver
             return true;
         }
         
-        $sql = "SELECT 
-            1 
-        FROM 
-            pg_tables AS pt 
-        INNER JOIN 
-            pg_type AS pp
-        ON
-            pp.typname = pt.tablename 
-        WHERE
-            LOWER(tablename) = '" . strtolower(addslashes($tableName)) . "'";
+        $sql = "SELECT 1 FROM pg_tables AS pt " . 
+            "INNER JOIN pg_type AS pp ON pp.typname = pt.tablename " . 
+            "WHERE LOWER(tablename) = '" . strtolower(addslashes($tableName)) . "'";
             
         if(!empty($schemaName))
         {

@@ -274,16 +274,9 @@ class MySql extends Driver
         
         // find tables that reference us:
         
-        $sql = "SELECT 
-            *
-        FROM 
-            INFORMATION_SCHEMA.KEY_COLUMN_USAGE 
-        WHERE 
-            CONSTRAINT_SCHEMA = '" . $this->_databaseName . "' 
-        AND 
-            CONSTRAINT_NAME != 'PRIMARY'
-        AND
-            REFERENCED_TABLE_NAME = '{$identifier}'";
+        $sql = "SELECT * FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE " . 
+            "WHERE CONSTRAINT_SCHEMA = '{$this->_databaseName}' " . 
+            "AND CONSTRAINT_NAME != 'PRIMARY' AND REFERENCED_TABLE_NAME = '{$identifier}'";
         
         if(!( $foreignKeys = $this->query($sql)))
             throw new QueryFailedException($this->getLastError());
