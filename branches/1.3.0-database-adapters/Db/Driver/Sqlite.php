@@ -246,15 +246,34 @@ class Sqlite extends Driver
                 "type" => "m-1",
                 "dependency" => true
             );
+        }
+
+        // get tables that reference us -- this is painful. Is there a better way?
+        
+        foreach($this->getTables() as $table)
+        {
+            if($table == $identifier)
+                continue;
             
-            self::$_schemas[$key->table]["foreign_key"][$name] = array(
-                "table" => $identifier,
-                "name" => $identifier,
-                "local" => array($key->to),
-                "foreign" => array($key->from),
-                "type" => "1-m",
-                "dependency" => false
-            );
+            $sql = "PRAGMA foreign_key_list(" . $this->quoteIdentifier($table) . ")";
+            
+            if(($keys = $this->query($sql)) === false)
+                throw new \OpenAvanti\Db\QueryFailedException($this->getLastError());
+            
+            foreach($keys as $key)
+            {
+                if($key->table == $identifier)
+                {
+                    self::$_schemas[$identifier]["foreign_key"][$table] = array(
+                        "table" => $table,
+                        "name" => $table,
+                        "local" => array($key->to),
+                        "foreign" => array($key->from),
+                        "type" => "1-m",
+                        "dependency" => false
+                    );
+                }
+            }
         }
         
         self::$_schemas[$identifier]["fks_loaded"] = true;
