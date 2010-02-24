@@ -130,6 +130,22 @@ class Dispatcher
         
     } // getRequest()
     
+    
+    /**
+     *
+     *
+     * @param string $controllerName
+     * @return string
+     */
+    protected function normalizeControllerName($controllerName)
+    {
+        $controllerName = ucwords(str_replace(array("-", "_"), " ", $controllerName));
+        $controllerName = str_replace(" ", "", $controllerName);
+        
+        return $controllerName;
+        
+    } // normalizeControllerName()
+    
 
     /**
      * Routes the specified request to an associated controller and action (class and method). 
@@ -180,11 +196,37 @@ class Dispatcher
         
         // Explode the request on /
         $request = explode("/", $requestUri);
+       
+        $moduleName = "default";
+        
+        if($this->getApplication()->getUseModules())
+        {
+            $moduleName = count($request) > 0 ? array_shift($request) : "default";
+        }
         
         // normalize the controller -
         // example action_items should become ActionItemsController
         
-        $controllerName = count($request) > 0 ? array_shift($request) : "";
+        $controllerName = count($request) > 1 ? array_shift($request) : "index";
+        
+        $controllerName = $this->normalizeControllerName($controllerName);
+        
+        if(!$this->getApplication()->controllerExists($moduleName, $controllerName) && 
+            $this->getApplication()->getuseModules())
+        {
+            // start over:
+            
+            $request = explode("/", $requestUri);
+            
+            $moduleName = "default";
+            
+            $controllerName = count($request) > 0 ? array_shift($request) : "index";
+            
+            $controllerName = $this->normalizeControllerName($controllerName);
+        }
+        
+        $this->getApplication()->moduleInitialization($moduleName);
+
         
         $controllerName = ucwords(str_replace(array("-", "_"), " ", $controllerName));
         $controllerName = str_replace(" ", "", $controllerName);
@@ -230,15 +272,8 @@ class Dispatcher
         // Continue on with the view loader method which will put the appropriate presentation
         // on the screen:
         
-        try
-        {
-            $this->_response->sendHeaders();
-            $this->_view->renderPage();
-        }
-        catch(Exception $e)
-        {
-            $this->handleError($e->getMessage());
-        }
+        $this->_response->sendHeaders();
+        $this->_view->renderPage();
         
         return $this->_request;
     
@@ -347,28 +382,6 @@ class Dispatcher
         }
     
     } // invokeAction()
-    
-    
-    /**
-     * Handles errors occurring during the Dispatch process and passes them off to the 
-     * defined ErrorController, or throws an exception if the controller does not exist.
-     * 
-     * @returns void
-     */
-    public function handleError($errorCode)
-    {
-        if(!empty($this->_errorController) && 
-            class_exists($this->_errorController, true))
-        {
-            $oController = new $this->_errorController($this);
-            $oController->error($errorCode);
-        }
-        else
-        {
-            throw new Exception("No ErrorController configured; cannot handle error");
-        }
-        
-    } // handleError()
     
 } // Dispatcher()
 
