@@ -37,6 +37,16 @@ class Application
     /**
      *
      */
+    protected $_modulePath = "";
+   
+    /**
+     *
+     */
+    protected $_currentModule = "";
+
+    /**
+     *
+     */
     protected $_formPath = "";
     
     /**
@@ -69,6 +79,11 @@ class Application
      */
     protected $_environment = null;
 
+    /**
+     *
+     */
+    protected $_useModules = false;
+
     
     /**
      * Constructor; sets up default paths, adds layout and view paths to
@@ -82,18 +97,15 @@ class Application
         
         $documentRoot = $_SERVER["DOCUMENT_ROOT"];
         
+        $this->_modulePath = realpath("{$documentRoot}/../application/modules");
+        
         $this->_controllerPath = realpath("{$documentRoot}/../application/controllers");
         $this->_modelPath = realpath("{$documentRoot}/../application/models");
+        $this->_modulePath = realpath("{$documentRoot}/../application/modules");
         $this->_formPath = realpath("{$documentRoot}/../application/forms");
         $this->_libraryPath = realpath("{$documentRoot}/../library/openavanti");
         $this->_layoutPath = realpath("{$documentRoot}/../application/layouts");
         $this->_viewPath = realpath("{$documentRoot}/../application/views");
-        
-        $includePath = get_include_path() . PATH_SEPARATOR .
-            $this->_layoutPath . PATH_SEPARATOR .
-            $this->_viewPath;
-        
-        set_include_Path($includePath);
         
         // set our default autoloader
         
@@ -105,8 +117,9 @@ class Application
    
     
     /**
+     * Sets the current working environment of the application.
      *
-     *
+     * @param string $environment The name of the environment
      */
     public function setEnvironment($environment)
     {
@@ -116,14 +129,102 @@ class Application
 
     
     /**
-     *
-     *
+     * Wraps the user init() method and sets the view include path after calling the init()
+     * method in case the user deviates from the default directory structure.
+     */
+    protected function _init()
+    {
+        $this->init();
+        
+        // We don't want to set our include path until after user initialization has occurred:
+        
+        $includePath = explode(PATH_SEPARATOR, get_include_path());
+        
+        $includePath[] = $this->_layoutPath;
+        $includePath[] = $this->_viewPath;
+        
+        set_include_path(implode(PATH_SEPARATOR, $includePath));
+        
+    } // _init()
+    
+    
+    /**
+     * Provides a mechanism for user initialization of the Application class. This method is useful
+     * for overriding the default locations of several resource paths.
      */
     public function init()
     {
         
-        
     } // init()
+   
+   
+    /**
+     * Determines whether or not a specified controller exists in the specified module, or in the
+     * default controller space (not to be confused with the default module controller space!) 
+     *
+     * @param string $module The module we expect the controller to be in
+     * @param string $controller The controller we're looking for
+     * @return bool True if the specified controller exists, false if not
+     */
+    public function controllerExists($module, $controller)
+    {
+        $controller = "{$this->_modulePath}/{$module}/controllers/{$controller}Controller.php";
+        $controllerDefault = "{$this->_controllerPath}/{$controller}Controller.php";
+        
+        if(file_exists($controller) || file_exists($controllerDefault))
+            return true;
+        
+        return false;
+        
+    } // controllerExists()
+   
+  
+    /**
+     * Initialize a specified module. If a method is defined on the application in the format
+     * of init[ModuleName]Module(), this method will be executed. The module will be stored as 
+     * the currentModule, and it's layouts and views directories will be added to the include 
+     * path.
+     *
+     * @param string $moduleName The name of the module
+     */
+    public function moduleInitialization($moduleName)
+    {
+        $this->_currentModule = $moduleName;
+
+        if(is_callable(array($this, "init{$moduleName}Module")))
+        {
+            call_user_func(array($this, "init{$moduleName}Module"));
+        }
+        
+        set_include_path(get_include_path() .
+            PATH_SEPARATOR . "{$this->_modulePath}/{$moduleName}/layouts" .
+            PATH_SEPARATOR . "{$this->_modulePath}/{$moduleName}/views");
+
+    } // moduleInitialization()
+
+
+    /**
+     * Enables or disables the use of modules, which is disabled by default
+     *
+     * @param bool $enable True of modules should be enabled, false to disable
+     */
+    public function setUseModules($use = true)
+    {
+        $this->_useModules = $use;
+        
+    } // setUseModules()
+    
+    
+    /**
+     * Returns whether modules are being used
+     *
+     * @return bool True if modules are enabled, false if disabled
+     */
+    public function getUseModules()
+    {
+        return $this->_useModules;
+    
+    } // getUseModules()
    
     
     /**
@@ -131,8 +232,6 @@ class Application
      * default autoloader to load requested classes.
      *
      * @param string $path The path to the controllers directory
-     * 
-     * @return void
      */
     public function setControllerPath($path)
     {
@@ -158,8 +257,6 @@ class Application
      * default autoloader to load requested classes.
      *
      * @param string $path The path to the models directory
-     * 
-     * @return void
      */
     public function setModelPath($path)
     {
@@ -185,8 +282,6 @@ class Application
      * the default autoloader to load requested classes.
      *
      * @param string $path The path to the library directory
-     * 
-     * @return void
      */
     public function setLibraryPath($path)
     {
@@ -212,8 +307,6 @@ class Application
      * include path to aid in requiring these layout files.
      *
      * @param string $path The path of the layouts directory
-     * 
-     * @return void
      */
     public function setLayoutPath($path)
     {
@@ -241,8 +334,6 @@ class Application
      * include path to aid in requiring these view files.
      *
      * @param string $path The path of the views directory
-     * 
-     * @return void
      */
     public function setViewPath($path)
     {
@@ -270,8 +361,6 @@ class Application
      * automatic class definition loading.
      *
      * @param array $paths An array of paths to add to the autoloader
-     * 
-     * @return void
      */
     public function addAdditionalAutoloadPaths(array $paths)
     {
@@ -293,8 +382,6 @@ class Application
      * loading of files without the path name specified.
      *
      * @param string $path The path to add to the include path
-     * 
-     * @return void
      */
     public function appendIncludePath($path)
     {
@@ -317,8 +404,6 @@ class Application
      * Class file names are assumed to be in the format "ClassFile.php"
      *
      * @param string $className The name of the class to attempt to autoload
-     * 
-     * @return void
      */
     public function defaultAutoloader($className)
     {
@@ -342,6 +427,11 @@ class Application
             $this->_libraryPath . '/Form',
             $this->_libraryPath . '/Form/Element'
         );
+        
+        $paths[] = "{$this->_modulePath}/{$this->_currentModule}/controllers";
+        $paths[] = "{$this->_modulePath}/{$this->_currentModule}/controllers/helpers";
+        $paths[] = "{$this->_modulePath}/{$this->_currentModule}/forms";
+        $paths[] = "{$this->_modulePath}/{$this->_currentModule}/views/helpers";
         
         $paths = array_merge($paths, $this->_additionalAutoloadPaths);
         
@@ -422,12 +512,10 @@ class Application
     /**
      * Parses the Uri and passes it along to the dispatcher for processing.
      * The query string is stripped out of the request uri for processing.
-     *
-     * @return void
      */
     public function run()
     {
-        $this->init();
+        $this->_init();
         
         if(!empty($this->_environment) && method_exists($this, "init" . $this->_environment))
         {
@@ -438,7 +526,14 @@ class Application
         $uri = str_replace("?" . $_SERVER["QUERY_STRING"], "", $_SERVER["REQUEST_URI"]);
         $uri = $uri != "/" ? $uri : "index";
         
-        $this->_dispatcher->connect($uri);
+        try
+        {
+            $this->_dispatcher->connect($uri);
+        }
+        catch(Exception $e)
+        {
+            echo 'Exception<br/>';
+        }
         
     } // run()
     

@@ -25,29 +25,44 @@ use \Exception;
  */
 class View
 {
-    // Stores a reference to the controller that is preparing this view:
+    /**
+     * Stores a reference to the controller that is preparing this view:
+     */
     protected $_controller = null;
     
-    // Stores data used by the actual view file for redering:
+    /**
+     * Stores data used by the actual view file for redering:
+     */
     public $_data = array();
     
-    // Stores the default layout to use if no other is specified:
+    /**
+     * Stores the default layout to use if no other is specified:
+     */
     public static $_defaultLayout = "";
     
-    // Stores the layout to render, overriding any default specified:
+    /**
+     * Stores the layout to render, overriding any default specified:
+     */
     public $_layout = "";
     
-    // Stores the view file to render inside the layout through 
-    // GetContent():
+    /**
+     * Stores the view file to render inside the layout through GetContent():
+     */
     protected $_viewScript = "";
     
-    //
+    /**
+     *
+     */
     public static $_viewFileExtension = ".php";
     
-    // Toggles whether to render the layout:
+    /**
+     * Toggles whether to render the layout:
+     */
     public $_renderLayout = true;
     
-    // Toggles whether to render the view:
+    /**
+     * Toggles whether to render the view:
+     */
     public $_renderView = true;
     
     
@@ -56,9 +71,8 @@ class View
      * init()
      * 
      * @final
-     * @argument Dispatcher The dispatcher class that loaded this controller
-     * @argument string Optional; the name of the view file to render
-     * @returns void
+     * @param Controller $controller The controller class that is prepairing this view
+     * @param string $viewFileName Optional; the name of the view file to render
      */
     public final function __construct(&$controller, $viewFileName = "")
     {
@@ -75,8 +89,6 @@ class View
      * Provides initialization mechanism for the View class and is called 
      * by the constructor. Subclasses cannot override the constructor due 
      * to the possibility of not passing the correct required parameters.
-     * 
-     * @returns void
      */
     public function init()
     {
@@ -88,7 +100,7 @@ class View
     /**
      * Returns a copy of the Controller class that invoked this view
      * 
-     * @returns Dispatcher The Controller class
+     * @return Dispatcher The Controller class
      */
     public function &getController()
     {
@@ -100,9 +112,8 @@ class View
     /**
      * Sets the layout file to use for this controller. 
      * 
-     * @argument string The file name of the layout file that should be 
+     * @param string $layoutFile The file name of the layout file that should be 
      *      rendered
-     * @returns void
      */
     public function setLayout($layoutFile)
     {
@@ -116,7 +127,6 @@ class View
      * @static 
      * @param string $layoutFile The file name of the layout that should be 
      *      rendered by default if no other layout file is specified
-     * @returns void
      */
     public static function setDefaultLayout($layoutFile)
     {
@@ -129,7 +139,6 @@ class View
      *
      * @static
      * @param
-     * @return
      */
     public static function setViewFileExtension($extension)
     {
@@ -154,11 +163,11 @@ class View
     
     } // setView()
     
-    // TODO document
     
     /**
+     * Retrieves the name of the view file that will be rendered for the request
      *
-     *
+     * @return string The name of the view file to be rendered
      */
     public function getViewScript()
     {
@@ -274,21 +283,6 @@ class View
         $this->disableView($disable);
         
     } // disableAllRendering()
-    
-    
-    /**
-     * Handles internal errors that occur in processing by passing the
-     * error off to the dispatcher, which handles all errors throughout
-     * the HTTP request process.
-     * 
-     * @argument string The error code to handle
-     * @returns void
-     */
-    protected function handleError($errorCode)
-    {
-        $this->oController->getDispatcher()->handleError($errorCode);
-        
-    } // handleError()
     
     
     /**
