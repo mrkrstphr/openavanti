@@ -6,6 +6,7 @@
  *
  * @author          Kristopher Wilson
  * @copyright       Copyright (c) 2007-2010, Kristopher Wilson
+ * @package         openavanti 
  * @license         http://www.openavanti.com/license
  * @link            http://www.openavanti.com
  * @version         SVN: $Id$
@@ -18,14 +19,19 @@ namespace OpenAvanti;
  *
  * @category    Controller
  * @author      Kristopher Wilson
+ * @package	openavanti
  * @link        http://www.openavanti.com/docs/controller
  */
 class Controller
 {
-    // Stores a reference to the dispatcher that spawned this controller:
+    /** 
+     * Stores a reference to the dispatcher that spawned this controller
+     */
     protected $_dispatcher = null;
     
-    // Stores a reference to the view file that will render the page:
+    /**
+     * Stores a reference to the view file that will render the page
+     */
     public $view = null;
     
     
@@ -33,8 +39,7 @@ class Controller
      * The final constructor; sets up data for the controller and calls 
      * init() to do user intialization.
      * 
-     * @final
-     * @arguments Dispatcher The dispatcher class that loaded this controller
+     * @param Dispatcher $dispatcher The dispatcher class that loaded this controller
      */
     public final function __construct(&$dispatcher)
     {
@@ -53,8 +58,6 @@ class Controller
      * Provides initialization mechanism for the Controller class and is called by the
      * constructor. Subclasses cannot override the constructor due to the possibility of not
      * passing the correct required parameters.
-     * 
-     * @returns void
      */
     public function init()
     {
@@ -73,9 +76,8 @@ class Controller
      * and action are pulled from the Request object to construct the 
      * view file name.
      * 
-     * @argument string Optional; The name of the controller
-     * @argument string Optional; The name of the action
-     * @returns void
+     * @param string $controller Optional; The name of the controller. Default: null
+     * @param string $action Optional; The name of the action. Default: null
      */
     protected function setDefaultView($controller = null, $action = null)
     {
@@ -98,9 +100,7 @@ class Controller
     /**
      * Every controller must have an index() method defined for default requests to the 
      * controller that do not define a method. Since it is a requirement for this method to 
-     * exist, it is defined in the parent controller class.                                                  
-     * 
-     * @returns void 
+     * exist, it is defined in the parent controller class.
      */
     public function index()
     {
@@ -113,7 +113,7 @@ class Controller
      * Returns a copy of the Dispatcher class that handled the current request and loaded
      * this controller. 
      * 
-     * @returns Dispatcher The Dispatcher class that handled this request and loaded the 
+     * @return Dispatcher The Dispatcher class that handled this request and loaded the 
      *      controller
      */
     public function &getDispatcher()
@@ -127,7 +127,7 @@ class Controller
      * Returns a reference to the Application class for this application instance (responsible for
      * creating the Dispatcher that handled the current request and loaded this controller)
      *
-     * @returns Application The Application class for this application instance
+     * @return Application The Application class for this application instance
      */
     public function &getApplication()
     {
@@ -140,7 +140,7 @@ class Controller
      * Returns a copy of the Dispatcher's Request object which contains information about
      * the current request.
      *
-     * @returns Request The Request object containing information about the current request
+     * @returs Request The Request object containing information about the current request
      */
     public function &getRequest()
     {
@@ -153,26 +153,13 @@ class Controller
      * Returns a copy of the Dispatcher's Response object which contains information about
      * the HTTP response.
      *
-     * @returns Request The Response object containing information about the HTTP response
+     * @return Request The Response object containing information about the HTTP response
      */
     public function &getResponse()
     {
         return $this->_dispatcher->getResponse();
         
     } // getResponse()
-    
-    
-    /**
-     * Determines whether or not the current HTTP request came via AJAX.                                             
-     * 
-     * @deprecated Use getRequest()->isAjaxRequest()
-     * @returns boolean True of the request is via AJAX, false otherwise 
-     */
-    public function isAjaxRequest()
-    {
-        return Dispatcher::isAjaxRequest();
-    
-    } // isAjaxRequest()
     
     
     /**
@@ -184,9 +171,10 @@ class Controller
      * If headers have already been sent to the browser, this method will return false and will
      * not call the redirect. Otherwise this method will always return true.                                                     
      *
-     * @argument string The URL to redirect to 
-     * @argument bool True to signal a permanent redirect, false to not set the HTTP response code       
-     * @returns bool True if the redirect was sucessfull, false otherwise        
+     * @param string $url The URL to redirect to 
+     * @param bool $permanentRedirect Optional; True to signal a permanent redirect, false to 
+     *      not set the HTTP response code. Default: true  
+     * @return bool True if the redirect was sucessfull, false otherwise        
      */ 
     public function redirectTo($url, $permanentRedirect = true)
     {
@@ -208,12 +196,11 @@ class Controller
      * to this action, and the view and data setup by the new action will be copied to this
      * controller.
      * 
-     * @argument string The action to which processing should be forwarded
-     * @argument string The controller to which processing should be forwarded to, used in
-     *      conjunction with the specified action.
-     * @argument mixed The data to be forwarded as arguments to the action. Can be a scalar 
-     *      value or an array of values. 
-     * @returns void
+     * @param string $action The action to which processing should be forwarded
+     * @param string $controllerName Optional; The controller to which processing should be 
+     *      forwarded to, used in conjunction with the specified action. Default: null
+     * @param mixed $arguments Optional; The data to be forwarded as arguments to the action. Can 
+     *      be a scalar value or an array of values. Default: null
      */
     public function forwardAction($action, $controllerName = null, $arguments = null)
     {
@@ -251,25 +238,9 @@ class Controller
     
     
     /**
-     * Sets the view file that should be loaded at the end of the request. This method does not
-     * check to ensure that the file specified actually exists. It is up to the code that loads
-     * the view file to do this (normally the Dispatcher class).                 
-     *       
-     * @deprecated Use $this->view->setViewScript()
-     * @argument string The file name of the view file that should be loaded.
-     * @returns void
-     */ 
-    public function setView($view)
-    {
-        $this->view->setViewScript($view);
-    
-    } // setView()
-    
-    
-    /**
      * Returns a reference to the View object that will render the page
      * 
-     * @returns View A refernece to the View that will render the page
+     * @return View A refernece to the View that will render the page
      */ 
     public function &getView()
     {
@@ -279,33 +250,14 @@ class Controller
     
     
     /**
-     * Sets a data variable that can be used by the view file. Supplying the name and value
-     * of the variable, before loading the view file, these variables will be extracted and
-     * available in the view file for processing and/or display.
-     * 
-     * If the supplied variable already exists, it will be overwritten.                                  
-     *
-     * @deprecated Use $this->view->[name] = [value]
-     * @argument string The name of the variable to set
-     * @argument mixed The value of the variable to set                  
-     * @returns void
-     */ 
-    public function setData($name, $value)
-    {
-        $this->view->$name = $value;
-        
-    } // setData()
-    
-    
-    /**
      * Sets a session variable called flash with the supplied message. This can be used on a
      * redirect to display a success message (in conjunction with the RedirectTo() method).      
      *
      * If a flash message is already set, it will be overwritten on subsequent calls.
      * 
-     * @argument string The scope or name of the flash message to set; default = flash
-     * @argument string The message to set in the flash session variable
-     * @returns void
+     * @param string $message The message to set in the flash session variable
+     * @param string $scope Optional; The scope or name of the flash message to set. 
+     *      Default: flash
      */ 
     public function setFlash($message, $scope = "flash")
     {
@@ -316,10 +268,11 @@ class Controller
     
     /**
      * Retrieves any flash message stored in the flash session variable, if any. See the
-     * SetFlash() method.        
+     * SetFlash() method.
      *
-     * @argument string The scope or name of the flash message to get; default = flash
-     * @returns string The flash message, if any, stored in the session
+     * @param string $scope Optional; The scope or name of the flash message to get. 
+     *      Default: flash
+     * @return string The flash message, if any, stored in the session
      */ 
     public function getFlash($scope = "flash")
     {
