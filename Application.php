@@ -156,29 +156,26 @@ class Application
     {
         
     } // init()
-   
-   
-    /**
-     * Determines whether or not a specified controller exists in the specified module, or in the
-     * default controller space (not to be confused with the default module controller space!) 
-     *
-     * @param string $module The module we expect the controller to be in
-     * @param string $controller The controller we're looking for
-     * @return bool True if the specified controller exists, false if not
-     */
-    public function controllerExists($module, $controller)
-    {
-        $controller = "{$this->_modulePath}/{$module}/controllers/{$controller}Controller.php";
-        $controllerDefault = "{$this->_controllerPath}/{$controller}Controller.php";
-        
-        if(file_exists($controller) || file_exists($controllerDefault))
-            return true;
-        
-        return false;
-        
-    } // controllerExists()
-   
   
+
+    /**
+     * Determines whether or not a specified module exists
+     *
+     * @param string $module The module we're looking for
+     * @return bool True if the specified module exists, false if not
+     */
+    public function moduleExists($module)
+    {
+        $module = "{$this->_modulePath}/{$module}";
+         
+        if(file_exists($module) && is_dir($module))
+            return true;
+         
+        return false;
+         
+    } // moduleExists()
+ 
+   
     /**
      * Initialize a specified module. If a method is defined on the application in the format
      * of init[ModuleName]Module(), this method will be executed. The module will be stored as 

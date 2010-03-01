@@ -169,75 +169,61 @@ class Dispatcher
     {
         $this->_request = new Request();
         $this->_request->_uri = $requestUri;
-        
+
         $this->_response = new Response();
-        
+
         $controller = "";
         $action = "";
         $arguments = array();
-        
-        // Loop each stored route and attempt to find a match to the URI:
-        
-        foreach($this->_routes as $route)
-        {               
-            if(preg_match($route["pattern"], $requestUri) != 0)
-            {
-                $requestUri = preg_replace($route["pattern"], $route["replace"], $requestUri);
-            }
-        }
-        
-        if(substr($requestUri, 0, 1) == "/")
-        {
-            $requestUri = substr($requestUri, 1);
-        }
-        
-        $this->_request->_rewrittenUri = $requestUri;
-        
-        
+
+        $requestUri = trim($requestUri, "/");
+
         // Explode the request on /
+
         $request = explode("/", $requestUri);
-       
+
         $moduleName = "default";
-        
+
         if($this->getApplication()->getUseModules())
         {
-            $moduleName = count($request) > 0 ? array_shift($request) : "default";
+            $moduleName = count($request) > 0 ? $request[0] : "default";
+
+            if($this->getApplication()->moduleExists($moduleName))
+                array_shift($request);
+            else
+                $moduleName = "default";
         }
-        
-        // normalize the controller -
-        // example action_items should become ActionItemsController
-        
-        $controllerName = count($request) > 1 ? array_shift($request) : "index";
-        
-        $controllerName = $this->normalizeControllerName($controllerName);
-        
-        if(!$this->getApplication()->controllerExists($moduleName, $controllerName) && 
-            $this->getApplication()->getuseModules())
-        {
-            // start over:
-            
-            $request = explode("/", $requestUri);
-            
-            $moduleName = "default";
-            
-            $controllerName = count($request) > 0 ? array_shift($request) : "index";
-            
-            $controllerName = $this->normalizeControllerName($controllerName);
-        }
-        
+
+        // Tell the Application class to initalize our module:
+
         $this->getApplication()->moduleInitialization($moduleName);
 
-        
-        $controllerName = ucwords(str_replace(array("-", "_"), " ", $controllerName));
-        $controllerName = str_replace(" ", "", $controllerName);
-        
+        // Apply any URI rewritting rules now that we've removed the module:
+
+        $requestUri = implode("/", $request);
+
+        foreach($this->_routes as $route)
+            if(preg_match($route["pattern"], $requestUri) != 0)
+                $requestUri = preg_replace($route["pattern"], $route["replace"], $requestUri);
+
+        $this->_request->_rewrittenUri = $requestUri;
+
+        $request = explode("/", $requestUri);
+
+
+        // normalize the controller -
+        // example action_items should become ActionItemsController
+
+        $controllerName = count($request) > 0 ? array_shift($request) : "index";
+        $controllerName = $this->normalizeControllerName($controllerName);
+
         $this->_request->_controllerName = $controllerName . "Controller";
-        
-        $this->_request->_actionName = count($request) > 0 ? 
+
+        $this->_request->_actionName = count($request) > 0 ?
             str_replace("-", "_", array_shift($request)) : "index";
-            
+
         $this->_request->_arguments = !empty($request) ? $request : array();
-        
+
         $this->preDispatch();
         
         // If we've found a controller and the class exists:
