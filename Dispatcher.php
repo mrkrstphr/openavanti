@@ -201,7 +201,7 @@ class Dispatcher
         // Apply any URI rewritting rules now that we've removed the module:
 
         $requestUri = implode("/", $request);
-
+        
         foreach($this->_routes as $route)
             if(preg_match($route["pattern"], $requestUri) != 0)
                 $requestUri = preg_replace($route["pattern"], $route["replace"], $requestUri);
@@ -210,11 +210,11 @@ class Dispatcher
 
         $request = explode("/", $requestUri);
 
-
         // normalize the controller -
         // example action_items should become ActionItemsController
 
         $controllerName = count($request) > 0 ? array_shift($request) : "index";
+        $controllerName = !empty($controllerName) ? $controllerName : "index";
         $controllerName = $this->normalizeControllerName($controllerName);
 
         $this->_request->_controllerName = $controllerName . "Controller";
@@ -242,7 +242,7 @@ class Dispatcher
         {
             // If we can't find the controller, we must throw an exception:
             
-            throw new ControllerNotFoundException();
+            throw new ControllerNotFoundException("Controller \"{$controllerName}\" does not exist");
         }
         
         $this->postDispatch();
