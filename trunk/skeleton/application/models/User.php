@@ -2,7 +2,7 @@
 
 use OpenAvanti\Validation;
 
-class User extends OpenAvanti\Model
+class User extends OpenAvanti\Db\Model
 {
     const StatusActive = 'active';
     const StatusInactive = 'inactive';
