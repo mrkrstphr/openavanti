@@ -3,7 +3,7 @@
 			<?php
 				if( !empty( $this->search->aPagination ) )
 				{
-					$sQueryString = Search::BuildQueryString();
+					$sQueryString = StandardSearch::BuildQueryString();
 				?>
 				
 				<table>
