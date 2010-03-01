@@ -301,7 +301,9 @@ class Controller
         {
             return call_user_func_array(array($method, 'process'), $arguments);
         }
-        
+       
+        throw new ControllerActionNotFoundException();
+
     } // __call()
 
 } // Controller()
