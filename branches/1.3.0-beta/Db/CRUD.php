@@ -706,9 +706,7 @@ class CRUD implements \Iterator, \Countable
     public function count() 
     {
         if(!is_null($this->_dataSet))
-        {
-            return $this->_dataSet->count();
-        }
+            return count($this->_dataSet);
         
         return 0;
     
@@ -992,7 +990,7 @@ class CRUD implements \Iterator, \Countable
             }
             
             // Save all related data last
-
+                
             foreach($foreignKeys as $relationship)
             {
                 $relationshipName = $relationship["name"];
@@ -1091,17 +1089,15 @@ class CRUD implements \Iterator, \Countable
             
             $result = null;
             
-            if(($result = $this->_database->query($sql, $params)) === false)
-            {
+            if($this->_database->query($sql, $params) === false)
                 throw new Exception($this->_database->getLastError());
-            }
             
             // For singular primary keys, let's grab the autoincrement or serial value
             
             if(count($primaryKeys) == 1)
             {
                 $pk = current($primaryKeys);
-            
+                
                 $this->_data[$pk] = $this->_database->lastInsertId($this->_tableIdentifier, $pk);
             }
             
@@ -1679,28 +1675,22 @@ class CRUD implements \Iterator, \Countable
             // don't exist until PHP 5.3, which is not available on all systems yet (Gentoo).
             // For now this code will persist, but users that fall under this scenario will
             // find the automatic instantiation of Model classes unpredictable and unusable.
-
+            
             $modelName = \OpenAvanti\StringFunctions::toSingular($tableName);
-           
+            
             $pieces = explode("_", $modelName);
            
             foreach($pieces as &$piece)
-            {
                 $piece = ucwords($piece);
-            }
             
             $modelName = implode("", $pieces);
 
             $object = null;
             
-            if(class_exists($modelName, true) && is_subclass_of($modelName, "Model"))
-            {
+            if(class_exists($modelName, true) && is_subclass_of($modelName, "OpenAvanti\\Db\\Model"))
                 $object = new $modelName($data);
-            }
             else
-            {
                 $object = new CRUD($tableName, $data);
-            }            
             
             return $object;
             

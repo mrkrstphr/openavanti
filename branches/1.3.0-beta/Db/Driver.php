@@ -100,8 +100,9 @@ abstract class Driver
         if(!$statement)
             return $statement;
         
-        $statement->execute($params);
-
+        if(($result = $statement->execute($params)) === false)
+            return $result;
+        
         $statement->setFetchMode($selMode);
         
         $results = $statement->fetchAll();
