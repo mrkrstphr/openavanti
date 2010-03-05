@@ -6,6 +6,7 @@
  *
  * @author          Kristopher Wilson <kwilson@shuttlebox.net>
  * @copyright       Copyright (c) 2007-2010, Kristopher Wilson
+ * @package         openavanti 
  * @license         http://www.openavanti.com/license
  * @link            http://www.openavanti.com
  * @version         SVN: $Id$
@@ -14,73 +15,73 @@
 namespace OpenAvanti;
  
 /**
- * Handles application execution, sets up an autoloader, provides a
- * mechanism for storing application configuration and provides for
- * standard request dispatching.
+ * Handles application execution, sets up an autoloader, provides a mechanism for storing
+ * application configuration and provides for standard request dispatching.
  * 
  * @category    Controller
  * @author      Kristopher Wilson <kwilson@shuttlebox.net>
- * @link        http://www.openavanti.com/docs/application
+ * @package     openavanti
+ * @link        http://www.openavanti.com/documentation/1.4.0/Application
  */
 class Application
 {
     /**
-     *
+     * Stores the path to the non modular application controllers
      */
     protected $_controllerPath = "";
     
     /**
-     *
+     * Stores the path to the application models
      */
     protected $_modelPath = "";
     
     /**
-     *
+     * Stores the path to the application modules
      */
     protected $_modulePath = "";
    
     /**
-     *
+     * Stores the currently loaded module
      */
     protected $_currentModule = "";
 
     /**
-     *
+     * Stores the path to the non modular application forms
      */
     protected $_formPath = "";
     
     /**
-     *
+     * Stores the path to the non modular application layouts
      */
     protected $_layoutPath = "";
     
     /**
-     *
+     * Stores the path tot he non modular application views
      */
     protected $_viewPath = "";
     
     /**
-     *
+     * Stores the path to the application libraries
      */
     protected $_libraryPath = "";
     
     /**
-     *
+     * Stores a list of additional paths to autoload classes from
      */
     protected $_additionalAutoloadPaths = array();
     
     /**
-     *
+     * Stores a reference to the dispatcher handling the HTTP request
      */
     protected $_dispatcher = null;
 
     /**
-     *
+     * Stores the current working environment for the application
      */
     protected $_environment = null;
 
     /**
-     *
+     * If true, the Dispatcher class will assume the first part of the URI is a module
      */
     protected $_useModules = false;
 
@@ -203,7 +204,8 @@ class Application
     /**
      * Enables or disables the use of modules, which is disabled by default
      *
-     * @param bool $enable True of modules should be enabled, false to disable
+     * @param bool $enable Optional; True of modules should be enabled, false to disable.
+     *      Default: true
      */
     public function setUseModules($use = true)
     {

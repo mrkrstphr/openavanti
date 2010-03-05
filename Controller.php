@@ -1,10 +1,10 @@
 <?php
-/***************************************************************************************************
+/**
  * OpenAvanti
  *
  * OpenAvanti is an open source, object oriented framework for PHP 5+
  *
- * @author          Kristopher Wilson
+ * @author          Kristopher Wilson <kwilson@shuttlebox.net>
  * @copyright       Copyright (c) 2007-2010, Kristopher Wilson
  * @package         openavanti 
  * @license         http://www.openavanti.com/license
@@ -19,8 +19,8 @@ namespace OpenAvanti;
  *
  * @category    Controller
  * @author      Kristopher Wilson
- * @package	openavanti
- * @link        http://www.openavanti.com/docs/controller
+ * @package     openavanti
+ * @link        http://www.openavanti.com/documentation/1.4.0/Controller
  */
 class Controller
 {
@@ -28,6 +28,7 @@ class Controller
      * Stores a reference to the dispatcher that spawned this controller
      */
     protected $_dispatcher = null;
+    
     
     /**
      * Stores a reference to the view file that will render the page
@@ -140,7 +141,7 @@ class Controller
      * Returns a copy of the Dispatcher's Request object which contains information about
      * the current request.
      *
-     * @returs Request The Request object containing information about the current request
+     * @returns Request The Request object containing information about the current request
      */
     public function &getRequest()
     {
