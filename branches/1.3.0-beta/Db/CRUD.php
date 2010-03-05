@@ -5,7 +5,8 @@
  * OpenAvanti is an open source, object oriented framework for PHP 5+
  *
  * @author          Kristopher Wilson <kwilson@shuttlebox.net>
- * @copyright       Copyright (c) 2007-2009, Kristopher Wilson
+ * @copyright       Copyright (c) 2007-2010, Kristopher Wilson
+ * @package         openavanti 
  * @license         http://www.openavanti.com/license
  * @link            http://www.openavanti.com
  * @version         SVN: $Id$
@@ -22,32 +23,49 @@ use \Exception;
  *
  * @category    Database
  * @author      Kristopher Wilson <kwilson@shuttlebox.net>
- * @link        http://www.openavanti.com/docs/crud
+ * @package     openavanti
+ * @link        http://www.openavanti.com/documentation/1.4.0/CRUD.php
  */
 class CRUD implements \Iterator, \Countable
 {
-    // specify the database profile to use:
+    /**
+     * Specifies the database profile to use
+     */
     protected $_profileName = null;
-    // the table identifier for this data element:
+    
+    
+    /**
+     * The table identifier for this data element
+     */
     protected $_tableIdentifier = null;
     
-    // a reference to the database connection:
+    /**
+     * A reference to the database connection
+     */
     protected $_database = null;
-    // a reference to the result set for the last query:
+    
+    
+    /**
+     * A reference to the result set for the last query
+     */
     protected $_dataSet = null;
-    // the data for the current object:
+    
+    
+    /**
+     * Stores the data for the current object
+     */
     protected $_data = array();
     
     
     /**
-     *  The constructor makes the necessary connection to the database (see Database::Construct) 
-     *  and attempts to load the schema of the specified table.
+     * The constructor makes the necessary connection to the database (see Database::Construct) 
+     * and attempts to load the schema of the specified table.
      *  
-     *  If the second argument of oData is supplied, the constructor will attempt to load that 
-     *  data into the class for later saving.
+     * If the second argument of oData is supplied, the constructor will attempt to load that 
+     * data into the class for later saving.
      * 
-     *  If there is a define defined called ENABLE_SCHEMA_CACHING, schema caching is turned on, 
-     *  allowing for faster subsequent page loads.       
+     * If there is a define defined called ENABLE_SCHEMA_CACHING, schema caching is turned on, 
+     * allowing for faster subsequent page loads.       
      *       
      * @param string $identifier The name of the database table
      * @param mixed $data Optional; An array or object of data to load into the CRUD object
@@ -86,10 +104,8 @@ class CRUD implements \Iterator, \Countable
     
     /**
      * Grabs all columns for this table and adds each as a key in the data array for
-     * this object       
-     * 
-     * @return void
-     */                      
+     * this object
+     */
     protected function prepareColumns()
     {
         $columns = $this->_database->getTableColumns($this->_tableIdentifier);
@@ -388,26 +404,6 @@ class CRUD implements \Iterator, \Countable
         return $this;
 
     } // find()
-
-
-    /**
-     * This method returns the number of records that match a passed set of SQL query clauses.
-     * This method is very similiar to Find(), except that it returns an integer value
-     * representing the number of matching records.
-     *
-     * @deprecated Use find() with option "count" => true
-     * @param array $clauses Additional databases clauses, including: join and where. Where is a
-     *      string that are directly appended to the query. Join is an array of referenced tables
-     *      to inner join.
-     * @return int Returns the number of database records that match the passed clauses
-     */
-    public function findCount($clauses)
-    {
-        $result = $this->find($clauses + array("count" => true));
-        
-        return $result;
-
-    } // findCount()
     
     
     /**
@@ -418,12 +414,13 @@ class CRUD implements \Iterator, \Countable
      * This method is invoked through __call() when the user uses the CRUD::FindBy[column]()
      * "virtual" method.                                     
      *
-     * @throws Exception, QueryFailedException  
+     * @throws Exception, QueryFailedException
+     * 
      * @param string $columnName The name of the column we are pulling records by. This name may 
      *      underscores removed and be cased differently         
      * @param string $columnValue The value of the column in the first argument that determines
      *      which records will be selected
-     * @param string $orderBy The order clause for the query
+     * @param string $orderBy Optional; The order clause for the query. Default: null
      * 
      * @return CRUD A reference to the current object to support chaining or secondary assignment                                     
      */
@@ -469,12 +466,13 @@ class CRUD implements \Iterator, \Countable
      * This method is invoked through __call() when the user uses the CRUD::destroyBy[column]()
      * "virtual" method.                                         
      *
+     * @throws Exception, QueryFailedException
+     * 
      * @param string The name of the column we are basing our delete from. This name may
      *  underscores removed and be cased differently         
      * @param string The value of the column in the first argument that determines which
      *  records will be deleted.
-     * @return boolean True if successful/no error; throws an Exception otherwise
-     * @throws Exception, QueryFailedException                                       
+     * @return boolean True if successful/no error; throws an Exception otherwise                                     
      */
     protected function destroyDataByColumnValue($columnName, $columnValue)
     {
@@ -512,13 +510,14 @@ class CRUD implements \Iterator, \Countable
         
     } // destroyDataByColumnValue() 
     
-    
+
     /**
-     *
-     *       
-     * @note GetRecord() will move the internal pointers of all 1-M iterators loaded
+     * Loops all data stored within this CRUD class and returns a standard class copy
+     * of the data as a StdClass.
      * 
-     *               
+     * NOTE:  GetRecord() will move the internal pointers of all 1-M iterators loaded
+     *
+     * @return StdClass A pure class copy of the data stored within the CRUD class          
      */
     public function getRecord()
     {           
@@ -554,10 +553,11 @@ class CRUD implements \Iterator, \Countable
     
     
     /**
+     * Returns an array containing all data stored in the current data set from 
+     * the last query
      *
-     *
-     *       
-     */                     
+     * @return array An array of data from the dataset      
+     */
     public function getAll()
     {
         $records = array();
@@ -575,10 +575,12 @@ class CRUD implements \Iterator, \Countable
     
     
     /**
+     * Attempts to find a relationship to the current database table by the relationship name
+     * provided.
      *
-     *
-     *       
-     */                     
+     * @param string $sName The name of the relationship to find
+     * @return array An array containing information about the relationship, if found
+     */
     protected function findRelationship($relationshipName)
     {
         $foreignKeys = $this->_database->getTableForeignKeys($this->_tableIdentifier);
@@ -597,9 +599,14 @@ class CRUD implements \Iterator, \Countable
     
     
     /**
+     * Attempts to find a relationship between two specified tables based on the column they
+     * are related through.
      *
-     *
-     *       
+     * @param string $sPrimaryTableName The name of the main table of the relationship
+     * @param string $sRelatedTable The name of the related table of the relationship
+     * @param string $sThroughColumn The name of the column of the primary table that the 
+     *      the related table is related through.
+     * @return array An array containing information about the relationship, if found
      */
     protected function findRelationship2($tableIdentifier, $relatedTable, $through)
     {
@@ -628,8 +635,7 @@ class CRUD implements \Iterator, \Countable
      * array/object to load can contained referenced data (through foreign keys) as either
      * an array or object.
      *               
-     * @param mixed The data to load into the CRUD object
-     * @return void
+     * @param mixed $record The data to load into the CRUD object
      */
     protected function load($record)
     {
@@ -714,10 +720,11 @@ class CRUD implements \Iterator, \Countable
         
     
     /**
+     * Determines if the specified attribute is defined in the data array.
      *
-     *
-     *
-     */                             
+     * @param string $sName The name of the attribute we are searching for
+     * @return bool true if the attribute is set, false otherwise
+     */
     public function __isset($name)
     {
         return isset($this->_data[$name]) || isset($this->{$name});
@@ -726,9 +733,11 @@ class CRUD implements \Iterator, \Countable
     
     
     /**
+     * Retrieves the specified attribute based on its name and presence in the data array
      *
-     *
-     */                     
+     * @param string $sName The name of the attribute to retrieve
+     * @return mixed The value of the attribute if found
+     */
     public function __get($name)
     {
         if(array_key_exists($name, $this->_data))
@@ -794,10 +803,10 @@ class CRUD implements \Iterator, \Countable
      * Attempts to set the value of a database column, or sets a relationship through the
      * CRUD->[column_name] syntax.
      * 
-     * @param string The name of the column to set
-     * @param string The value to set the column specified in the first argument
-     * @return void
      * @throws Exception
+     * 
+     * @param string $name The name of the column to set
+     * @param string $value The value to set the column specified in the first argument
      */ 
     public function __set($name, $value)
     {           
@@ -831,7 +840,7 @@ class CRUD implements \Iterator, \Countable
      * the known list of columns for this instance, causing a CRUD::Save() operation to not
      * update the value.
      * 
-     * @param string The name of the database column to unset
+     * @param string $name The name of the database column to unset
      * @return void
      */ 
     public function __unset($name)
@@ -846,14 +855,15 @@ class CRUD implements \Iterator, \Countable
     
     /**
      * Supports several "virtual" or magic methods, such as data manipulation/retrieval through 
-     *  getBy[column_name] and destroyBy[column_name], reserved word methods, such as empty(),
-     *  and also provides access to public methods of the database, which fakes database
-     *  class inheritance (which is needed to support multiple database drivers).
+     * getBy[column_name] and destroyBy[column_name], reserved word methods, such as empty(),
+     * and also provides access to public methods of the database, which fakes database
+     * class inheritance (which is needed to support multiple database drivers).
      *
-     * @param string The name of the argument to be called magically 
-     * @param array An array of arguments to pass to the magically called method
-     * @return mixed Depends sName, the first argument
      * @throws Exception
+     * 
+     * @param string $name The name of the argument to be called magically 
+     * @param array $arguments An array of arguments to pass to the magically called method
+     * @return mixed Depends $name, the first argument
      */
     public function __call($name, $arguments)
     {
@@ -886,9 +896,7 @@ class CRUD implements \Iterator, \Countable
     
     /**
      * Assists slightly in object cloning. If this table has a single primary key, the value
-     * of this key will be whiped out when cloning.          
-     *               
-     * @return void         
+     * of this key will be whiped out when cloning.      
      */             
     public function __clone()
     {
@@ -955,7 +963,11 @@ class CRUD implements \Iterator, \Countable
     
     
     /**
+     * saveAll() is misleading and really means SaveDeep. This method will attempt to save
+     * all of the data stored within this CRUD class, and calls SaveAll() on all dependent
+     * CRUD data that is currently loaded into the class. 
      *
+     * @return bool True if the operation was successful, false if it failed
      */
     public function saveAll()
     {           
@@ -1027,9 +1039,10 @@ class CRUD implements \Iterator, \Countable
         
         
         /**
-         * Generates an insert query based on the data stored within this class
-         * 
-         * @return bool True if the query was successful, false otherwise
+         * Builds an insert query based on the data stored within this CRUD class and 
+         * executes it against the database.
+         *
+         * @return bool True if the operation was successful, false on failure
          */
         protected function insert()
         {
@@ -1193,9 +1206,11 @@ class CRUD implements \Iterator, \Countable
         
         
         /**
+         * Determines if the data currently stored within this CRUD class already exists 
+         * in the database based on primary key data. This method is used to determine whether
+         * to perform an INSERT or UPDATE operation on a table with compound primary keys
          *
-         *
-         *       
+         * @return bool True if the record exists, false if it does not
          */ 
         protected function recordExists()
         {
@@ -1226,8 +1241,6 @@ class CRUD implements \Iterator, \Countable
         /**
          * Destroys (deletes) the current data. This method will delete the primary record 
          * (assuming that the primary key for the data is set).
-         *  
-         * @return void
          */
         public function destroy()
         {
@@ -1255,10 +1268,13 @@ class CRUD implements \Iterator, \Countable
         
         
         /**
-         * Helper method for generating a where clause for a query string. Where clause is
+         * Helper method for generating a WHERE clause for a query string. WHERE clause is
          * built by supplied keys and associated data
          * 
-         */                     
+         * @param array $keys The keys of the dataset
+         * @param object $dataSet The dataset containing data for the WHERE clause
+         * @return string The WHERE clause
+         */                      
         protected function buildWhereClause($keys, $dataSet)
         {
             $where = "";
@@ -1284,9 +1300,9 @@ class CRUD implements \Iterator, \Countable
         
 
         /**
+         * Returns to the first element in the dataset
          *
-         * 
-         * 
+         * @see http://www.php.net/manual/en/spl.iterators.php
          */              
         public function rewind() 
         {                           
@@ -1306,9 +1322,10 @@ class CRUD implements \Iterator, \Countable
         
 
         /**
-         *  Returns the current object from the DataSet generated from the last call to Find().
-         *  This method is part of the PHP Iterator implementation.      
-         *  
+         * Returns the current object from the DataSet generated from the last call to Find().
+         * This method is part of the PHP Iterator implementation
+         *
+         * @see http://www.php.net/manual/en/spl.iterators.php
          * @return CRUD Returns a CRUD object if there data, or null otherwise
          */
         public function current() 
@@ -1324,10 +1341,11 @@ class CRUD implements \Iterator, \Countable
         
         
         /**
-         *
+         * Gets the key of the current element in the dataset
          * 
-         * 
-         */     
+         * @see http://www.php.net/manual/en/spl.iterators.php
+         * @return mixed The key of the current element in the dataset
+         */   
         public function key() 
         {           
             return $this->_dataSet->key();
@@ -1336,10 +1354,10 @@ class CRUD implements \Iterator, \Countable
 
 
         /**
+         * Move to the next element in the dataset
          *
-         * 
-         * 
-         */     
+         * @see http://www.php.net/manual/en/spl.iterators.php
+         */   
         public function next() 
         {           
             if(!is_null($this->_dataSet))
@@ -1374,10 +1392,11 @@ class CRUD implements \Iterator, \Countable
 
 
         /**
-         *
+         * Checks if the iterator is valid
          * 
-         * 
-         */     
+         * @see http://www.php.net/manual/en/spl.iterators.php
+         * @return bool True if the iterator is valid, false otherwise
+         */      
         public function valid()  
         {           
             return $this->_dataSet->valid();
@@ -1386,9 +1405,10 @@ class CRUD implements \Iterator, \Countable
         
         
         /**
-         *
-         *
-         */                     
+         * Removes all data and related data from the data array to prepare for the next load.
+         * Prevents stale data from persisting when null values are encountered in the column
+         * of the next data set.
+         */
         protected function cleanup()
         {
             $relationships = $this->_database->getTableForeignKeys($this->_tableIdentifier);
@@ -1414,7 +1434,6 @@ class CRUD implements \Iterator, \Countable
         } // cleanup()
         
         
-        
         /**
          * Returns the table name associated with this CRUD object
          *
@@ -1432,9 +1451,11 @@ class CRUD implements \Iterator, \Countable
          * string representation. This requires the DOM and SimpleXML extensions of PHP to be 
          * installed. If either extension is not installed, this method will throw an exception.
          *          
-         * @param bool Should this returned XML include references? Default false.
-         * @param bool Should this returned XML include all records returned by the last Find()
-         *      call? If not, only the current record stored is returned. Default false.      
+         * @param bool $includeReferences Optional; Should this returned XML include 
+         *      references? Default false.
+         * @param bool $provideAll Optional; Should this returned XML include all records 
+         *      returned by the last Find() call? If not, only the current record stored is 
+         *      returned. Default false.      
          * @return string A well formed XML document as a string representation
          */
         public function asXmlString($includeReferences = false, $provideAll = false)
@@ -1453,9 +1474,11 @@ class CRUD implements \Iterator, \Countable
          * installed. If the SimpleXML extension is not installed, this method will throw an 
          * exception.
          *          
-         * @param bool Should this returned XML include references? Default false.
-         * @param bool Should this returned XML include all records returned by the last Find()
-         *      call? If not, only the current record stored is returned. Default false.      
+         * @param bool $includeReferences Optional; Should this returned XML include 
+         *      references? Default false.
+         * @param bool $provideAll Optional; Should this returned XML include all records 
+         *      returned by the last Find() call? If not, only the current record stored is 
+         *      returned. Default false.      
          * @return SimpleXMLElement The data requested as a SimpleXMLElement object
          */
         public function asXml($includeReferences = false, $provideAll = false)
@@ -1503,11 +1526,11 @@ class CRUD implements \Iterator, \Countable
          * Add the database table columns for the specified table, from the specified object, to
          * the specfied SimpleXMLElement. Used internally by AsXML() 
          *          
-         * @param SimpleXMLElement 
-         * @param CRUD
-         * @param string           
+         * @param SimpleXMLElement $element
+         * @param CRUD $object
+         * @param string $tableName    
          * @return SimpleXMLElement The data requested as a SimpleXMLElement object
-          */
+         */
         private function addColumns(&$element, &$object, $tableName)
         {
             // FIXME: ???
@@ -1522,12 +1545,12 @@ class CRUD implements \Iterator, \Countable
         
 
         /**
-         * Add the database table references for the specified table, from the specified object, to
-         * the specfied SimpleXMLElement. Used internally by AsXML()   
+         * Add the database table columns for the specified table, from the specified object, to
+         * the specfied SimpleXMLElement. Used internally by AsXML() 
          *          
-         * @param SimpleXMLElement 
-         * @param CRUD
-         * @param string           
+         * @param SimpleXMLElement $element
+         * @param CRUD $object
+         * @param string $tableName    
          * @return SimpleXMLElement The data requested as a SimpleXMLElement object
          */
         private function addReferences(&$element, &$object, $tableName)
@@ -1567,11 +1590,12 @@ class CRUD implements \Iterator, \Countable
 
         
         /**
-         * Returns the data currently stored in the CRUD object as a JSON (JavaScript object notation)
-         * string. If bIncludeReferences is true, then each reference to the table is considered and 
-         * added to the XML document.
+         * Returns the data currently stored in the CRUD object as a JSON (JavaScript object
+         * notation) string. If bIncludeReferences is true, then each reference to the table is
+         * considered and added to the XML document.
          *
-         * @param bool Toggles whether references/relationships should be stored in the JSON string       
+         * @param bool $includeReferences Optional; Toggles whether references/relationships should
+         *      be stored in the JSON string. Default: false
          * @return string A JSON string representing the CRUD object
          */
         public function asJson($includeReferences = false)

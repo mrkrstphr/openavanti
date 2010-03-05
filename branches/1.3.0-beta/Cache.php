@@ -33,10 +33,12 @@ class Cache
      */
     private $_fileName = null;
 
+
     /**
      * The date the cache file was created
      */
     private $_createdStamp = null;
+
 
     /**
      * The date the cache file was last modified
@@ -76,7 +78,7 @@ class Cache
      */
     public static function exists($cacheFileName)
     {
-        return(file_exists($cacheFileName));
+        return file_exists($cacheFileName);
         
     } // exists()
     
@@ -105,7 +107,7 @@ class Cache
         $this->_modifiedStamp = filemtime($cacheFileName);
         
         return( $this->_cacheFile );
-    
+        
     } // open()
     
     

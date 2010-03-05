@@ -6,6 +6,7 @@
  *
  * @author          Kristopher Wilson <kwilson@shuttlebox.net>
  * @copyright       Copyright (c) 2007-2010, Kristopher Wilson
+ * @package         openavanti 
  * @license         http://www.openavanti.com/license
  * @link            http://www.openavanti.com
  * @version         SVN: $Id$
@@ -18,7 +19,8 @@ namespace OpenAvanti;
  *
  * @category    Controller
  * @author      Kristopher Wilson <kwilson@shuttlebox.net>
- * @link        http://www.openavanti.com/docs/controlleractionhelper
+ * @package     openavanti
+ * @link        http://www.openavanti.com/documentation/1.4.0/ControllerActionHelper
  */
 abstract class ControllerActionHelper
 {
