@@ -74,6 +74,16 @@ class Registry
         
     } // retrieve()
     
+    
+    /**
+     *
+     *
+     */
+    public static function dump()
+    {
+        return $_SESSION["oaRegistry"];
+    }
+    
 } // Registry()
 
 ?>
