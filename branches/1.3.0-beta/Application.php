@@ -478,6 +478,12 @@ class Application
             
             return true;
         }
+        else if(file_exists("{$this->_modulePath}/{$this->_currentModule}/controllers/helpers/" . ucfirst($helper) . ".php"))
+        {
+            require_once "{$this->_modulePath}/{$this->_currentModule}/controllers/helpers/" . ucfirst($helper) . ".php";
+            
+            return true;
+        }
         
         return false;
         
@@ -496,9 +502,15 @@ class Application
         {
             return true;
         }
-        else if(file_exists($this->_viewPath . "/helpers/" . ucfirst($helper) . ".php"))
+        else if(file_exists("{$this->_viewPath}/helpers/" . ucfirst($helper) . ".php"))
         {
             require_once $this->_viewPath . "/helpers/" . ucfirst($helper) . ".php";
+            
+            return true;
+        }
+        else if(file_exists("{$this->_modulePath}/{$this->_currentModule}/views/helpers/" . ucfirst($helper) . ".php"))
+        {
+            require_once "{$this->_modulePath}/{$this->_currentModule}/views/helpers/" . ucfirst($helper) . ".php";
             
             return true;
         }
