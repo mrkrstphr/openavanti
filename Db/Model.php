@@ -44,9 +44,8 @@ class Model extends CRUD
         {
             $className = get_class($this);
             $tableName = ltrim(strtolower(preg_replace("/([A-Z])/", "_\$1", $className)), "_");
-            $className = strtolower(get_class($this));
             
-            $this->_tableIdentifier = \OpenAvanti\StringFunctions::toPlural($className);
+            $this->_tableIdentifier = \OpenAvanti\StringFunctions::toPlural($tableName);
         }
 
         if(is_array($data) || is_object($data))
