@@ -96,7 +96,10 @@ class Application
         // set our default assumptions about the paths. These can be
         // overridden by the developer
         
-        $documentRoot = $_SERVER["DOCUMENT_ROOT"];
+        if(!empty($_SERVER["DOCUMENT_ROOT"]))
+            $documentRoot = $_SERVER["DOCUMENT_ROOT"];
+        else
+            $documentRoot = realpath(__DIR__ . "/../../public");
         
         $this->_modulePath = realpath("{$documentRoot}/../application/modules");
         
@@ -130,6 +133,22 @@ class Application
 
     
     /**
+     *
+     *
+     */
+    public function setIncludePath()
+    {
+        $includePath = explode(PATH_SEPARATOR, get_include_path());
+        
+        $includePath[] = $this->_layoutPath;
+        $includePath[] = $this->_viewPath;
+        
+        set_include_path(implode(PATH_SEPARATOR, $includePath));
+        
+    } // setIncludePath()
+
+    
+    /**
      * Wraps the user init() method and sets the view include path after calling the init()
      * method in case the user deviates from the default directory structure.
      */
@@ -139,12 +158,7 @@ class Application
         
         // We don't want to set our include path until after user initialization has occurred:
         
-        $includePath = explode(PATH_SEPARATOR, get_include_path());
-        
-        $includePath[] = $this->_layoutPath;
-        $includePath[] = $this->_viewPath;
-        
-        set_include_path(implode(PATH_SEPARATOR, $includePath));
+        $this->setIncludePath();
         
     } // _init()
     
@@ -521,6 +535,21 @@ class Application
     
     
     /**
+     *
+     *
+     */
+    public function initEnvironment()
+    {
+        if(!empty($this->_environment) && method_exists($this, "init" . $this->_environment))
+        {
+            $init = "init" . $this->_environment;
+            $this->$init();
+        }
+    
+    } // initEnvironment()
+    
+    
+    /**
      * Parses the Uri and passes it along to the dispatcher for processing.
      * The query string is stripped out of the request uri for processing.
      */
@@ -528,11 +557,7 @@ class Application
     {
         $this->_init();
         
-        if(!empty($this->_environment) && method_exists($this, "init" . $this->_environment))
-        {
-            $init = "init" . $this->_environment;
-            $this->$init();
-        }
+        $this->initEnvironment();
 
         $uri = str_replace("?" . $_SERVER["QUERY_STRING"], "", $_SERVER["REQUEST_URI"]);
         $uri = $uri != "/" ? $uri : "index";
