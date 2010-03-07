@@ -218,15 +218,7 @@ class CRUD implements \Iterator, \Countable
                         throw new Exception("Join column not specified");
                     }
 
-                    $sJoinType = isset($xJoin["type"]) ?
-                        $xJoin["type"] : Database::JoinTypeInner;
-
-                    if(!isset(Database::$_joinTypes[$sJoinType]))
-                    {
-                        throw new Exception("Unknown join type specified: " . $xJoin["type"]);
-                    }
-
-                    $sJoinType = Database::$_joinTypes[$sJoinType];
+                    $sJoinType = (isset($xJoin["type"]) ? $xJoin["type"] : "INNER") . " JOIN";
 
                     if(isset($xJoin["through"]))
                     {
@@ -389,7 +381,7 @@ class CRUD implements \Iterator, \Countable
         // Concatenate all the pieces of the query together:
         $sql = "SELECT {$selectColumns} FROM {$tableIdentifier} AS _{$tableAlias} " . 
             "{$joinClause} {$whereClause} {$orderClause} {$limitClause} " . 
-            "{$offsetClause}"; // FIXME PostgreSQL Specific Syntax
+            "{$offsetClause}";
         
         if(!($this->_dataSet = $this->_database->query($sql, $queryClauses["params"])))
             throw new Exception("Failed on Query: " . $this->_database->getLastError());
