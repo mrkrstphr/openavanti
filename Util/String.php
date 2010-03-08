@@ -12,7 +12,7 @@
  */
 
 
-namespace OpenAvanti;
+namespace OpenAvanti\Util;
  
 /**
  * A library for manipulating strings
@@ -21,7 +21,7 @@ namespace OpenAvanti;
  * @author      Kristopher Wilson
  * @link        http://www.openavanti.com/docs/stringfunctions
  */
-class StringFunctions
+class String
 {
     protected static $_consonants = "bcdfghjklmnpqrstvwxyz";
     protected static $_vowels = "aeiou";
@@ -226,6 +226,6 @@ class StringFunctions
     
     } // afterLastOccurrenceOf()
 
-} // StringFunctions()
+} // String()
 
 ?>

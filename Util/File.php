@@ -11,7 +11,7 @@
  * @version         SVN: $Id$
  */
 
-namespace OpenAvanti;
+namespace OpenAvanti\Util;
  
 /**
  * A library for manipulating files, directories and paths
@@ -20,7 +20,7 @@ namespace OpenAvanti;
  * @author      Kristopher Wilson
  * @link        http://www.openavanti.com/docs/filefunctions
  */
-class FileFunctions
+class File
 {
 
     /**
@@ -313,6 +313,6 @@ class FileFunctions
         
     } // MoveRecursively()
 
-} // FileFunctions()
+} // File()
 
 ?>

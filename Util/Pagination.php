@@ -12,7 +12,7 @@
  */
 
 
-namespace OpenAvanti;
+namespace OpenAvanti\Util;
  
 /**
  * A simple library to handle calculating pagination values and returning a set of pagination

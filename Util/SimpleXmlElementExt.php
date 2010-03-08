@@ -12,7 +12,7 @@
  */
 
 
-namespace OpenAvanti; 
+namespace OpenAvanti\Util; 
 
 /**
  * This class extends the SimpleXMLElement class in PHP and adds a few extra methods to aid
@@ -20,9 +20,9 @@ namespace OpenAvanti;
  *
  * @category    XML
  * @author      Kristopher Wilson
- * @link            http://www.openavanti.com/docs/simplexmlelementext
+ * @link        http://www.openavanti.com/docs/simplexmlelementext
  */
-class SimpleXMLElementExt extends SimpleXMLElement
+class SimpleXmlElementExt extends SimpleXMLElement
 {
 
     /**

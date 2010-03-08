@@ -12,7 +12,7 @@
  */
 
 
-namespace OpenAvanti;
+namespace OpenAvanti\Util;
  
 /**
  * Based on properties added, this class is responsible for building a list of elements,
@@ -24,7 +24,7 @@ namespace OpenAvanti;
  * @author      Kristopher Wilson
  * @link        http://www.openavanti.com/docs/jsonobject
  */
-class JSONObject
+class JsonObject
 {
     private $_attributes = array();
 
@@ -126,6 +126,6 @@ class JSONObject
     
     } // __toString()
 
-} // JSONObject()
+} // JsonObject()
 
 ?>

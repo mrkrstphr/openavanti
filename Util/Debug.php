@@ -12,7 +12,7 @@
  */
 
 
-namespace OpenAvanti;
+namespace OpenAvanti\Util;
 
 /**
  * Provides a method for debugging and logging information by specifying a callback function
