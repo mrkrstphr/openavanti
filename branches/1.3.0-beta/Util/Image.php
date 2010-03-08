@@ -12,7 +12,7 @@
  */
 
 
-namespace OpenAvanti;
+namespace OpenAvanti\Util;
 
 use \Exception;
 
@@ -24,7 +24,7 @@ use \Exception;
  * @author      Kristopher Wilson
  * @link            http://www.openavanti.com/docs/imagefunctions
  */
-class ImageFunctions
+class Image
 {
     
     /**
@@ -142,6 +142,6 @@ class ImageFunctions
     } // generateThumb()
     
     
-} // ImageFunctions()
+} // Image()
 
 ?>

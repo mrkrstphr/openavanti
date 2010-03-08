@@ -12,7 +12,7 @@
  */
 
 
-namespace OpenAvanti;
+namespace OpenAvanti\Util;
 
 use \Exception;
 
@@ -20,11 +20,11 @@ use \Exception;
 /**
  * Simple object to aid in creating CSV documents
  *
- * @category    CSV
+ * @category    Csv
  * @author      Kristopher Wilson <kwilson@shuttlebox.net>
  * @link        http://www.openavanti.com/docs/csv
  */
-class CSV
+class Csv
 {
     public $headers = array(); 
     public $data = array();
@@ -126,6 +126,6 @@ class CSV
     
     } // __toString()
 
-} // CSV()
+} // Csv()
 
 ?>

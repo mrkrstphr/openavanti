@@ -13,7 +13,7 @@
  */
 
 
-namespace OpenAvanti;
+namespace OpenAvanti\Util;
 
 use \Exception;
 

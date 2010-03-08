@@ -11,7 +11,7 @@
  * @version         SVN: $Id$
  */
 
-namespace OpenAvanti;
+namespace OpenAvanti\Util;
  
 /**
  * A library for manipulating XML objects and/or strings
@@ -20,7 +20,7 @@ namespace OpenAvanti;
  * @author      Kristopher Wilson <kwilson@shuttlebox.net>
  * @link        http://www.openavanti.com/docs/xmlfunctions
  */
-class XMLFunctions
+class Xml
 {
     
     /**
@@ -62,6 +62,6 @@ class XMLFunctions
     } // prettyPrint()
 
 
-} // XMLFunctions()
+} // Xml()
 
 ?>
