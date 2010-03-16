@@ -367,7 +367,10 @@ class CRUD implements \Iterator, \Countable
 
         $tableIdentifier = $this->_database->getIdentifier($this->_tableIdentifier);
         
-        $selectColumns = "_" . $tableAlias . ".*";
+        if(isset($queryClauses["columns"]))
+            $selectColumns = $queryClauses["columns"];
+        else
+            $selectColumns = "_" . $tableAlias . ".*";
         
         if(isset($queryClauses["distinct"]) && $queryClauses["distinct"] === true)
             $selectColumns = " DISTINCT {$selectColumns} ";
@@ -674,6 +677,10 @@ class CRUD implements \Iterator, \Countable
             {
                 $this->{$key} = $value;
             }
+            else if(is_scalar($value))
+            {
+                $this->{$key} = $value;
+            }
         }
 
     } // load()
@@ -816,6 +823,10 @@ class CRUD implements \Iterator, \Countable
             }
         }
         else if(!is_null($this->findRelationship($name)))
+        {
+            $this->_data[$name] = $value;
+        }
+        else if(is_scalar($value))
         {
             $this->_data[$name] = $value;
         }
@@ -1368,7 +1379,9 @@ class CRUD implements \Iterator, \Countable
                     
                     foreach($data as $key => $value)
                     {
-                        if(strpos($definition["columns"][$key]["type"], "bool") !== false)
+                        
+                        if(isset($definition["columns"][$key]) &&
+                            strpos($definition["columns"][$key]["type"], "bool") !== false)
                         {
                             $data->$key = $value == "t" ? true : false;
                         }
