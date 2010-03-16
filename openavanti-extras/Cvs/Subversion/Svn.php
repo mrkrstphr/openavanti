@@ -12,7 +12,7 @@
  * @version         SVN: $Id$
  */
 
-namespace OpenAvanti\CVS\Subversion;
+namespace OpenAvanti\Cvs\Subversion;
 
 use \SimpleXMLElement;
 use \stdClass;
@@ -27,7 +27,7 @@ use \stdClass;
  * @link        http://www.openavanti.com/documentation/1.4.0/Subversion
  */
 
-class Subversion
+class Svn
 {
     /**
      * Stores the location of the repository
@@ -45,6 +45,59 @@ class Subversion
         $this->_repositoryUri = $repository;
     
     } // __construct()
+    
+    
+    /**
+     *
+     *
+     */
+    public function adminCreate()
+    {
+        $cmd = "svnadmin create {$this->_repositoryUri}";
+        
+        return $this->processCommand($cmd);
+        
+    } // adminCreate()
+   
+    
+    /**
+     *
+     *
+     */
+    public function switchRepository($repository)
+    {
+        $this->_repositoryUri = $repository;
+
+    } // switchRepository()
+
+    
+    /**
+     *
+     *
+     */
+    public function adminDump()
+    {
+        $cmd = "svnadmin dump {$this->_repositoryUri}";
+
+        return $this->processCommand($cmd);
+    
+    } // adminDump()
+
+    
+    /**
+     *
+     *
+     */
+    public function adminLoad($dumpFile)
+    {
+        if(!file_exists($dumpFile))
+            return false;
+        
+        $cmd = "svnadmin load {$this->_repositoryUri} < {$dumpFile}";
+        
+        return $this->processCommand($cmd);
+        
+    } // adminLoad()
     
     
     /**
@@ -266,7 +319,7 @@ class Subversion
      * @param string $revision Optional; The revision to return logs for Default: null
      * @return array An array of logs
      */
-    public function getLogs($path, $revision = null, $options = null)
+    public function getLogs($path = null, $revision = null, $options = null)
     {
         $xml = $this->log($path, $revision, $options);
         
@@ -288,8 +341,8 @@ class Subversion
         return $ret;
         
     } // getLogs()
-    
-    
+   
+
     /**
      * Responsible for running a command, preparing and returning the results
      *
