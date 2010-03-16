@@ -165,7 +165,7 @@ class CRUD implements \Iterator, \Countable
         else
         {
             // FIXME: This is borked -- why?
-            $singularIdentifier = \OpenAvanti\StringFunctions::toSingular($this->_tableIdentifier);
+            $singularIdentifier = \OpenAvanti\Util\String::toSingular($this->_tableIdentifier);
             $tableAlias = $this->_database->getIdentifier($singularIdentifier, "_", false);
         }
         
@@ -273,7 +273,7 @@ class CRUD implements \Iterator, \Countable
                             //$sAs = "_" . $aRelationship["name"];
                             
                             $as = $this->_database->getIdentifier($aRelationship["schema"], 
-                                \OpenAvanti\StringFunctions::toSingular($aRelationship["name"]), "_", false);
+                                \OpenAvanti\Util\String::toSingular($aRelationship["name"]), "_", false);
                         }
 
                         $xJoin["as"] = $as; // Store this for later use!
@@ -313,7 +313,7 @@ class CRUD implements \Iterator, \Countable
                             //$sAs = "_" . $aRelationship["name"];
                             
                             $as = $this->_database->getIdentifier($aRelationship["schema"], 
-                                \OpenAvanti\StringFunctions::toSingular($aRelationship["name"]), "_", false);
+                                \OpenAvanti\Util\String::toSingular($aRelationship["name"]), "_", false);
                         }
 
                         if(!empty($xJoin["as"]))
@@ -342,7 +342,7 @@ class CRUD implements \Iterator, \Countable
                     }
                     
                     $as = $this->_database->getIdentifier($aRelationship["schema"], 
-                        \OpenAvanti\StringFunctions::toSingular($aRelationship["name"]), "_", false);
+                        \OpenAvanti\Util\String::toSingular($aRelationship["name"]), "_", false);
                     
                     $joinClause .= " INNER JOIN " . $aRelationship["table"] . " AS " .
                         "{$as} ON ";
@@ -1466,7 +1466,7 @@ class CRUD implements \Iterator, \Countable
         public function asXmlString($includeReferences = false, $provideAll = false)
         {
             $xmlObj = $this->asXml($includeReferences, $provideAll);
-            $xml = \OpenAvanti\XMLFunctions::PrettyPrint($xmlObj->asXML());
+            $xml = \OpenAvanti\Util\Xml::prettyPrint($xmlObj->asXML());
             
             return $xml;
             
@@ -1493,7 +1493,7 @@ class CRUD implements \Iterator, \Countable
             if($provideAll)
             {
                 $name = $this->_tableName;
-                $elementName = \OpenAvanti\StringFunctions::toSingular($this->_tableName);
+                $elementName = \OpenAvanti\Util\String::toSingular($this->_tableName);
                 
                 $xml = new SimpleXMLElement("<{$name}></{$name}>");
                 
@@ -1510,7 +1510,7 @@ class CRUD implements \Iterator, \Countable
             }
             else
             {
-                $name = \OpenAvanti\StringFunctions::toSingular($this->_tableName);
+                $name = \OpenAvanti\Util\String::toSingular($this->_tableName);
                 
                 $xml = new \SimpleXMLElement("<{$name}></{$name}>");
                 
@@ -1571,7 +1571,7 @@ class CRUD implements \Iterator, \Countable
                 {
                     if($reference["type"] == "1-m")
                     {
-                        $childReferenceName = \OpenAvanti\StringFunctions::toSingular($reference["name"]);
+                        $childReferenceName = \OpenAvanti\Util\String::toSingular($reference["name"]);
                         
                         $referenceObj = $element->addChild($reference["name"]);
                         
@@ -1605,7 +1605,7 @@ class CRUD implements \Iterator, \Countable
          */
         public function asJson($includeReferences = false)
         {
-            $json = new JSONObject();
+            $json = new \OpenAvanti\Util\JsonObject();
             
             $columns = $this->_database->getTableColumns($this->_tableIdentifier);
             
@@ -1632,11 +1632,11 @@ class CRUD implements \Iterator, \Countable
                             $references = array();
                             
                             // FIXME: ???
-                            $childReferenceName = \OpenAvanti\StringFunctions::toSingular($this->_schemaName, $reference["name"]);
+                            $childReferenceName = \OpenAvanti\Util\String::toSingular($this->_schemaName, $reference["name"]);
                             
                             foreach($data as $dataElement)
                             {
-                                $referenceJSON = new JSONObject();
+                                $referenceJSON = new \OpenAvanti\Util\JsonObject();
                             
                                 foreach($referenceColumns as $column)
                                 {
@@ -1650,7 +1650,7 @@ class CRUD implements \Iterator, \Countable
                         }
                         else
                         {
-                            $referenceJSON = new JSONObject();
+                            $referenceJSON = new \OpenAvanti\Util\JsonObject();
                             
                             foreach($referenceColumns as $column)
                             {
@@ -1705,7 +1705,7 @@ class CRUD implements \Iterator, \Countable
             // For now this code will persist, but users that fall under this scenario will
             // find the automatic instantiation of Model classes unpredictable and unusable.
             
-            $modelName = \OpenAvanti\StringFunctions::toSingular($tableName);
+            $modelName = \OpenAvanti\Util\String::toSingular($tableName);
             
             $pieces = explode("_", $modelName);
            

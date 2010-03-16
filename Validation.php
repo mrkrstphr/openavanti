@@ -545,7 +545,7 @@ class Validation
         
         if( file_exists( $sTmpFileName ) )
         {
-            $sMimeType = FileFunctions::GetMimeType( $sTmpFileName );
+            $sMimeType = \OpenAvanti\Util\File::GetMimeType( $sTmpFileName );
             
             if( !in_array( $sMimeType, $aMimeTypes ) )
             {
@@ -574,7 +574,7 @@ class Validation
         if( empty( $sMessage ) )
         {
             $sMessage = ucwords( str_replace( "_", " ", $sName ) ) . " must be less than " . 
-                FileFunctions::HumanReadableSize( $iSizeInBytes ) . " in size.";
+                \OpenAvanti\Util\File::HumanReadableSize( $iSizeInBytes ) . " in size.";
         }
         
         if( isset( $_FILES[ $sName ] ) && !empty( $_FILES[ $sName ][ "size" ] ) )

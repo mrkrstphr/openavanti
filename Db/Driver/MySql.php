@@ -259,7 +259,7 @@ class MySql extends Driver
             $relName = substr($localField, strlen($localField) - 3) == "_id" ? 
                 substr($localField, 0, strlen($localField) - 3) : $localField;
             
-            $relName = \OpenAvanti\StringFunctions::toSingular($relName);
+            $relName = \OpenAvanti\Util\String::toSingular($relName);
             
             self::$_schemas[$identifier]["foreign_key"][$relName] = array(
                 "table" => $foreignKey->REFERENCED_TABLE_NAME,

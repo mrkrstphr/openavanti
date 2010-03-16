@@ -278,7 +278,7 @@ class PgSql extends Driver
             throw new QueryFailedException($this->getLastError());
         
         foreach($tablesObj as $table) 
-            $tables[ $table->typrelid ] = $table->tablename;
+            $tables[$table->typrelid] = $table->tablename;
         
         return $tables;
     
@@ -518,7 +518,7 @@ class PgSql extends Driver
             $name = substr($localField, strlen($localField) - 3) == "_id" ? 
                 substr($localField, 0, strlen($localField) - 3) : $localField;
             
-            $name = \OpenAvanti\StringFunctions::toSingular($name);
+            $name = \OpenAvanti\Util\String::toSingular($name);
                             
             self::$_schemas[$tableIdentifier]["foreign_key"][$name] = array(
                 "schema" => $foreignSchema,

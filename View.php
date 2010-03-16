@@ -189,7 +189,7 @@ class View
         {
             if(!empty($this->_layout))
             {
-                if(FileFunctions::fileExistsInPath($this->_layout))
+                if(\OpenAvanti\Util\File::fileExistsInPath($this->_layout))
                 {
                     require $this->_layout;
                 }
@@ -200,7 +200,7 @@ class View
             }
             else if(!empty(self::$_defaultLayout))
             {
-                if(FileFunctions::fileExistsInPath(self::$_defaultLayout))
+                if(\OpenAvanti\Util\File::fileExistsInPath(self::$_defaultLayout))
                 {
                     require self::$_defaultLayout;
                 }
@@ -228,7 +228,7 @@ class View
     {
         if($this->_renderView)
         {
-            if(($view = FileFunctions::fileExistsInPath($this->_viewScript)) !== false)
+            if(($view = \OpenAvanti\Util\File::fileExistsInPath($this->_viewScript)) !== false)
             {
                 require($view);
             }
