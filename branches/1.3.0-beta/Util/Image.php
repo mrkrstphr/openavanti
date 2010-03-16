@@ -60,7 +60,7 @@ class Image
         $maximumWidth = $maxDimensions[0];
         $maximumHeight = $maxDimensions[1];
         
-        $fileExtension = FileFunctions::GetFileExtension($fileName);
+        $fileExtension = File::GetFileExtension($fileName);
         
         if(!file_exists($fileName))
         {   

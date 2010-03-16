@@ -257,7 +257,7 @@ class File
                     continue;
                 }
                 
-                if( !FileFunctions::RemoveRecursively( $sCurrentFile ) )
+                if( !self::RemoveRecursively( $sCurrentFile ) )
                 {
                     return( false );
                 }
@@ -301,7 +301,7 @@ class File
                     mkdir( $sDestination . "/" . basename( $sCurrentFile ) );
                 }
                 
-                FileFunctions::MoveRecursively( $sCurrentFile, $sNewDirectory . "/" . basename( $sCurrentFile ) );
+                self::MoveRecursively( $sCurrentFile, $sNewDirectory . "/" . basename( $sCurrentFile ) );
             }
             else
             {
