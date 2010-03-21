@@ -550,6 +550,23 @@ class Application
     
     
     /**
+     * Returns the base directory for the current URI. This will be the same as the current
+     * module string if using modules, or this will be null if modules are not being used or
+     * if the request is handled by the default module.
+     *
+     * @return string The base directory of the request
+     */
+    public function getBaseDir()
+    {
+        if(empty($this->_currentModule))
+            return null;
+        
+        return $this->_currentModule . "/";
+        
+    } // getBaseDir()
+    
+    
+    /**
      * Parses the Uri and passes it along to the dispatcher for processing.
      * The query string is stripped out of the request uri for processing.
      */
