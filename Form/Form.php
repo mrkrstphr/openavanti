@@ -12,7 +12,7 @@
  */
 
 
-namespace OpenAvanti;
+namespace OpenAvanti\Form;
 
 use \Exception;
 

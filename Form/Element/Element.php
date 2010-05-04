@@ -11,7 +11,7 @@
  * @version         SVN: $Id$
  */
 
-namespace OpenAvanti;
+namespace OpenAvanti\Form\Element;
 
 /**
  * Abstract class for the definition of a basic HTML form element
@@ -20,7 +20,7 @@ namespace OpenAvanti;
  * @author      Kristopher Wilson
  * @link        http://www.openavanti.com/docs/form
  */
-abstract class FormElement
+abstract class Element
 {
     /**
      * @var string The name of the HTML form element

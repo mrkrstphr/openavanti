@@ -11,7 +11,9 @@
  * @version         SVN: $Id$
  */
 
-namespace OpenAvanti;
+namespace OpenAvanti\Form\Element;
+
+require_once __DIR__ . "/LabeledFormElement.php";
 
 /**
  * FormField for a <select> element.

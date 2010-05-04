@@ -11,7 +11,9 @@
  * @version         SVN: $Id$
  */
 
-namespace OpenAvanti;
+namespace OpenAvanti\Form\Element;
+
+require_once __DIR__ . "/Element.php";
 
 /**
  *
@@ -19,7 +21,7 @@ namespace OpenAvanti;
  * @author      Kristopher Wilson
  * @link        http://www.openavanti.com/docs/form
  */
-class ReCaptcha extends FormElement
+class ReCaptcha extends Element
 {
     /**
      * Renders the form element as HTML and returns the HTML string
