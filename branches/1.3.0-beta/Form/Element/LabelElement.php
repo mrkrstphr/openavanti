@@ -11,7 +11,9 @@
  * @version         SVN: $Id$
  */
 
-namespace OpenAvanti;
+namespace OpenAvanti\Form\Element;
+
+require_once __DIR__ . "/Element.php";
 
 /**
  * 
@@ -20,7 +22,7 @@ namespace OpenAvanti;
  * @author      Kristopher Wilson
  * @link        http://www.openavanti.com/docs/form
  */
-class LabelElement extends FormElement
+class LabelElement extends Element
 {
     protected $_label = null;
     

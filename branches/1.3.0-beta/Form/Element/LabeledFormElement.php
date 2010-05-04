@@ -11,7 +11,9 @@
  * @version         SVN: $Id$
  */
 
-namespace OpenAvanti;
+namespace OpenAvanti\Form\Element;
+
+require_once __DIR__ . "/Element.php";
 
 /**
  * A specialized FormElement subclass that combines any inherited class
@@ -22,7 +24,7 @@ namespace OpenAvanti;
  * @author      Kristopher Wilson
  * @link        http://www.openavanti.com/docs/form
  */
-abstract class LabeledFormElement extends FormElement
+abstract class LabeledFormElement extends Element
 {
     /**
      * @var LabelElement The label for this FormElement
