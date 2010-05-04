@@ -14,6 +14,8 @@
 
 namespace OpenAvanti\Util; 
 
+use \SimpleXMLElement;
+
 /**
  * This class extends the SimpleXMLElement class in PHP and adds a few extra methods to aid
  * in the XML DOM manipulation.
@@ -52,7 +54,7 @@ class SimpleXmlElementExt extends SimpleXMLElement
         $domNode = dom_import_simplexml($this);
         $newNode = $domNode->cloneNode(true);
         
-        return simplexml_import_dom($newNode, "SimpleXMLElementExt"));         
+        return simplexml_import_dom($newNode, "SimpleXMLElementExt");         
         
     } // cloneNode()
     
