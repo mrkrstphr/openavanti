@@ -212,7 +212,32 @@ class Validation
         return( true );
     
     } // ValidateEqualTo()
-    
+   
+
+    /**
+     *
+     *
+     */
+    public static function validateInArray($name, $value, $values, $message = '')
+    {
+        if(empty($message))
+        {
+            $message = ucwords(str_replace('_', ' ', $name)) . ' must be one of: ' . 
+                implode(',', $values);
+        }
+
+        if(!in_array($value, $values))
+        {
+            if(self::isLoggingErrors())
+                self::setError($name, $message);
+            
+            return false;
+        }
+
+        return true;
+    }
+
+
 
     /**
      * Validates that the supplied data is at least iMin characters in length. This method trims
