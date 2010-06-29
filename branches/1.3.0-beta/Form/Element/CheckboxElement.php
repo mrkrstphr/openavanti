@@ -15,6 +15,8 @@ namespace OpenAvanti\Form\Element;
 
 require_once __DIR__ . "/InputElement.php";
 
+use \OpenAvanti\Form\Element;
+
 /**
  * FormField for a checkbox <input /> element.
  *

@@ -11,7 +11,7 @@
  * @version         SVN: $Id$
  */
 
-namespace OpenAvanti\Form\Element;
+namespace OpenAvanti\Form;
 
 /**
  * Abstract class for the definition of a basic HTML form element
