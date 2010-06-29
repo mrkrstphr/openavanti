@@ -13,7 +13,9 @@
 
 namespace OpenAvanti\Form\Element;
 
-require_once __DIR__ . "/Element.php";
+require_once __DIR__ . "/../Element.php";
+
+use \OpenAvanti\Form\Element;
 
 /**
  *

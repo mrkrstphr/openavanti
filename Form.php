@@ -202,7 +202,7 @@ class Form
      *
      * @param FormElement $element The FormElement to add to this form
      */
-    public function &addElement(FormElement $element)
+    public function &addElement(Form\Element $element)
     {
         $this->_elements[] = $element;
         

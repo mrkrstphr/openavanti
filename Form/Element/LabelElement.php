@@ -13,7 +13,9 @@
 
 namespace OpenAvanti\Form\Element;
 
-require_once __DIR__ . "/Element.php";
+require_once __DIR__ . "/../Element.php";
+
+use \OpenAvanti\Form\Element;
 
 /**
  * 
@@ -48,7 +50,7 @@ class LabelElement extends Element
     {
         $label = "";
         
-        if(class_exists("OpenAvanti\Validation") && isset($this->_name) && 
+        if(class_exists("\OpenAvanti\Validation") && isset($this->_name) && 
             Validation::fieldHasErrors($this->_name))
         {
             $this->_attributes["class"] = isset($this->_attributes["class"]) ? 
