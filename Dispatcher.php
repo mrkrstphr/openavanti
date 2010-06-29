@@ -219,8 +219,13 @@ class Dispatcher
 
         $this->_request->_controllerName = $controllerName . "Controller";
 
-        $this->_request->_actionName = count($request) > 0 ?
+        $actionName = count($request) > 0 ?
             str_replace("-", "_", array_shift($request)) : "index";
+
+        $actionName = \OpenAvanti\Util\String::toCamelCase($actionName);
+        $actionName .= 'Action';
+
+        $this->_request->_actionName = $actionName;
 
         $this->_request->_arguments = !empty($request) ? $request : array();
 

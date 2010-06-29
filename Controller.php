@@ -92,7 +92,14 @@ class Controller
         {
             $action = $this->getRequest()->getAction();
         }
-        
+    
+        if(strtolower(substr($action, strlen($action) - 6)) == 'action')
+        {
+            $action = substr($action, 0, strlen($action) - 6);
+        }
+
+        $action = \OpenAvanti\Util\String::fromCamelCase($action, '-');
+
         $this->view->setViewScript(strtolower($controller . "/" . $action . View::$_viewFileExtension));
         
     } // setDefaultView()
@@ -103,7 +110,7 @@ class Controller
      * controller that do not define a method. Since it is a requirement for this method to 
      * exist, it is defined in the parent controller class.
      */
-    public function index()
+    public function indexAction()
     {
         $this->getResponse()->set404Error( true );
             

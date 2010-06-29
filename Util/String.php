@@ -160,7 +160,31 @@ class String
         return $inputString;
     
     } // toPlural()
+   
     
+    /**
+     *
+     *
+     */
+    public static function toCamelCase($input)
+    {
+        $words = explode('_', $input);
+
+        $words = $words ? array_map('ucfirst', $words) : array($input);
+        $words[0] = lcfirst($words[0]);
+
+        return implode('', $words);
+    }
+
+
+    /**
+     *
+     *
+     */
+    public static function fromCamelCase($input, $separator = '_')
+    {
+        return trim(strtolower(preg_replace('/([A-Z])/', $separator . '$1', $input)), $separator);
+    }
     
     /**
      * Allows for adding custom words to the single/plural dictionary used by the toSingular()
