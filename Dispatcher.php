@@ -351,6 +351,15 @@ class Dispatcher
         if(!empty($this->_request->_actionName) && 
             is_callable(array($this->_controller, $this->_request->_actionName)))
         {
+            $reflection = new \ReflectionMethod($this->_request->_controllerName, $this->_request->_actionName);
+
+            $numReqArgs = $reflection->getNumberOfRequiredParameters();
+
+            if($numReqArgs > count($this->_request->_arguments))
+            {
+                throw new ControllerActionNotFoundException('Controller with matching arguments not found');
+            }
+
             // Call $oController->$sAction() with arguments $aArguments:
             call_user_func_array(array($this->_controller, $this->_request->_actionName), 
                 $this->_request->_arguments);

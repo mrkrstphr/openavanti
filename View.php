@@ -185,6 +185,8 @@ class View
      */
     public function renderPage()
     {
+        ob_start();
+
         if($this->_renderLayout)
         {
             if(!empty($this->_layout))
@@ -209,6 +211,8 @@ class View
                     throw new LayoutNotFoundException("Layout {$this->_layout} not found.");
                 }
             }
+
+            ob_flush();
         }
         else if($this->_renderView)
         {
@@ -234,6 +238,7 @@ class View
             }
             else
             {
+                ob_clean();
                 throw new ViewNotFoundException("View file {$this->_viewScript} not found.");
             }
         }

@@ -8,11 +8,11 @@
  * @copyright       Copyright (c) 2007-2010, Kristopher Wilson
  * @license         http://www.openavanti.com/license
  * @link            http://www.openavanti.com
- * @version         SVN: $Id$
+ * @version         SVN: $Id: Form.php 273 2010-02-09 02:06:29Z kristopherwilson $
  */
 
 
-namespace OpenAvanti\Form;
+namespace OpenAvanti;
 
 use \Exception;
 

@@ -213,7 +213,16 @@ class Application
             PATH_SEPARATOR . "{$this->_modulePath}/{$moduleName}/views");
 
     } // moduleInitialization()
-
+    
+    
+    /**
+     *
+     *
+     */
+    public function getCurrentModule()
+    {
+        return $this->_currentModule;
+    }
 
     /**
      * Enables or disables the use of modules, which is disabled by default
@@ -579,14 +588,7 @@ class Application
         $uri = str_replace("?" . $_SERVER["QUERY_STRING"], "", $_SERVER["REQUEST_URI"]);
         $uri = $uri != "/" ? $uri : "index";
         
-        try
-        {
-            $this->_dispatcher->connect($uri);
-        }
-        catch(Exception $e)
-        {
-            echo 'Exception<br/>';
-        }
+        $this->_dispatcher->connect($uri);
         
     } // run()
     

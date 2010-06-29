@@ -233,6 +233,8 @@ class Controller
             $controller->$action();
         }
         
+        $this->view->_data = array_merge($this->view->_data, $controller->view->_data);
+        
         $this->view->setViewScript($controller->view->getViewScript()); 
         
     } // forwardAction()
