@@ -43,7 +43,7 @@ class Model extends CRUD
         if(empty($this->_tableIdentifier))
         {
             $className = get_class($this);
-            $tableName = ltrim(strtolower(preg_replace("/([A-Z])/", "_\$1", $className)), "_");
+            $tableName = \OpenAvanti\Util\String::fromCamelCase($className);
             
             $this->_tableIdentifier = \OpenAvanti\Util\String::toPlural($tableName);
         }
