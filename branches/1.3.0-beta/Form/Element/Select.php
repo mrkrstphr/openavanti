@@ -13,7 +13,7 @@
 
 namespace OpenAvanti\Form\Element;
 
-require_once __DIR__ . "/LabeledFormElement.php";
+require_once __DIR__ . "/Labeled.php";
 
 /**
  * FormField for a <select> element.
@@ -22,7 +22,7 @@ require_once __DIR__ . "/LabeledFormElement.php";
  * @author      Kristopher Wilson
  * @link        http://www.openavanti.com/docs/form
  */
-class SelectElement extends LabeledFormElement
+class Select extends Labeled
 {
     /**
      * @var string Stores the default selected option 
@@ -42,8 +42,6 @@ class SelectElement extends LabeledFormElement
     
     /**
      * Ensures that the options are stored within the attributes array
-     *
-     * @returns void
      */
     public function init()
     {
@@ -51,8 +49,7 @@ class SelectElement extends LabeledFormElement
         {
             $this->_attributes['options'] = array();    
         }
-        
-    } // init()
+    }
     
     
     /**
@@ -85,8 +82,7 @@ class SelectElement extends LabeledFormElement
         $html .= "</select>";
         
         return $html;
-        
-    } // render()
+    }
     
     
     /**
@@ -105,8 +101,7 @@ class SelectElement extends LabeledFormElement
         $this->_addBlankWhenEmpty = $addBlank;
         
         return $this;
-        
-    } // addBlankWhenEmpty()
+    }
     
     
     /**
@@ -122,9 +117,8 @@ class SelectElement extends LabeledFormElement
         $this->_autoBlankLabel = $label;
         
         return $this;
-        
-    } // setAutoBlankLabel()
+    }
     
-} // SelectElement()
+}
 
 ?>

@@ -13,31 +13,31 @@
 
 namespace OpenAvanti\Form\Element;
 
-require_once __DIR__ . "/InputElement.php";
-
-use \OpenAvanti\Form\Element;
+require_once __DIR__ . "/Labeled.php";
 
 /**
- * FormField for a checkbox <input /> element.
+ * FormField for a <textarea> element.
  *
  * @category    Forms
  * @author      Kristopher Wilson
  * @link        http://www.openavanti.com/docs/form
  */
-class CheckboxElement extends InputElement
+class TextArea extends Labeled
 {
     
     /**
-     * Sets the type attribute to text. 
-     *
-     * @returns void
+     * Renders the <textarea> form element as HTML and returns the HTML
+     * string.
+     * 
+     * @return string The HTML of the rendered textarea element
      */
-    public function init()
+    public function render()
     {
-        $this->_attributes["type"] = "checkbox";
+        $html = "<textarea name=\"{$this->_name}\" id=\"{$this->_id}\" " .
+            $this->generateAttributeString() . ">" . $this->_value . "</textarea>";
         
-    } // init()
+        return $html;
+    }
+    
+}
 
-} // CheckboxElement()
-
-?>

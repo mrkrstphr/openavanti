@@ -24,7 +24,7 @@ use \OpenAvanti\Form\Element;
  * @author      Kristopher Wilson
  * @link        http://www.openavanti.com/docs/form
  */
-class LabelElement extends Element
+class Label extends Element
 {
     protected $_label = null;
     
@@ -38,8 +38,7 @@ class LabelElement extends Element
         parent::__construct($name, array());
         
         $this->_label = $label;
-        
-    } // __construct()
+    }
     
     
     /**
@@ -51,7 +50,7 @@ class LabelElement extends Element
         $label = "";
         
         if(class_exists("\OpenAvanti\Validation") && isset($this->_name) && 
-            Validation::fieldHasErrors($this->_name))
+            \OpenAvanti\Validation::fieldHasErrors($this->_name))
         {
             $this->_attributes["class"] = isset($this->_attributes["class"]) ? 
                 $this->_attributes["class"] . " error" : "error";
@@ -61,9 +60,7 @@ class LabelElement extends Element
         $label = "<label for=\"{$this->_name}\" {$atts}>{$this->_label}</label>";
         
         return $label;
-        
-    } // render()
+    } 
     
-} // LabelElement()
+}
 
-?>

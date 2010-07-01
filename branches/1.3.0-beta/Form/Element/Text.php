@@ -13,33 +13,25 @@
 
 namespace OpenAvanti\Form\Element;
 
-require_once __DIR__ . "/LabeledFormElement.php";
+require_once __DIR__ . "/Input.php";
 
 /**
- * FormField for a <textarea> element.
+ * FormField for a text <input /> element.
  *
  * @category    Forms
  * @author      Kristopher Wilson
  * @link        http://www.openavanti.com/docs/form
  */
-class TextAreaElement extends LabeledFormElement
+class Text extends Input
 {
     
     /**
-     * Renders the <textarea> form element as HTML and returns the HTML
-     * string.
-     * 
-     * @return string The HTML of the rendered textarea element
+     * Sets the type attribute to text. 
      */
-    public function render()
+    public function init()
     {
-        $html = "<textarea name=\"{$this->_name}\" id=\"{$this->_id}\" " .
-            $this->generateAttributeString() . ">" . $this->_value . "</textarea>";
-        
-        return $html;
-        
-    } // render()
+        $this->_attributes["type"] = "text";
+    }
     
-} // TextAreaElement()
+}
 
-?>

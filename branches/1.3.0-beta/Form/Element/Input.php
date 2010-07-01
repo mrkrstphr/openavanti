@@ -13,7 +13,7 @@
 
 namespace OpenAvanti\Form\Element;
 
-require_once __DIR__ . "/LabeledFormElement.php";
+require_once __DIR__ . "/Labeled.php";
 
 /**
  * An abstract implementation of LabeledFormElement that encapsulates any
@@ -25,7 +25,7 @@ require_once __DIR__ . "/LabeledFormElement.php";
  * @author      Kristopher Wilson
  * @link        http://www.openavanti.com/docs/form
  */
-abstract class InputElement extends LabeledFormElement
+abstract class Input extends Labeled
 {
     /**
      * Renders the form element as HTML and returns the HTML string
@@ -38,9 +38,7 @@ abstract class InputElement extends LabeledFormElement
             $this->generateAttributeString() . " value=\"{$this->_value}\" />";
         
         return $html;
-        
-    } // render()
+    }
     
-} // InputElement()
+}
 
-?>

@@ -13,29 +13,28 @@
 
 namespace OpenAvanti\Form\Element;
 
-require_once __DIR__ . "/InputElement.php";
+require_once __DIR__ . "/Input.php";
+
+use \OpenAvanti\Form\Element;
 
 /**
- * FormField for a file <input /> element.
+ * FormField for a checkbox <input /> element.
  *
  * @category    Forms
  * @author      Kristopher Wilson
  * @link        http://www.openavanti.com/docs/form
  */
-class FileElement extends InputElement
+class Checkbox extends Input
 {
     
     /**
-     * Sets the type attribute to file. 
+     * Sets the type attribute to checkbox. 
      *
-     * @returns void
      */
     public function init()
     {
-        $this->_attributes["type"] = "file";
-        
-    } // init()
+        $this->_attributes["type"] = "checkbox";
+    }
 
-} // FileElement()
+}
 
-?>

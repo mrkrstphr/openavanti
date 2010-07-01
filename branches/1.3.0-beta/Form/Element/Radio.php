@@ -13,29 +13,27 @@
 
 namespace OpenAvanti\Form\Element;
 
-require_once __DIR__ . "/InputElement.php";
+require_once __DIR__ . "/Input.php";
 
 /**
- * FormField for a hidden <input /> element.
+ * FormField for a radio <input /> element.
  *
  * @category    Forms
  * @author      Kristopher Wilson
  * @link        http://www.openavanti.com/docs/form
  */
-class HiddenElement extends InputElement
+class Radio extends Input
 {
     
     /**
-     * Sets the type attribute to hidden. 
+     * Sets the type attribute to radio. 
      *
-     * @returns void
      */
     public function init()
     {
-        $this->_attributes["type"] = "hidden";
-        
-    } // init()
+        $this->_attributes["type"] = "radio";
+    }
 
-} // HiddenElement()
+}
 
 ?>

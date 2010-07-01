@@ -13,40 +13,25 @@
 
 namespace OpenAvanti\Form\Element;
 
-require_once __DIR__ . "/../Element.php";
-
-use \OpenAvanti\Form\Element;
+require_once __DIR__ . "/Input.php";
 
 /**
+ * FormField for a file <input /> element.
  *
  * @category    Forms
  * @author      Kristopher Wilson
  * @link        http://www.openavanti.com/docs/form
  */
-class ReCaptcha extends Element
+class FileElement extends Input
 {
-    /**
-     * Renders the form element as HTML and returns the HTML string
-     *
-     * @return string The HTML of the rendered form element
-     */
-    public function render()
-    {
-        $recaptcha = new \OpenAvanti\Service\ReCaptcha($this->_attributes['publicKey'], null);
-
-        return $recaptcha->getHtml();
-
-    }
-
     
     /**
-     *
+     * Sets the type attribute to file. 
      *
      */
-    public function setPublicKey($key)
+    public function init()
     {
-        $this->_attributes['publicKey'] = $key;
-
+        $this->_attributes["type"] = "file";
     }
 
 }
