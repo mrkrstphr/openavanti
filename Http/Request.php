@@ -59,7 +59,7 @@ class Request
      * @param string $uri
      * @param array $data Optional; 
      */
-    public function sendRequest($method, $uri, $data = array())
+    public function sendRequest($method = 'GET', $uri, $data = array())
     {
         curl_setopt($this->_request, CURLOPT_POST, true);
         curl_setopt($this->_request, CURLOPT_URL, $uri);
