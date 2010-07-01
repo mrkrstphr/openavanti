@@ -367,7 +367,7 @@ class CRUD implements \Iterator, \Countable
 
         $tableIdentifier = $this->_database->getIdentifier($this->_tableIdentifier);
         
-        if(isset($queryClauses["columns"]))
+        if(isset($queryClauses["columns"]) && !empty($queryClauses["columns"]))
             $selectColumns = $queryClauses["columns"];
         else
             $selectColumns = "_" . $tableAlias . ".*";

@@ -43,7 +43,20 @@ class ResultSet extends \ArrayIterator #implements \Iterator, \Countable
         }
 
         return null;
-    }
+    
+    } // __get()
+    
+    
+    /**
+     *
+     *
+     */
+    public function __isset($column)
+    {
+        return isset(current($this)->$column);
+        
+    } // __isset()
+
 
     /**
      * Returns a copy of the current record, if any, or null if no record is stored
