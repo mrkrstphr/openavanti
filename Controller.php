@@ -212,6 +212,13 @@ class Controller
      */
     public function forwardAction($action, $controllerName = null, $arguments = null)
     {
+        $action = \OpenAvanti\Util\String::toCamelCase($action);
+
+        if(strtolower(substr($action, strlen($action) - 6)) != 'action')
+        {
+            $action .= 'Action';
+        }
+
         $this->setDefaultView($controllerName, $action);
         
         $controller = &$this;
