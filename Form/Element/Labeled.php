@@ -26,7 +26,7 @@ use \OpenAvanti\Form\Element;
  * @author      Kristopher Wilson
  * @link        http://www.openavanti.com/docs/form
  */
-abstract class LabeledFormElement extends Element
+abstract class Labeled extends Element
 {
     /**
      * @var LabelElement The label for this FormElement
@@ -47,9 +47,8 @@ abstract class LabeledFormElement extends Element
         parent::__construct($name, $attributes);
         
         
-        $this->label = new LabelElement($this->_id, $label);
-        
-    } // __construct()
+        $this->label = new Label($this->_id, $label);
+    }
     
     
     /**
@@ -60,8 +59,7 @@ abstract class LabeledFormElement extends Element
     public function &getLabel()
     {
         return $this->_label;
-        
-    } // getLabel()
+    }
     
     
     /**
@@ -80,9 +78,7 @@ abstract class LabeledFormElement extends Element
         {
             return $this->getLabel();
         }
-        
-    } // __get()
+    }
 
-} // LabeledFormElement()
+}
 
-?>

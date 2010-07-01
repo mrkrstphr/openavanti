@@ -13,29 +13,26 @@
 
 namespace OpenAvanti\Form\Element;
 
-require_once __DIR__ . "/InputElement.php";
+require_once __DIR__ . "/Input.php";
 
 /**
- * FormField for a text <input /> element.
+ * FormField for a hidden <input /> element.
  *
  * @category    Forms
  * @author      Kristopher Wilson
  * @link        http://www.openavanti.com/docs/form
  */
-class TextElement extends InputElement
+class Hidden extends Input
 {
     
     /**
-     * Sets the type attribute to text. 
+     * Sets the type attribute to hidden. 
      *
-     * @returns void
      */
     public function init()
     {
-        $this->_attributes["type"] = "text";
-        
-    } // init()
-    
-} // TextElement()
+        $this->_attributes["type"] = "hidden";
+    }
 
-?>
+}
+
