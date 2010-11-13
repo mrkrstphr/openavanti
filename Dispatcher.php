@@ -71,8 +71,7 @@ class Dispatcher
     public function __construct(Application &$application)
     {
         $this->_application = &$application;
-        
-    } // __construct()
+    }
 
 
     /**
@@ -90,8 +89,7 @@ class Dispatcher
             "pattern" => $pattern,
             "replace" => $replacement
         );
-    
-    } // addRoute()
+    }
 
     
     /**
@@ -103,8 +101,7 @@ class Dispatcher
     public function &getApplication()
     {
         return $this->_application;
-        
-    } // getApplication()
+    }
 
 
     /**
@@ -115,8 +112,7 @@ class Dispatcher
     public function &getRequest()
     {
         return $this->_request;
-        
-    } // getRequest()
+    }
 
 
     /**
@@ -127,8 +123,7 @@ class Dispatcher
     public function &getResponse()
     {
         return $this->_response;
-        
-    } // getRequest()
+    }
     
     
     /**
@@ -143,8 +138,7 @@ class Dispatcher
         $controllerName = str_replace(" ", "", $controllerName);
         
         return $controllerName;
-        
-    } // normalizeControllerName()
+    }
     
 
     /**
@@ -267,8 +261,7 @@ class Dispatcher
         $this->_view->renderPage();
         
         return $this->_request;
-    
-    } // connect()
+    }
     
     
     /**
@@ -281,8 +274,7 @@ class Dispatcher
     public function registerPreDispatchMethod($callback)
     {
         $this->_preDispatchCallbacks[] = $callback;
-        
-    } // registerPreDispatchMethod()
+    }
     
     
     /**
@@ -295,8 +287,7 @@ class Dispatcher
     public function registerPostDispatchMethod($callback)
     {
         $this->_postDispatchCallbacks[] = $callback;
-        
-    } // registerPreDispatchMethod()
+    }
     
     
     /**
@@ -317,8 +308,7 @@ class Dispatcher
                 call_user_func_array($callback, array($dispatcher));
             }
         }
-        
-    } // preDispatch()
+    }
     
     
     /**
@@ -339,8 +329,7 @@ class Dispatcher
                 call_user_func_array($callback, array($dispatcher));
             }
         }
-        
-    } // postDispatch()
+    }
     
     
     /**
@@ -380,9 +369,8 @@ class Dispatcher
             
             throw new ControllerActionNotFoundException();
         }
+    }
     
-    } // invokeAction()
-    
-} // Dispatcher()
+}
 
-?>
+

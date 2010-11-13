@@ -51,8 +51,7 @@ class Controller
         $this->setDefaultView();
         
         $this->init();
-        
-    } // __construct()
+    }
     
     
     /**
@@ -63,7 +62,7 @@ class Controller
     public function init()
     {
     
-    } // init()
+    }
     
     
     /**
@@ -101,8 +100,7 @@ class Controller
         $action = \OpenAvanti\Util\String::fromCamelCase($action, '-');
 
         $this->view->setViewScript(strtolower($controller . "/" . $action . View::$_viewFileExtension));
-        
-    } // setDefaultView()
+    }
     
     
     /**
@@ -112,9 +110,8 @@ class Controller
      */
     public function indexAction()
     {
-        $this->getResponse()->set404Error( true );
-            
-    } // index()
+        $this->getResponse()->set404Error(true);
+    }
     
     
     /**
@@ -127,8 +124,7 @@ class Controller
     public function &getDispatcher()
     {
         return $this->_dispatcher;
-    
-    } // getDispatcher()
+    }
     
     
     /**
@@ -140,8 +136,7 @@ class Controller
     public function &getApplication()
     {
         return $this->getDispatcher()->getApplication();
-        
-    } // getApplication()
+    }
     
     
     /**
@@ -153,8 +148,7 @@ class Controller
     public function &getRequest()
     {
         return $this->_dispatcher->getRequest();
-        
-    } // getRequest()
+    }
     
     
     /**
@@ -166,8 +160,7 @@ class Controller
     public function &getResponse()
     {
         return $this->_dispatcher->getResponse();
-        
-    } // getResponse()
+    }
     
     
     /**
@@ -194,8 +187,7 @@ class Controller
         }
         
         return false;
-        
-    } // redirectTo()
+    }
     
     
     /**
@@ -249,9 +241,8 @@ class Controller
         
         $this->view->_data = array_merge($this->view->_data, $controller->view->_data);
         
-        $this->view->setViewScript($controller->view->getViewScript()); 
-        
-    } // forwardAction()
+        $this->view->setViewScript($controller->view->getViewScript());
+    }
     
     
     /**
@@ -262,8 +253,7 @@ class Controller
     public function &getView()
     {
         return $this->view;
-    
-    } // getView()
+    }
     
     
     /**
@@ -279,8 +269,7 @@ class Controller
     public function setFlash($message, $scope = "flash")
     {
         $_SESSION[(string)$scope] = $message;
-        
-    } // setFlash()
+    }
     
     
     /**
@@ -299,8 +288,7 @@ class Controller
         unset($_SESSION[(string)$scope]);
         
         return $flash;
-        
-    } // getFlash()
+    }
     
     
     /**
@@ -316,13 +304,12 @@ class Controller
         
         if($this->getApplication()->actionHelperExists($method))
         {
-            return call_user_func_array(array($method, 'process'), $arguments);
+            $helper = new $method($this);
+            return call_user_func_array(array($helper, 'process'), $arguments);
         }
        
         throw new ControllerActionNotFoundException();
+    }
 
-    } // __call()
+}
 
-} // Controller()
-
-?>
