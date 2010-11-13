@@ -116,8 +116,7 @@ class Application
         spl_autoload_register(array($this, "defaultAutoloader"));
         
         $this->_dispatcher = new Dispatcher($this);
-        
-    } // __construct()
+    }
    
     
     /**
@@ -128,8 +127,7 @@ class Application
     public function setEnvironment($environment)
     {
         $this->_environment = $environment;
-    
-    } // setEnvironment()
+    }
 
     
     /**
@@ -144,8 +142,7 @@ class Application
         $includePath[] = $this->_viewPath;
         
         set_include_path(implode(PATH_SEPARATOR, $includePath));
-        
-    } // setIncludePath()
+    }
 
     
     /**
@@ -159,8 +156,7 @@ class Application
         // We don't want to set our include path until after user initialization has occurred:
         
         $this->setIncludePath();
-        
-    } // _init()
+    }
     
     
     /**
@@ -170,7 +166,7 @@ class Application
     public function init()
     {
         
-    } // init()
+    }
   
 
     /**
@@ -187,8 +183,7 @@ class Application
             return true;
          
         return false;
-         
-    } // moduleExists()
+    }
  
    
     /**
@@ -211,8 +206,7 @@ class Application
         set_include_path(get_include_path() .
             PATH_SEPARATOR . "{$this->_modulePath}/{$moduleName}/layouts" .
             PATH_SEPARATOR . "{$this->_modulePath}/{$moduleName}/views");
-
-    } // moduleInitialization()
+    }
     
     
     /**
@@ -224,6 +218,7 @@ class Application
         return $this->_currentModule;
     }
 
+
     /**
      * Enables or disables the use of modules, which is disabled by default
      *
@@ -233,8 +228,7 @@ class Application
     public function setUseModules($use = true)
     {
         $this->_useModules = $use;
-        
-    } // setUseModules()
+    }
     
     
     /**
@@ -245,8 +239,7 @@ class Application
     public function getUseModules()
     {
         return $this->_useModules;
-    
-    } // getUseModules()
+    }
    
     
     /**
@@ -258,8 +251,7 @@ class Application
     public function setControllerPath($path)
     {
         $this->_controllerPath = $path;
-        
-    } // setControllerPath()
+    }
     
     
     /**
@@ -270,8 +262,7 @@ class Application
     public function getControllerPath()
     {
         return $this->_controllerPath;
-        
-    } // getControllerPath()
+    }
     
     
     /**
@@ -283,8 +274,7 @@ class Application
     public function setModelPath($path)
     {
         $this->_modelPath = $path;
-        
-    } // setModelPath()
+    }
     
     
     /**
@@ -295,8 +285,7 @@ class Application
     public function getModelPath()
     {
         return $this->_modelPath;
-        
-    } // getModelPath()
+    }
     
     
     /**
@@ -308,8 +297,7 @@ class Application
     public function setLibraryPath($path)
     {
         $this->_libraryPath = $path;
-        
-    } // setLibraryPath()
+    }
     
     
     /**
@@ -320,8 +308,7 @@ class Application
     public function getLibraryPath()
     {
         return $this->_libraryPath;
-        
-    } // getLibraryPath()
+    }
     
     
     /**
@@ -335,8 +322,7 @@ class Application
         $this->_layoutPath = $path;
         
         $this->appendIncludePath($path);
-        
-    } // setLayoutPath()
+    }
     
     
     /**
@@ -347,8 +333,7 @@ class Application
     public function getLayoutPath()
     {
         return $this->_layoutPath;
-        
-    } // getLayoutPath()
+    }
     
     
     /**
@@ -362,8 +347,7 @@ class Application
         $this->_viewPath = $path;
         
         $this->appendIncludePath($path);
-        
-    } // setViewPath()
+    }
     
     
     /**
@@ -374,8 +358,7 @@ class Application
     public function getViewPath()
     {
         return $this->_viewPath;
-        
-    } // getViewPath()
+    }
     
     
     /**
@@ -391,12 +374,9 @@ class Application
             $path = realpath($path);
             
             if(!empty($path))
-            {
                 $this->_additionalAutoloadPaths[] = $path;
-            }
         }
-        
-    } // addAdditionalAutoloadPaths()
+    }
     
     
     /**
@@ -410,11 +390,8 @@ class Application
         $path = realpath($path);
         
         if(is_dir($path))
-        {
             set_include_path(get_include_path() . PATH_SEPARATOR . $path);
-        }
-        
-    } // appendIncludePath()
+    }
     
     
     /**
@@ -433,9 +410,7 @@ class Application
         $className = str_replace("\\", "/", $className);
         
         if(substr($className, 0, 11) == "OpenAvanti/")
-        {
             $className = substr($className, 11);
-        }
         
         $fileName = "{$className}.php";
         
@@ -467,8 +442,7 @@ class Application
                 return;
             }
         }
-        
-    } // defaultAutoloader()
+    }
     
     
     /**
@@ -479,8 +453,7 @@ class Application
     public function &getDispatcher()
     {
         return $this->_dispatcher;
-        
-    } // getDispatcher()
+    }
     
     
     /**
@@ -509,8 +482,7 @@ class Application
         }
         
         return false;
-        
-    } // actionHelperExists()
+    }
     
     
     /**
@@ -539,8 +511,7 @@ class Application
         }
         
         return false;
-        
-    } // viewHelperExists()
+    }
     
     
     /**
@@ -554,8 +525,7 @@ class Application
             $init = "init" . $this->_environment;
             $this->$init();
         }
-    
-    } // initEnvironment()
+    }
     
     
     /**
@@ -571,8 +541,7 @@ class Application
             return null;
         
         return $this->_currentModule . "/";
-        
-    } // getBaseDir()
+    }
     
     
     /**
@@ -590,8 +559,8 @@ class Application
         
         $this->_dispatcher->connect($uri);
         
-    } // run()
+    }
     
-} // Application()
+}
 
-?>
+

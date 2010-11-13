@@ -22,7 +22,29 @@ namespace OpenAvanti;
  */
 abstract class ViewHelper
 {
+    /**
+     *
+     */
+    protected $_view = null;
+    
+    
+    /**
+     *
+     *
+     */
+    public function __construct(&$view)
+    {
+        $this->_view = &$view;
+    }
+    
+    
+    /**
+     *
+     *
+     */
+    protected function &getView()
+    {
+        return $this->_view;
+    }
+}
 
-} // ViewHelper()
-
-?>

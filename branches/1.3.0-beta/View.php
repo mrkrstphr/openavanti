@@ -82,7 +82,7 @@ class View
 
         $this->init();
         
-    } // __construct()
+    }
     
     
     /**
@@ -93,8 +93,7 @@ class View
     public function init()
     {
         
-    } // init()
-    
+    }
     
     
     /**
@@ -105,8 +104,7 @@ class View
     public function &getController()
     {
         return $this->_controller;
-    
-    } // getController()
+    }
     
     
     /**
@@ -118,8 +116,7 @@ class View
     public function setLayout($layoutFile)
     {
         $this->_layout = $layoutFile;
-        
-    } // setLayout()
+    }
     
     
     /**
@@ -131,8 +128,7 @@ class View
     public static function setDefaultLayout($layoutFile)
     {
         self::$_defaultLayout = $layoutFile;
-        
-    } // setDefaultLayout()
+    } 
     
     
     /**
@@ -143,8 +139,7 @@ class View
     public static function setViewFileExtension($extension)
     {
         self::$_viewFileExtension = $extension;
-        
-    } // setViewFileExtension()
+    }
     
     
     /**
@@ -160,8 +155,7 @@ class View
     public function setViewScript($view)
     {
         $this->_viewScript = $view;
-    
-    } // setView()
+    }
     
     
     /**
@@ -172,8 +166,7 @@ class View
     public function getViewScript()
     {
         return $this->_viewScript;
-    
-    } // getViewScript()
+    }
     
     
     /**
@@ -218,8 +211,7 @@ class View
         {
             return $this->renderContent();
         }
-
-    } // renderPage()
+    }
 
 
     /**
@@ -242,8 +234,7 @@ class View
                 throw new ViewNotFoundException("View file {$this->_viewScript} not found.");
             }
         }
-        
-    } // renderContent()
+    }
     
     
     /**
@@ -256,8 +247,7 @@ class View
     public function disableLayout($disable = true)
     {
         $this->_renderLayout = !$disable;
-        
-    } // disableLayout()
+    }
     
     
     /**
@@ -270,8 +260,7 @@ class View
     public function disableView($disable = true)
     {
         $this->_renderView = !$disable;
-        
-    } // disableView()
+    }
     
     
     /**
@@ -286,8 +275,7 @@ class View
     {            
         $this->disableLayout($disable);
         $this->disableView($disable);
-        
-    } // disableAllRendering()
+    }
     
     
     /**
@@ -307,8 +295,7 @@ class View
         }
         
         return null;
-        
-    } // __get()
+    }
     
     
     /**
@@ -322,8 +309,7 @@ class View
     public function __set($name, $value)
     {
         $this->_data[$name] = $value;
-        
-    } // __set()
+    }
     
     
     /**
@@ -333,8 +319,7 @@ class View
     public function __isset($name)
     {
         return isset($this->_data[$name]);
-
-    } // __isset()
+    }
     
     
     /**
@@ -350,12 +335,10 @@ class View
         
         if($this->getController()->getApplication()->viewHelperExists($method))
         {
-            $method = new $method;
+            $method = new $method($this);
             return call_user_func_array(array($method, 'render'), $arguments);
         }
-        
-    } // __call()
+    }
 
-} // View()
+} 
 
-?>

@@ -24,7 +24,30 @@ namespace OpenAvanti;
  */
 abstract class ControllerActionHelper
 {
+    /**
+     *
+     */
+    protected $_controller = null;
+    
+    
+    /**
+     *
+     *
+     */
+    public function __construct(&$controller)
+    {
+        $this->_controller = &$controller;
+    }
+    
+    
+    /**
+     *
+     *
+     */
+    protected function &getController()
+    {
+        return $this->_controller;
+    }
+}
 
-} // ControllerActionHelper()
 
-?>
