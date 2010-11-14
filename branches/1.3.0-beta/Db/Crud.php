@@ -26,7 +26,7 @@ use \Exception;
  * @package     openavanti
  * @link        http://www.openavanti.com/documentation/1.4.0/CRUD.php
  */
-class CRUD implements \Iterator, \Countable
+class Crud implements \Iterator, \Countable
 {
     /**
      * Specifies the database profile to use
@@ -362,8 +362,8 @@ class CRUD implements \Iterator, \Countable
         }
 
 
-        $orderClause = isset($queryClauses["order"]) ?
-            "ORDER BY " . $queryClauses["order"] : "";
+        $orderClause = isset($queryClauses['order']) && !empty($queryClauses['order']) ?
+            'ORDER BY ' . $queryClauses['order'] : '';
 
         $tableIdentifier = $this->_database->getIdentifier($this->_tableIdentifier);
         
