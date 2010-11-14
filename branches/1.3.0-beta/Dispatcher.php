@@ -343,7 +343,7 @@ class Dispatcher
         // is_callable() is used over method_exists() in order to properly utilize __call()
         
         if(!empty($this->_request->_actionName) && 
-            is_callable(array($this->_controller, $this->_request->_actionName)))
+            method_exists($this->_controller, $this->_request->_actionName))
         {
             $reflection = new \ReflectionMethod($this->_request->_controllerName, $this->_request->_actionName);
 
@@ -352,6 +352,11 @@ class Dispatcher
             if($numReqArgs > count($this->_request->_arguments))
             {
                 throw new ControllerActionNotFoundException('Controller with matching arguments not found');
+            }
+
+            foreach($this->_request->_arguments as &$arg)
+            {
+                $arg = urldecode($arg);
             }
 
             // Call $oController->$sAction() with arguments $aArguments:
