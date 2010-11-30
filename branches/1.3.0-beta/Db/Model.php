@@ -26,7 +26,7 @@ use \Exception;
  * @author      Kristopher Wilson
  * @link        http://www.openavanti.com/docs/model
  */
-class Model extends CRUD
+class Model extends Crud
 {
 
     protected $_saveEvents = array();
