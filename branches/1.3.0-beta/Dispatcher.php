@@ -32,7 +32,7 @@ class Dispatcher
     
     // Stores the name of the error controller that will handle 
     // dispatching errors:
-    protected $_errorController = "ErrorController";
+    protected $_errorController = 'ErrorController';
     
     /**
      * Stores a reference to the Application object for this application instance
@@ -86,8 +86,8 @@ class Dispatcher
     public function addRoute($pattern, $replacement)
     {
         $this->_routes[] = array(
-            "pattern" => $pattern,
-            "replace" => $replacement
+            'pattern' => $pattern,
+            'replace' => $replacement
         );
     }
 
@@ -134,8 +134,8 @@ class Dispatcher
      */
     protected function normalizeControllerName($controllerName)
     {
-        $controllerName = ucwords(str_replace(array("-", "_"), " ", $controllerName));
-        $controllerName = str_replace(" ", "", $controllerName);
+        $controllerName = ucwords(str_replace(array('-', '_'), ' ', $controllerName));
+        $controllerName = str_replace(' ', '', $controllerName);
         
         return $controllerName;
     }
@@ -166,26 +166,26 @@ class Dispatcher
 
         $this->_response = new Response();
 
-        $controller = "";
-        $action = "";
+        $controller = '';
+        $action = '';
         $arguments = array();
 
-        $requestUri = trim($requestUri, "/");
+        $requestUri = trim($requestUri, '/');
 
         // Explode the request on /
 
-        $request = explode("/", $requestUri);
+        $request = explode('/', $requestUri);
 
-        $moduleName = "default";
+        $moduleName = 'default';
 
         if($this->getApplication()->getUseModules())
         {
-            $moduleName = count($request) > 0 ? $request[0] : "default";
+            $moduleName = count($request) > 0 ? $request[0] : 'default';
 
             if($this->getApplication()->moduleExists($moduleName))
                 array_shift($request);
             else
-                $moduleName = "default";
+                $moduleName = 'default';
         }
 
         // Tell the Application class to initalize our module:
@@ -194,27 +194,27 @@ class Dispatcher
 
         // Apply any URI rewritting rules now that we've removed the module:
 
-        $requestUri = implode("/", $request);
+        $requestUri = implode('/', $request);
         
         foreach($this->_routes as $route)
-            if(preg_match($route["pattern"], $requestUri) != 0)
-                $requestUri = preg_replace($route["pattern"], $route["replace"], $requestUri);
-
+            if(preg_match($route['pattern'], $requestUri) != 0)
+                $requestUri = preg_replace($route['pattern'], $route['replace'], $requestUri);
+        
         $this->_request->_rewrittenUri = $requestUri;
 
-        $request = explode("/", $requestUri);
+        $request = explode('/', $requestUri);
 
         // normalize the controller -
         // example action_items should become ActionItemsController
 
-        $controllerName = count($request) > 0 ? array_shift($request) : "index";
-        $controllerName = !empty($controllerName) ? $controllerName : "index";
+        $controllerName = count($request) > 0 ? array_shift($request) : 'index';
+        $controllerName = !empty($controllerName) ? $controllerName : 'index';
         $controllerName = $this->normalizeControllerName($controllerName);
 
-        $this->_request->_controllerName = $controllerName . "Controller";
+        $this->_request->_controllerName = $controllerName . 'Controller';
 
         $actionName = count($request) > 0 ?
-            str_replace("-", "_", array_shift($request)) : "index";
+            str_replace('-', '_', array_shift($request)) : 'index';
 
         $actionName = \OpenAvanti\Util\String::toCamelCase($actionName);
         $actionName .= 'Action';
@@ -240,8 +240,7 @@ class Dispatcher
         else
         {
             // If we can't find the controller, we must throw an exception:
-            
-            throw new ControllerNotFoundException("Controller \"{$controllerName}\" does not exist");
+            throw new ControllerNotFoundException('Controller "' . $controllerName . '" does not exist');
         }
         
         $this->postDispatch();
@@ -250,9 +249,7 @@ class Dispatcher
         // the layout:
         // TODO move this logic to the view
         if($this->_request->isAjaxRequest())
-        {
             $this->_view->disableLayout();
-        }
         
         // Continue on with the view loader method which will put the appropriate presentation
         // on the screen:
@@ -350,14 +347,10 @@ class Dispatcher
             $numReqArgs = $reflection->getNumberOfRequiredParameters();
 
             if($numReqArgs > count($this->_request->_arguments))
-            {
                 throw new ControllerActionNotFoundException('Controller with matching arguments not found');
-            }
 
             foreach($this->_request->_arguments as &$arg)
-            {
                 $arg = urldecode($arg);
-            }
 
             // Call $oController->$sAction() with arguments $aArguments:
             call_user_func_array(array($this->_controller, $this->_request->_actionName), 
