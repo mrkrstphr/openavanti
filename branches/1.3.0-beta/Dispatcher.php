@@ -245,17 +245,12 @@ class Dispatcher
         
         $this->postDispatch();
         
-        // If this is an AJAX request, let's be assumptious and disable
-        // the layout:
-        // TODO move this logic to the view
-        if($this->_request->isAjaxRequest())
-            $this->_view->disableLayout();
-        
         // Continue on with the view loader method which will put the appropriate presentation
         // on the screen:
         
         $this->_response->sendHeaders();
-        $this->_view->renderPage();
+        
+        echo $this->_view->renderPage();
         
         return $this->_request;
     }
