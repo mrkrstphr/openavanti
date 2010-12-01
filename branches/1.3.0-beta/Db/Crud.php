@@ -367,33 +367,33 @@ class Crud implements \Iterator, \Countable
 
         $tableIdentifier = $this->_database->getIdentifier($this->_tableIdentifier);
         
-        if(isset($queryClauses["columns"]) && !empty($queryClauses["columns"]))
-            $selectColumns = $queryClauses["columns"];
+        if(isset($queryClauses['columns']) && !empty($queryClauses['columns']))
+            $selectColumns = $queryClauses['columns'];
         else
-            $selectColumns = "_" . $tableAlias . ".*";
+            $selectColumns = '_' . $tableAlias . '.*';
         
-        if(isset($queryClauses["distinct"]) && $queryClauses["distinct"] === true)
-            $selectColumns = " DISTINCT {$selectColumns} ";
+        if(isset($queryClauses['distinct']) && $queryClauses['distinct'] === true)
+            $selectColumns = ' DISTINCT ' . $selectColumns . ' ';
         
-        if(isset($queryClauses["count"]) && $queryClauses["count"] === true)
-            $selectColumns = "COUNT(*) AS count";
+        if(isset($queryClauses['count']) && $queryClauses['count'] === true)
+            $selectColumns = 'COUNT(*) AS count';
        
-        if(!isset($queryClauses["params"]) || !is_array($queryClauses["params"]))
-            $queryClauses["params"] = array();
+        if(!isset($queryClauses['params']) || !is_array($queryClauses['params']))
+            $queryClauses['params'] = array();
         
         // Concatenate all the pieces of the query together:
-        $sql = "SELECT {$selectColumns} FROM {$tableIdentifier} AS _{$tableAlias} " . 
-            "{$joinClause} {$whereClause} {$orderClause} {$limitClause} " . 
-            "{$offsetClause}";
+        $sql = 'SELECT ' . $selectColumns . ' FROM ' . $tableIdentifier . 
+            ' AS _' . $tableAlias . ' ' . $joinClause . ' ' . $whereClause . 
+            ' ' . $orderClause . ' ' . $limitClause . ' ' . $offsetClause;
         
-        if(!($this->_dataSet = $this->_database->query($sql, $queryClauses["params"])))
-            throw new Exception("Failed on Query: " . $this->_database->getLastError());
+        if(!($this->_dataSet = $this->_database->query($sql, $queryClauses['params'])))
+            throw new Exception('Failed on Query: ' . $this->_database->getLastError());
 
         // Loop the data and create member variables
         if($this->_dataSet->count() != 0)
             $this->load($this->_dataSet->current());
 
-        if(isset($queryClauses["count"]) && $queryClauses["count"] == true)
+        if(isset($queryClauses['count']) && $queryClauses['count'] == true)
             return $this->_dataSet->current()->count;
         
         return $this;
