@@ -39,59 +39,54 @@ class Request
     
     /**
      * Constructor. Determines information about the request type and 
-     * connection type and stores it within the class.       
-     *
+     * connection type and stores it within the class.
      */
     public function __construct()
     {
-        $this->_requestType = $_SERVER["REQUEST_METHOD"];
+        $this->_requestType = strtolower($_SERVER['REQUEST_METHOD']);
         
-        $this->_secureConnection = isset($_SERVER["HTTPS"]) && 
-            !empty($_SERVER["HTTPS"]);
-    
-    } // __construct()
+        $this->_secureConnection = isset($_SERVER['HTTPS']) && 
+            !empty($_SERVER['HTTPS']);
+    }
     
     
     /**
      * Returns true if the current request came via a secure connection, or 
      * false otherwise.
      *
-     * @returns bool True if the current request is a secure connection, 
+     * @return bool True if the current request is a secure connection, 
      *      false otherwise
      */                             
     public function isSecureConnection()
     {
         return $this->_secureConnection;
-        
-    } // isSecureConnection()
+    }
     
     
     /**
      * Returns true if the current request is a POST request, or false 
      * otherwise.
      *
-     * @returns bool True if the current request is a POST request, false 
+     * @return bool True if the current request is a POST request, false 
      *      otherwise
      */                             
     public function isPostRequest()
     {
-        return strtolower($this->_requestType) == "post";
-        
-    } // isPostRequest()
+        return strtolower($this->_requestType) == 'post';
+    }
     
     
     /**
      * Returns true if the current request is a GET request, or false 
      * otherwise.
      *
-     * @returns bool True if the current request is a GET request, false 
+     * @return bool True if the current request is a GET request, false 
      *      otherwise
      */                             
     public function isGetRequest()
     {
-        return strtolower($this->_requestType) == "get";
-        
-    } // isGetRequest()
+        return strtolower($this->_requestType) == 'get';
+    }
     
     
     /**
@@ -101,8 +96,7 @@ class Request
     public function isPostEmpty()
     {
         return empty($_POST);
-        
-    } // isPostEmpty()
+    }
     
     
     /**
@@ -112,83 +106,76 @@ class Request
     public function isGetEmpty()
     {
         return empty($_GET);
-        
-    } // isGetEmpty()
+    }
     
     
     /**
      * Determines whether or not the current HTTP request came via AJAX.                                             
      * 
-     * @returns boolean True of the request is via AJAX, false otherwise 
+     * @return boolean True of the request is via AJAX, false otherwise 
      */
     public static function isAjaxRequest()
     {
-        return isset($_SERVER["HTTP_X_REQUESTED_WITH"]);
-        
-    } // isAjaxRequest()
+        return isset($_SERVER['HTTP_X_REQUESTED_WITH']);
+    }
 
 
     /**
      * Returns the requested URI as it was passed to the server
      * 
-     * @returns string The requested URI
+     * @return string The requested URI
      */
     public function getUri()
     {
         return $this->_uri;
-        
-    } // getUri()
+    }
     
     
     /**
      * Returns the requested URI after any user rewrites are performed
      * through the dispatching process
      * 
-     * @returns string The requested URI after any user rewrites are 
+     * @return string The requested URI after any user rewrites are 
      *      performed
      */
     public function getRewrittenUri()
     {
         return $this->_rewrittenUri;
-        
-    } // getRewrittenUri()
+    }
 
 
     /**
      * Returns the controller component of the request from the URI
      * 
-     * @returns string The controller part of the request
+     * @return string The controller part of the request
      */
     public function getController()
     {
         return $this->_controllerName;
-        
-    } // getController()
+    }
     
 
     /**
      * Returns the action component of the request from the URI
      * 
-     * @returns string The action part of the request
+     * @return string The action part of the request
      */
     public function getAction()
     {
         return $this->_actionName;
-        
-    } // getAction()
+    }
     
 
     /**
      * Returns all arguments of the request from the URI
      * 
-     * @returns string The arguments of the request
+     * @return string The arguments of the request
      */
     public function getArguments()
     {
         return $this->_arguments;
-        
-    } // getAction()
+    }
 
-} // Request()
+}
 
-?>
+
