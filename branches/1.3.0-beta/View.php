@@ -324,11 +324,32 @@ class View
      * 
      * @argument string The name of the data variable being set
      * @argument string The value of the data variable being set
-     * @returns void
      */
     public function __set($name, $value)
     {
         $this->_data[$name] = $value;
+    }
+    
+    
+    /**
+     * Returns a reference to the view data set
+     *
+     * @return array A reference to the view dataset
+     */
+    public function &getData()
+    {
+        return $this->_data;
+    }
+    
+    
+    /**
+     * Overwrites the view data with the supplied data
+     *
+     * @argument array The data to store in the view file
+     */
+    public function setData($data)
+    {
+        $this->_data = $data;
     }
     
     
