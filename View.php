@@ -33,7 +33,7 @@ class View
     /**
      * Stores data used by the actual view file for redering:
      */
-    public $_data = array();
+    protected $_data = array();
     
     /**
      * Stores the default layout to use if no other is specified:
@@ -43,7 +43,7 @@ class View
     /**
      * Stores the layout to render, overriding any default specified:
      */
-    public $_layout = "";
+    protected $_layout = "";
     
     /**
      * Stores the view file to render inside the layout through GetContent():
@@ -58,12 +58,15 @@ class View
     /**
      * Toggles whether to render the layout:
      */
-    public $_renderLayout = true;
+    protected $_renderLayout = true;
     
     /**
      * Toggles whether to render the view:
      */
-    public $_renderView = true;
+    protected $_renderView = true;
+    
+    
+    protected $_isBuffering = false;
     
     
     /**
@@ -80,8 +83,13 @@ class View
         
         $this->_viewScript = $viewFileName;
 
-        $this->init();
+        // If this is an AJAX request, let's be assumptious and disable
+        // the layout:
         
+        if($this->_controller->getRequest()->isAjaxRequest())
+            $this->disableLayout();
+
+        $this->init();
     }
     
     
@@ -150,7 +158,6 @@ class View
      *       
      * @param string $view The file name of the view file that should be 
      *      loaded.
-     * @returns void
      */ 
     public function setViewScript($view)
     {
@@ -171,15 +178,19 @@ class View
     
     /**
      * Responsible for rendering the page, or the layout file specifically. 
-     * The view file will be rendered when GetContent() is called by
+     * The view file will be rendered when renderContent() is called by
      * the layout. 
      * 
-     * @returns void
+     * @returns string The rendered page
      */
     public function renderPage()
     {
         ob_start();
+        
+        $this->_isBuffering = true;
 
+        $contents = '';
+        
         if($this->_renderLayout)
         {
             if(!empty($this->_layout))
@@ -204,21 +215,26 @@ class View
                     throw new LayoutNotFoundException("Layout {$this->_layout} not found.");
                 }
             }
-
-            ob_flush();
         }
         else if($this->_renderView)
         {
-            return $this->renderContent();
+            $this->renderContent();
         }
+        
+        $contents .= ob_get_contents();
+        
+        ob_end_clean();
+        
+        $this->_isBuffering = false;
+        
+        
+        return $contents;
     }
 
 
     /**
      * Called from the layout file to render the action specific view file 
      * into the layout.
-     * 
-     * @returns void
      */
     public function renderContent()
     {
@@ -226,11 +242,16 @@ class View
         {
             if(($view = \OpenAvanti\Util\File::fileExistsInPath($this->_viewScript)) !== false)
             {
-                require($view);
+                require $view;
             }
             else
             {
-                ob_clean();
+                if($this->_isBuffering)
+                {
+                    ob_clean();
+                    $this->_isBuffering = false;
+                }
+                
                 throw new ViewNotFoundException("View file {$this->_viewScript} not found.");
             }
         }
@@ -242,7 +263,6 @@ class View
      * unless it is also disabled.
      * 
      * @argument bool Optional; Should the layout be disabled? Default: true
-     * @returns void
      */
     public function disableLayout($disable = true)
     {
