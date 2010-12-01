@@ -1108,13 +1108,50 @@ class Crud implements \Iterator, \Countable
             if($this->_database->query($sql, $params) === false)
                 throw new Exception($this->_database->getLastError());
             
-            // For singular primary keys, let's grab the autoincrement or serial value
+            // Grab the record we created to pull any default or trigger 
+            // created values into the object
             
             if(count($primaryKeys) == 1)
             {
                 $pk = current($primaryKeys);
+                $id = $this->_database->lastInsertId($this->_tableIdentifier, $pk);
                 
-                $this->_data[$pk] = $this->_database->lastInsertId($this->_tableIdentifier, $pk);
+                $sql = 'SELECT * FROM ' . $this->_tableIdentifier . 
+                    ' WHERE ' . $pk . ' = ?';
+                    
+                $record = $this->_database->query($sql, array($id));
+                
+                if(!empty($record))
+                {
+                    $record = current($record);
+                    $this->_data = array_merge($this->_data, (array)$record);
+                }
+                
+                $this->_data[$pk] = $id;
+            }
+            else
+            {
+                $sql = 'SELECT * FROM ' . $this->_tableIdentifier . 
+                    ' WHERE ' ;
+                $where = '';
+                
+                $params = array();
+                
+                foreach($primaryKeys as $key)
+                {
+                    $where .= (!empty($where) ? ' AND ' : '') . $key . ' = ? ';
+                    $params[] = $this->_data[$key];
+                }
+                
+                $sql = $sql . $where;
+                
+                $record = $this->_database->query($sql, $params);
+                
+                if(!empty($record))
+                {
+                    $record = current($record);
+                    $this->_data = array_merge($this->_data, (array)$record);
+                }
             }
             
             return true;
