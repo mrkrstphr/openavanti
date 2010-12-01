@@ -36,17 +36,15 @@ class Response
      * @argument string The value of the header
      * @argument bool Optional; Should this header replace a previous 
      *      similar one? Default: false
-     * @returns void
      */
     public function setHeader($header, $value, $replace = false)
     {
         $this->_headers[$header] = array(
-            "header" => $header, 
-            "value" => $value, 
-            "replace" => $replace
+            'header' => $header, 
+            'value' => $value, 
+            'replace' => $replace
         );
-        
-    } // setHeader()
+    }
     
     
     /**
@@ -61,20 +59,18 @@ class Response
      *   )
      * 
      * @argument array An array of header data to add
-     * @returns void
      */
     public function setHeaders(array $headers)
     {
         $this->_headers += $headers;
-        
-    } // setHeaders()
+    }
     
     
     /**
      * Returns the specified header, if it exists
      * 
      * @argument string The header to retrieve
-     * @returns array The specified header
+     * @return array The specified header
      */
     public function getHeader($header)
     {
@@ -84,70 +80,56 @@ class Response
         }
         
         return null;
-        
-    } // getHeader()
+    }
     
     
     /**
      * Returns all headers added to this object
      * 
-     * @returns array The array of headers added to this object
+     * @return array The array of headers added to this object
      */
     public function getHeaders()
     {
         return $this->_headers;
-        
-    } // getHeaders()
+    }
     
     
     /**
      * Clears the specified header if it is stored in this object
      * 
      * @argument string The header to remove
-     * @returns void
      */
     public function clearHeader($header)
     {
         if(isset($this->_headers[$header]))
-        {
             unset($this->_headers[$header]);
-        }
-        
-    } // clearHeader()
+    }
     
     
     /**
      * Clears all headers stored in this object
-     * 
-     * @returns void
      */
     public function clearHeaders()
     {
         $this->_headers = array();
-        
-    } // clearHeaders()
+    }
     
     
     /**
      * Sends all headers added to the Response object
      * 
-     * @returns bool True if headers were sent, false otherwise
+     * @return bool True if headers were sent, false otherwise
      */
     public function sendHeaders()
     {
         if(headers_sent())
-        {
             return false;
-        }
         
         foreach($this->_headers as $name => $header)
-        {
-            header($name . ": " . $header["value"], $header["replace"]);
-        }
+            header($name . ': ' . $header['value'], $header['replace']);
         
         return true;
-        
-    } // sendHeaders()
+    }
     
     
     /**
@@ -155,20 +137,19 @@ class Response
      * have already been sent.
      *       
      * @argument int The HTTP status code
-     * @returns bool True if the operation was successful, false on failure
+     * @return bool True if the operation was successful, false on failure
      */
-    public function setHTTPStatus($code)
+    public function setHttpStatus($code)
     {
         if(!headers_sent())
         {
-            header(" ", true, $code);
+            header(' ', true, $code);
             
             return true;
         }
         
         return false;
-        
-    } // setHTTPStatus()
+    }
     
     
     /**
@@ -179,42 +160,34 @@ class Response
      *
      * @argument string The error message to output
      * @argument int The response code to send to the browser, default: 400
-     * @returns void                         
      */                     
     public function ajaxError($errorString, $responseCode = 400)
     {
-        $this->setHTTPStatus($responseCode);
+        $this->setHttpStatus($responseCode);
         
         echo $errorString;
-        
-    } // ajaxError()
+    }
     
     
     /**
      * Returns the internal 404 status to determine if a 404 error flag was triggered
      *
-     * @returns bool True if a 404 error was encountered, false otherwise
+     * @return bool True if a 404 error was encountered, false otherwise
      */                             
     public function is404Error()
     {
         return $this->_is404Error;
-        
-    } // is404Error()
+    }
     
     
     /**
      * Sets or clears the internal 404 error status flag. 
      * 
      * @argument bool True to trigger a 404 error, false to clear the 404 flag, default: true
-     * @returns void
      */ 
     public function set404Error($is404Error = true)
     {
         $this->_is404Error = $is404Error;
-        
-    } // set404Error()
+    }
+}
 
-
-} // Response()
-
-?>
