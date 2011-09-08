@@ -13,7 +13,7 @@
 
 namespace OpenAvanti\Form\Element;
 
-require_once __DIR__ . "/../Element.php";
+require_once __DIR__ . '/../Element.php';
 
 use \OpenAvanti\Form\Element;
 
@@ -29,13 +29,12 @@ use \OpenAvanti\Form\Element;
 abstract class Labeled extends Element
 {
     /**
-     * @var LabelElement The label for this FormElement
+     * @var Label The label for this FormElement
      */
     protected $_label = null;
     
-    
     /**
-     * Sets up the FormElement and the LabelElement
+     * Sets up the Element and the Label
      *
      * @param string $name The name attribute of the FormField
      * @param string $label The text of the label of the FormField
@@ -46,21 +45,18 @@ abstract class Labeled extends Element
     {        
         parent::__construct($name, $attributes);
         
-        
-        $this->label = new Label($this->_id, $label);
+        $this->_label = new Label($this->_id, $label);
     }
     
-    
     /**
-     * Returns the LabelElement for the FormField
+     * Returns the Label for the FormField
      *
-     * @return LabelElement The label for the FormField
+     * @return Label The label for the FormField
      */
     public function &getLabel()
     {
         return $this->_label;
     }
-    
     
     /**
      * Provides read only access to protected or private attributes, or
@@ -74,11 +70,7 @@ abstract class Labeled extends Element
      */
     public function __get($name)
     {
-        if($name == "label")
-        {
+        if($name == 'label')
             return $this->getLabel();
-        }
     }
-
 }
-
