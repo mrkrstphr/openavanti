@@ -194,8 +194,15 @@ class Form
             }
         }
         
-    } // propagateFormValues()
+    }
     
+    /**
+     *
+     */
+    public function getData()
+    {
+        return $this->_data;
+    }
     
     /**
      * Adds a new form element to this form class.
