@@ -9,7 +9,7 @@
  * @package     openavanti
  * @license     http://www.openavanti.com/license
  * @link        http://www.openavanti.com
- * @version     SVN: $Rev$ $LastChangedDate$
+ * @version     1.3.0-beta
  */
 
 namespace OpenAvanti;
