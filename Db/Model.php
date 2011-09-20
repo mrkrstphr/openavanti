@@ -80,6 +80,21 @@ class Model extends Crud
         
     } // init()
     
+    
+    /**
+     *
+     *
+     */
+    public function getPrimaryKeyColumn()
+    {
+        $pks = $this->_database->getTablePrimaryKey($this->_tableIdentifier);
+        
+        if(is_array($pks) && count($pks) == 1)
+            $pks = current($pks);
+        
+        return $pks;
+    }
+    
 
     /**
      * Wraps CRUD's Save() method to invoke the events ValidateUpdate(), Validate(), 

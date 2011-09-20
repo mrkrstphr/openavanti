@@ -26,6 +26,16 @@ namespace OpenAvanti;
 class Application
 {
     /**
+     *
+     */
+    protected $_applicationNamespace;
+    
+    /**
+     *
+     */
+    protected $_applicationPath = '';
+    
+    /**
      * Stores the path to the non modular application controllers
      */
     protected $_controllerPath = "";
@@ -103,6 +113,8 @@ class Application
         
         $this->_modulePath = realpath("{$documentRoot}/../application/modules");
         
+        $this->_applicationPath = realpath($documentRoot . '/../application');
+        
         $this->_controllerPath = realpath("{$documentRoot}/../application/controllers");
         $this->_modelPath = realpath("{$documentRoot}/../application/models");
         $this->_modulePath = realpath("{$documentRoot}/../application/modules");
@@ -116,6 +128,16 @@ class Application
         spl_autoload_register(array($this, "defaultAutoloader"));
         
         $this->_dispatcher = new Dispatcher($this);
+    }
+   
+     
+    /**
+     *
+     *
+     */
+    public function setApplicationNamespace($namespace)
+    {
+        $this->_applicationNamespace = $namespace;
     }
    
     
@@ -215,7 +237,7 @@ class Application
      */
     public function getCurrentModule()
     {
-        return $this->_currentModule;
+        return $this->_useModules ? $this->_currentModule : null;
     }
 
 
@@ -409,6 +431,12 @@ class Application
         // normalize the class name for namespaces:
         $className = str_replace("\\", "/", $className);
         
+        if(strtolower(substr($className, 0, strlen($this->_applicationNamespace) + 1)) ==
+            strtolower($this->_applicationNamespace) . '/')
+        {
+            $className = substr($className, strlen($this->_applicationNamespace) + 1);
+        }
+        
         if(substr($className, 0, 11) == "OpenAvanti/")
             $className = substr($className, 11);
         
@@ -424,6 +452,8 @@ class Application
             $this->_libraryPath . '/Form',
             $this->_libraryPath . '/Form/Element'
         );
+        
+        $paths[] = $this->_applicationPath;
         
         $paths[] = "{$this->_modulePath}/{$this->_currentModule}/controllers";
         $paths[] = "{$this->_modulePath}/{$this->_currentModule}/controllers/helpers";
