@@ -468,7 +468,7 @@ class Application
             
             if(file_exists($candidate))
             {
-                include_once $candidate;
+                require_once $candidate;
                 return;
             }
         }
@@ -494,20 +494,18 @@ class Application
      */
     public function actionHelperExists($helper)
     {
-        if(class_exists($helper) && is_subclass_of($helper, "ControllerActionHelper"))
+        if(class_exists($helper, false) && is_subclass_of($helper, 'ControllerActionHelper'))
         {
             return true;
         }
-        else if(file_exists($this->_controllerPath . "/helpers/" . ucfirst($helper) . ".php"))
+        else if(file_exists($this->_controllerPath . '/helpers/' . ucfirst($helper) . '.php'))
         {
-            require_once $this->_controllerPath . "/helpers/" . ucfirst($helper) . ".php";
-            
+            require_once $this->_controllerPath . '/helpers/' . ucfirst($helper) . '.php';
             return true;
         }
-        else if(file_exists("{$this->_modulePath}/{$this->_currentModule}/controllers/helpers/" . ucfirst($helper) . ".php"))
+        else if(file_exists("{$this->_modulePath}/{$this->_currentModule}/controllers/helpers/" . ucfirst($helper) . '.php'))
         {
-            require_once "{$this->_modulePath}/{$this->_currentModule}/controllers/helpers/" . ucfirst($helper) . ".php";
-            
+            require_once "{$this->_modulePath}/{$this->_currentModule}/controllers/helpers/" . ucfirst($helper) . '.php';
             return true;
         }
         
