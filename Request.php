@@ -175,7 +175,19 @@ class Request
     {
         return $this->_arguments;
     }
-
+    
+    /**
+     *
+     */
+    public function getParam($name, $default = '')
+    {
+        if(isset($_POST[$name]))
+            return $_POST[$name];
+        else if(isset($_GET[$name]))
+            return $_GET[$name];
+        
+        return $default;
+    }
 }
 
 
