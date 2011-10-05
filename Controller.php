@@ -21,7 +21,7 @@ namespace OpenAvanti;
  * @author      Kristopher Wilson
  * @package     openavanti
  */
-class Controller
+abstract class Controller
 {
     /**
      * Stores a reference to the dispatcher that spawned this controller
@@ -290,7 +290,7 @@ class Controller
     public function __call($method, $arguments)
     {
         $method = $method . 'Helper';
-
+        
         if ($this->getApplication()->actionHelperExists($method)) {
             $class = new $method($this);
             return call_user_func_array(array($class, 'process'), $arguments);
