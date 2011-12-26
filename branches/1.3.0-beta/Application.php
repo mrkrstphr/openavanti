@@ -469,9 +469,11 @@ class Application
             if(file_exists($candidate))
             {
                 require_once $candidate;
-                return;
+                return true;
             }
         }
+        
+        return false;
     }
     
     
@@ -517,25 +519,23 @@ class Application
      * Determines if a view helper class exists and, if so, loads the class file
      *
      * @param string $helper The name of the helper class to check for existance and load
-     * @return bool True if the helper exists and is loaded, false otherwise
+     * @return mixed Returns the namespaced class name for the found class
+     *      file, or false if not found
      */
     public function viewHelperExists($helper)
     {
-        if(class_exists($helper) && is_subclass_of($helper, "ViewHelper"))
-        {
-            return true;
-        }
-        else if(file_exists("{$this->_viewPath}/helpers/" . ucfirst($helper) . ".php"))
-        {
+        if (class_exists($helper) && is_subclass_of($helper, 'ViewHelper')) {
+            return $helper;
+        } else if(file_exists("{$this->_viewPath}/helpers/" . ucfirst($helper) . ".php")) {
             require_once $this->_viewPath . "/helpers/" . ucfirst($helper) . ".php";
             
-            return true;
-        }
-        else if(file_exists("{$this->_modulePath}/{$this->_currentModule}/views/helpers/" . ucfirst($helper) . ".php"))
-        {
+            return $helper;
+        } else if(file_exists("{$this->_modulePath}/{$this->_currentModule}/views/helpers/" . ucfirst($helper) . ".php")) {
             require_once "{$this->_modulePath}/{$this->_currentModule}/views/helpers/" . ucfirst($helper) . ".php";
             
-            return true;
+            return $helper;
+        } else if ($this->defaultAutoloader('\\OpenAvanti\\View\\Helper\\' . $helper)) {
+            return '\\OpenAvanti\\View\\Helper\\' . $helper;
         }
         
         return false;

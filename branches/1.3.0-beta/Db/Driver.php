@@ -93,7 +93,7 @@ abstract class Driver
      * @return string|false A ResultSet object containing the results of the database query or
      *      false on failure
      */
-    public function &query($sql, Array $params = array(), $selMode = \PDO::FETCH_OBJ)
+    public function &query($sql, array $params = array(), $selMode = \PDO::FETCH_OBJ)
     {
         $statement = $this->_databaseResource->prepare($sql);
         

@@ -372,13 +372,15 @@ class View
      */
     public function __call($method, $arguments)
     {
-        $method = $method . 'Helper';
+        $method = $method;
         
-        if($this->getController()->getApplication()->viewHelperExists($method))
+        if(($method = $this->getController()->getApplication()->viewHelperExists($method)) !== false)
         {
             $method = new $method($this);
             return call_user_func_array(array($method, 'render'), $arguments);
         }
+        
+        throw new \Exception('View Helper [' . $method . '] not found');
     }
 
 } 
