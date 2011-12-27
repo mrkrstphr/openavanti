@@ -28,7 +28,7 @@ class Application
     /**
      *
      */
-    protected $_applicationNamespace;
+    protected $_namespace;
     
     /**
      *
@@ -111,17 +111,17 @@ class Application
         else
             $documentRoot = realpath(__DIR__ . "/../../public");
         
-        $this->_modulePath = realpath("{$documentRoot}/../application/modules");
+        $this->_modulePath = realpath("{$documentRoot}/../application/module");
         
         $this->_applicationPath = realpath($documentRoot . '/../application');
         
-        $this->_controllerPath = realpath("{$documentRoot}/../application/controllers");
-        $this->_modelPath = realpath("{$documentRoot}/../application/models");
-        $this->_modulePath = realpath("{$documentRoot}/../application/modules");
-        $this->_formPath = realpath("{$documentRoot}/../application/forms");
+        $this->_controllerPath = realpath("{$documentRoot}/../application/controller");
+        $this->_modelPath = realpath("{$documentRoot}/../application/model");
+        $this->_modulePath = realpath("{$documentRoot}/../application/module");
+        $this->_formPath = realpath("{$documentRoot}/../application/form");
         $this->_libraryPath = realpath("{$documentRoot}/../library/openavanti");
-        $this->_layoutPath = realpath("{$documentRoot}/../application/layouts");
-        $this->_viewPath = realpath("{$documentRoot}/../application/views");
+        $this->_layoutPath = realpath("{$documentRoot}/../application/layout");
+        $this->_viewPath = realpath("{$documentRoot}/../application/view");
         
         // set our default autoloader
         
@@ -129,17 +129,6 @@ class Application
         
         $this->_dispatcher = new Dispatcher($this);
     }
-   
-     
-    /**
-     *
-     *
-     */
-    public function setApplicationNamespace($namespace)
-    {
-        $this->_applicationNamespace = $namespace;
-    }
-   
     
     /**
      * Sets the current working environment of the application.
@@ -189,6 +178,22 @@ class Application
     {
         
     }
+    
+    /**
+     *
+     */
+    public function setNamespace($namespace)
+    {
+        $this->_namespace = $namespace;
+    }
+    
+    /**
+     *
+     */
+    public function getNamespace()
+    {
+        return $this->_namespace;
+    }
   
 
     /**
@@ -226,8 +231,8 @@ class Application
         }
         
         set_include_path(get_include_path() .
-            PATH_SEPARATOR . "{$this->_modulePath}/{$moduleName}/layouts" .
-            PATH_SEPARATOR . "{$this->_modulePath}/{$moduleName}/views");
+            PATH_SEPARATOR . "{$this->_modulePath}/{$moduleName}/layout" .
+            PATH_SEPARATOR . "{$this->_modulePath}/{$moduleName}/view");
     }
     
     
@@ -431,10 +436,10 @@ class Application
         // normalize the class name for namespaces:
         $className = str_replace("\\", "/", $className);
         
-        if(strtolower(substr($className, 0, strlen($this->_applicationNamespace) + 1)) ==
-            strtolower($this->_applicationNamespace) . '/')
+        if(strtolower(substr($className, 0, strlen($this->_namespace) + 1)) ==
+            strtolower($this->_namespace) . '/')
         {
-            $className = substr($className, strlen($this->_applicationNamespace) + 1);
+            $className = substr($className, strlen($this->_namespace) + 1);
         }
         
         if(substr($className, 0, 11) == "OpenAvanti/")
@@ -444,10 +449,10 @@ class Application
         
         $paths = array(
             $this->_controllerPath,
-            $this->_controllerPath . "/helpers",
+            $this->_controllerPath . "/helper",
             $this->_modelPath,
             $this->_formPath,
-            $this->_viewPath . "/helpers",
+            $this->_viewPath . "/helper",
             $this->_libraryPath,
             $this->_libraryPath . '/Form',
             $this->_libraryPath . '/Form/Element'
@@ -455,19 +460,20 @@ class Application
         
         $paths[] = $this->_applicationPath;
         
-        $paths[] = "{$this->_modulePath}/{$this->_currentModule}/controllers";
-        $paths[] = "{$this->_modulePath}/{$this->_currentModule}/controllers/helpers";
-        $paths[] = "{$this->_modulePath}/{$this->_currentModule}/forms";
-        $paths[] = "{$this->_modulePath}/{$this->_currentModule}/views/helpers";
+        $paths[] = "{$this->_modulePath}/{$this->_currentModule}/controller";
+        $paths[] = "{$this->_modulePath}/{$this->_currentModule}/controller/helper";
+        $paths[] = "{$this->_modulePath}/{$this->_currentModule}/form";
+        $paths[] = "{$this->_modulePath}/{$this->_currentModule}/view/helper";
         
         $paths = array_merge($paths, $this->_additionalAutoloadPaths);
         
         foreach($paths as $path)
         {
             $candidate = "{$path}/{$fileName}";
-            
+            echo '---- TESTING candidate: ' . $candidate . '<br />';
             if(file_exists($candidate))
             {
+                echo '----- REQURIING!H!!!<br/>';
                 require_once $candidate;
                 return true;
             }
@@ -524,14 +530,41 @@ class Application
      */
     public function viewHelperExists($helper)
     {
-        if (class_exists($helper) && is_subclass_of($helper, 'ViewHelper')) {
+        $candidates = array(
+            '\\' . $this->getNamespace() . '\\view\\helper\\' . $helper,
+            '\\' . $this->getNamespace() . '\\' . $this->getCurrentModule() . '\\view\\helper\\' . $helper,
+            '\\OpenAvanti\\View\\Helper\\' . $helper
+        );
+        
+        foreach ($candidates as $candidate) {
+            echo '-- Trying ' . $candidate . '<br/>';
+            if (class_exists($candidate) && is_subclass_of($helper, '\\OpenAvanti\\View\\HelperAbstract')) {
+                return $candidate;
+            }
+        }
+        
+        echo '<pre>' . print_r(get_declared_classes(), true) . '</pre>';
+        
+        return false;
+        
+        
+        echo '---- Looking for [' . $helper . ']<br />';
+        if (class_exists($helper) && is_subclass_of($helper, '\\OpenAvanti\\View\\HelperAbstract')) {
+            echo '------ Found class_exists()<br/>';
             return $helper;
         } else if(file_exists("{$this->_viewPath}/helpers/" . ucfirst($helper) . ".php")) {
+            echo '------ Found in Helper path<br/>';
             require_once $this->_viewPath . "/helpers/" . ucfirst($helper) . ".php";
             
             return $helper;
         } else if(file_exists("{$this->_modulePath}/{$this->_currentModule}/views/helpers/" . ucfirst($helper) . ".php")) {
+            echo '------ Found in module Helper path<br/>';
+            echo '-------- Loading: ' . "{$this->_modulePath}/{$this->_currentModule}/views/helpers/" . ucfirst($helper) . ".php";
+            echo '<pre>' . print_r(get_declared_classes(), true) . '</pre>';
             require_once "{$this->_modulePath}/{$this->_currentModule}/views/helpers/" . ucfirst($helper) . ".php";
+            
+            echo '-X-X-X- EXITING<br/>';
+            exit;
             
             return $helper;
         } else if ($this->defaultAutoloader('\\OpenAvanti\\View\\Helper\\' . $helper)) {

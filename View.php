@@ -372,9 +372,9 @@ class View
      */
     public function __call($helperName, $arguments)
     {
-        $method = $helperName;
+        echo '-- Received call for [' . $helperName . ']<br/>';
         
-        if(($method = $this->getController()->getApplication()->viewHelperExists($method)) !== false)
+        if(($method = $this->getController()->getApplication()->viewHelperExists($helperName)) !== false)
         {
             $method = new $method($this);
             return call_user_func_array(array($method, 'render'), $arguments);
