@@ -17,7 +17,7 @@ namespace OpenAvanti\View\Helper;
  * A view helper for loading a partial with data and returning the rendered
  * output
  */
-class Partial extends \OpenAvanti\ViewHelper
+class Partial extends \OpenAvanti\View\HelperAbstract
 {
     /**
      * Loads the view file, passes the argument and returns the rendered
