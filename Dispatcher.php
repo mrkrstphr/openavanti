@@ -176,16 +176,18 @@ class Dispatcher
 
         $request = explode('/', $requestUri);
 
-        $moduleName = 'default';
+        $defaultModule = $this->getApplication()->getDefaultModule();
+
+        $moduleName = $defaultModule;
 
         if($this->getApplication()->getUseModules())
         {
-            $moduleName = count($request) > 0 ? $request[0] : 'default';
+            $moduleName = count($request) > 0 ? $request[0] : $defaultModule;
 
             if($this->getApplication()->moduleExists($moduleName))
                 array_shift($request);
             else
-                $moduleName = 'default';
+                $moduleName = $defaultModule;
         }
 
         // Tell the Application class to initalize our module:
@@ -209,9 +211,17 @@ class Dispatcher
 
         $controllerName = count($request) > 0 ? array_shift($request) : 'index';
         $controllerName = !empty($controllerName) ? $controllerName : 'index';
-        $controllerName = $this->normalizeControllerName($controllerName);
-
-        $this->_request->_controllerName = $controllerName . 'Controller';
+        $controllerName = 'controller\\' . $this->normalizeControllerName($controllerName);
+        
+        if ($this->getApplication()->getUseModules()) {
+            $controllerName = $this->getApplication()->getCurrentModule() .
+                '\\' . $controllerName;
+        }
+        
+        $controllerName = '\\' . $this->getApplication()->getNamespace() .
+            '\\' . $controllerName;
+        
+        $this->_request->_controllerName = $controllerName;
 
         $actionName = count($request) > 0 ?
             str_replace('-', '_', array_shift($request)) : 'index';

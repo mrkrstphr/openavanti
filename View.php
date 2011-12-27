@@ -372,8 +372,6 @@ class View
      */
     public function __call($helperName, $arguments)
     {
-        echo '-- Received call for [' . $helperName . ']<br/>';
-        
         if(($method = $this->getController()->getApplication()->viewHelperExists($helperName)) !== false)
         {
             $method = new $method($this);
