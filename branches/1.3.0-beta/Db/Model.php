@@ -43,6 +43,8 @@ class Model extends Crud
         if(empty($this->_tableIdentifier))
         {
             $className = get_class($this);
+            $className = substr($className, strrpos($className, '\\') + 1);
+            
             $tableName = \OpenAvanti\Util\String::fromCamelCase($className);
             
             $this->_tableIdentifier = \OpenAvanti\Util\String::toPlural($tableName);

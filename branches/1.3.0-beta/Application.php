@@ -28,7 +28,12 @@ class Application
     /**
      *
      */
-    protected $_namespace;
+    protected $_namespace = '';
+    
+    /**
+     *
+     */
+    protected $defaultModule = '';
     
     /**
      *
@@ -268,6 +273,21 @@ class Application
         return $this->_useModules;
     }
    
+    /**
+     *
+     */
+    public function setDefaultModule($defaultModule)
+    {
+        $this->_defaultModule = $defaultModule;
+    }
+    
+    /**
+     *
+     */
+    public function getDefaultModule()
+    {
+        return $this->_defaultModule;
+    }
     
     /**
      * Sets the path to the controllers directory, which is used by the
@@ -434,48 +454,21 @@ class Application
     public function defaultAutoloader($className)
     {
         // normalize the class name for namespaces:
-        $className = str_replace("\\", "/", $className);
+        $className = str_replace('\\', '/', $className);
         
-        if(strtolower(substr($className, 0, strlen($this->_namespace) + 1)) ==
-            strtolower($this->_namespace) . '/')
-        {
-            $className = substr($className, strlen($this->_namespace) + 1);
-        }
+        $namespace = substr($className, 0, strpos($className, '/'));
+        $className = substr($className, strpos($className, '/') + 1);
         
-        if(substr($className, 0, 11) == "OpenAvanti/")
-            $className = substr($className, 11);
-        
-        $fileName = "{$className}.php";
-        
-        $paths = array(
-            $this->_controllerPath,
-            $this->_controllerPath . "/helper",
-            $this->_modelPath,
-            $this->_formPath,
-            $this->_viewPath . "/helper",
-            $this->_libraryPath,
-            $this->_libraryPath . '/Form',
-            $this->_libraryPath . '/Form/Element'
+        $candidates = array(
+            $this->_applicationPath . '/module/' . $className . '.php',
+            $this->_applicationPath . '/' . $className . '.php',
+            realpath($this->_libraryPath . '/../') . '/' . strtolower($namespace) . '/' . $className . '.php'
         );
         
-        $paths[] = $this->_applicationPath;
-        
-        $paths[] = "{$this->_modulePath}/{$this->_currentModule}/controller";
-        $paths[] = "{$this->_modulePath}/{$this->_currentModule}/controller/helper";
-        $paths[] = "{$this->_modulePath}/{$this->_currentModule}/form";
-        $paths[] = "{$this->_modulePath}/{$this->_currentModule}/view/helper";
-        
-        $paths = array_merge($paths, $this->_additionalAutoloadPaths);
-        
-        foreach($paths as $path)
-        {
-            $candidate = "{$path}/{$fileName}";
-            echo '---- TESTING candidate: ' . $candidate . '<br />';
-            if(file_exists($candidate))
-            {
-                echo '----- REQURIING!H!!!<br/>';
+        foreach ($candidates as $candidate) {
+            if (file_exists($candidate)) {
                 require_once $candidate;
-                return true;
+                return;
             }
         }
         
@@ -531,49 +524,19 @@ class Application
     public function viewHelperExists($helper)
     {
         $candidates = array(
-            '\\' . $this->getNamespace() . '\\view\\helper\\' . $helper,
             '\\' . $this->getNamespace() . '\\' . $this->getCurrentModule() . '\\view\\helper\\' . $helper,
+            '\\' . $this->getNamespace() . '\\view\\helper\\' . $helper,
             '\\OpenAvanti\\View\\Helper\\' . $helper
         );
         
         foreach ($candidates as $candidate) {
-            echo '-- Trying ' . $candidate . '<br/>';
-            if (class_exists($candidate) && is_subclass_of($helper, '\\OpenAvanti\\View\\HelperAbstract')) {
+            if (class_exists($candidate) && is_subclass_of($candidate, '\\OpenAvanti\\View\\HelperAbstract')) {
                 return $candidate;
             }
         }
         
-        echo '<pre>' . print_r(get_declared_classes(), true) . '</pre>';
-        
-        return false;
-        
-        
-        echo '---- Looking for [' . $helper . ']<br />';
-        if (class_exists($helper) && is_subclass_of($helper, '\\OpenAvanti\\View\\HelperAbstract')) {
-            echo '------ Found class_exists()<br/>';
-            return $helper;
-        } else if(file_exists("{$this->_viewPath}/helpers/" . ucfirst($helper) . ".php")) {
-            echo '------ Found in Helper path<br/>';
-            require_once $this->_viewPath . "/helpers/" . ucfirst($helper) . ".php";
-            
-            return $helper;
-        } else if(file_exists("{$this->_modulePath}/{$this->_currentModule}/views/helpers/" . ucfirst($helper) . ".php")) {
-            echo '------ Found in module Helper path<br/>';
-            echo '-------- Loading: ' . "{$this->_modulePath}/{$this->_currentModule}/views/helpers/" . ucfirst($helper) . ".php";
-            echo '<pre>' . print_r(get_declared_classes(), true) . '</pre>';
-            require_once "{$this->_modulePath}/{$this->_currentModule}/views/helpers/" . ucfirst($helper) . ".php";
-            
-            echo '-X-X-X- EXITING<br/>';
-            exit;
-            
-            return $helper;
-        } else if ($this->defaultAutoloader('\\OpenAvanti\\View\\Helper\\' . $helper)) {
-            return '\\OpenAvanti\\View\\Helper\\' . $helper;
-        }
-        
         return false;
     }
-    
     
     /**
      *

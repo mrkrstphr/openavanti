@@ -79,13 +79,12 @@ abstract class Controller
     protected function setDefaultView($controller = null, $action = null)
     {
         if (empty($controller)) {
-            $controller = substr(
-                get_class($this),
-                0,
-                strlen(get_class($this)) - strlen('Controller')
-            );
+            $controller = get_class($this);
         }
-
+        
+        $pieces = explode('\\', $controller);
+        $controller = $pieces[count($pieces) - 1];
+        
         if (empty($action))
             $action = $this->getRequest()->getAction();
 
