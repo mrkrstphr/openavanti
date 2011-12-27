@@ -11,7 +11,7 @@
  * @version         SVN: $Id$
  */
  
-namespace OpenAvanti;
+namespace OpenAvanti\View;
 
 /**
  * View Helper abstract class implementation
@@ -20,7 +20,7 @@ namespace OpenAvanti;
  * @author      Kristopher Wilson <kwilson@shuttlebox.net>
  * @link        http://www.openavanti.com/docs/viewhelper
  */
-abstract class ViewHelper
+abstract class HelperAbstract
 {
     /**
      *
