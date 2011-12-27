@@ -370,9 +370,9 @@ class View
      * @param array $arguments An array of arguments to pass to the render() method of the helper
      * @return mixed The return value of the helper, if any
      */
-    public function __call($method, $arguments)
+    public function __call($helperName, $arguments)
     {
-        $method = $method;
+        $method = $helperName;
         
         if(($method = $this->getController()->getApplication()->viewHelperExists($method)) !== false)
         {
@@ -380,7 +380,7 @@ class View
             return call_user_func_array(array($method, 'render'), $arguments);
         }
         
-        throw new \Exception('View Helper [' . $method . '] not found');
+        throw new \Exception('View Helper [' . $helperName . '] not found');
     }
 
 } 
