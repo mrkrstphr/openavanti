@@ -523,6 +523,8 @@ class Application
      */
     public function viewHelperExists($helper)
     {
+        $helper = ucfirst($helper);
+        
         $candidates = array(
             '\\' . $this->getNamespace() . '\\' . $this->getCurrentModule() . '\\view\\helper\\' . $helper,
             '\\' . $this->getNamespace() . '\\view\\helper\\' . $helper,
