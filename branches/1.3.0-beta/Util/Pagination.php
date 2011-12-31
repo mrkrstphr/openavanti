@@ -56,108 +56,75 @@ class Pagination
      *    )
      * )                                                                      
      * 
-     * @argument string The URL for each pagination link, containing a %s to denote where to 
-     *       place the page number for each page
-     * @argument integer The starting page number
-     * @argument integer The number of elements to show per page
-     * @argument integer The total number of elements to be paginated
-     * @argument integer The number of pagination links shown at a given time
-     * @returns array An array of pagination data            
+     * @param string $link The URL for each pagination link, containing a %s to
+     *      denote where to place the page number for each page
+     * @param integer $start The starting page number
+     * @param integer $perPage The number of elements to show per page
+     * @param integer $totalResults The total number of elements to be paginated
+     * @param integer $linksShown The number of pagination links shown at a
+     *      given time
+     * @return array An array of pagination data            
      */
-    public static function generate($sLink, $iStart, $iPerPage, $iTotalResults, $iLinksShown)
+    public static function generate($link, $start, $perPage, $totalResults, $linksShown)
     {
-        $aData = array();
+        $data = array();
         
-        $iTotalPages = ceil( $iTotalResults / ( $iPerPage == 0 ? $iTotalResults : $iPerPage ) );
-    
-        // Return nothing if there's only one page:
-        if( $iTotalPages <= 1 )
-        {
-            return( $aData );
-        }
-
-        // Calculations:
-        $iStartPage = 1; $iEnd = $iTotalPages;
+        $totalPages = ceil($totalResults / ($perPage == 0 ? $totalResults : $perPage));
+        $startPage = 1; $end = $totalPages;
         
-        if( $iTotalPages > $iLinksShown ) 
-        {
-            if( $iStart <= ceil( $iLinksShown / 2 ) ) 
-            {
-                $iStartPage = 1;
-                $iEnd = $iLinksShown;
-            } 
-            else if( $iStart >= $iTotalPages - floor( $iLinksShown / 2 ) ) 
-            {
-                $iStartPage = $iTotalPages - ( $iLinksShown - 1 );
-                $iEnd = $iTotalPages;
-            } 
-            else 
-            {
-                $iStartPage = $iStart - floor( $iLinksShown / 2 );
-                $iEnd = $iStart + floor( $iLinksShown / 2 );
+        if ($totalPages > $linksShown) {
+            if ($start <= ceil($linksShown / 2)) {
+                $startPage = 1;
+                $end = $linksShown;
+            } else if ($start >= $totalPages - floor($linksShown / 2)) {
+                $startPage = $totalPages - ($linksShown - 1);
+                $end = $totalPages;
+            } else {
+                $startPage = $start - floor($linksShown / 2);
+                $end = $start + floor($linksShown / 2);
             }
         }
-                                                
-        $iRecordsStart = ( ( $iStart - 1 ) * $iPerPage ) + 1;
-        $iRecordsEnd = $iRecordsStart + $iPerPage - 1 > $iTotalResults ? 
-        $iTotalResults : $iRecordsStart + $iPerPage - 1;
-            
-        $aData[ "start" ] = $iRecordsStart;
-        $aData[ "end" ] = $iRecordsEnd;
-        $aData[ "total" ] = $iTotalResults;
         
-        $aData[ "links" ] = array();
-        $aData[ "previous" ] = array();
-        $aData[ "next" ] = array();
-            
-        // Previous page link:
+        $recordsStart = (($start - 1) * $perPage) + 1;
+        $recordsEnd = $recordsStart + $perPage - 1 > $totalResults ? 
+        $totalResults : $recordsStart + $perPage - 1;
         
-        if( $iStart != 1 )
-        {            
-            $aData[ "previous" ] = array(
-                "page" => $iStart - 1,
-                "link" => sprintf( $sLink, $iStart - 1 )
+        $data['start'] = $recordsStart;
+        $data['end'] = $recordsEnd;
+        $data['total'] = $totalResults;
+        
+        $data['links'] = array();
+        $data['previous'] = array();
+        $data['next'] = array();
+        
+        if ($start != 1) {
+            $data['previous'] = array(
+                'page' => $start - 1,
+                'link' => sprintf($link, $start - 1)
             );
         }
-
-        // Individual page link:
         
-        // Use the variables we setup above to loop the links:
-        for( $i = $iStartPage; $i <= $iEnd; $i++ ) 
-        {
-            // If this is our current page:
-            if( $i == $iStart ) 
-            {                         
-                $aData[ "links" ][ $i ] = array(
-                    "page" => $i,
-                    "link" => ""
+        for ($i = $startPage; $i <= $end; $i++) {
+            if($i == $start) {                         
+                $data['links'][$i] = array(
+                    'page' => $i,
+                    'link' => ''
                 );
-            } 
-            // Create a link to this page:
-            else 
-            {                         
-                $aData[ "links" ][ $i ] = array(
-                    "page" => $i,
-                    "link" => sprintf( $sLink, $i )
+            } else {                         
+                $data['links'][$i] = array(
+                    'page' => $i,
+                    'link' => sprintf($link, $i)
                 );
             }
         }
-            
-        // Next page link:
-        if( $iStart != $iTotalPages )
-        {
         
-            $aData[ "next" ] = array(
-                "page" => $iStart + 1,
-                "link" => sprintf( $sLink, $iStart + 1 )
+        if ($start != $totalPages) {
+            $data['next'] = array(
+                'page' => $start + 1,
+                'link' => sprintf($link, $start + 1)
             );
         }
-
-        return $aData;
-
-    } // generate()
-
-
-} // Pagination()
-
-?> 
+        
+        return $data;
+    }
+}
