@@ -101,7 +101,9 @@ abstract class Driver
             return $statement;
         
         if(($result = $statement->execute($params)) === false)
-            return $result;
+        {
+            throw new \Exception($this->getLastError());
+        }
         
         $statement->setFetchMode($selMode);
         
@@ -153,7 +155,7 @@ abstract class Driver
         return $this->_databaseResource->rollback();
         
     } // rollback()
-
+    
 
     /**
      * Returns the last database error, if any.
