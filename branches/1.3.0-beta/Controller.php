@@ -224,10 +224,10 @@ abstract class Controller
         else
             $controller->$action();
 
-        $this->view->_data = array_merge(
-            $this->view->_data,
-            $controller->view->_data
-        );
+        $this->view->setData(array_merge(
+            $this->view->getData(),
+            $controller->view->getData()
+        ));
 
         $this->view->setViewScript($controller->view->getViewScript());
     }
