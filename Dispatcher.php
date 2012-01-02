@@ -250,7 +250,7 @@ class Dispatcher
         else
         {
             // If we can't find the controller, we must throw an exception:
-            throw new ControllerNotFoundException('Controller "' . $controllerName . '" does not exist');
+            throw new ControllerNotFoundException('Controller "' . $this->_request->_controllerName . '" does not exist');
         }
         
         $this->postDispatch();
