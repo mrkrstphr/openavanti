@@ -27,7 +27,6 @@ abstract class HelperAbstract
      */
     protected $_view = null;
     
-    
     /**
      *
      *
@@ -36,7 +35,6 @@ abstract class HelperAbstract
     {
         $this->_view = &$view;
     }
-    
     
     /**
      *
@@ -47,4 +45,3 @@ abstract class HelperAbstract
         return $this->_view;
     }
 }
-

@@ -286,6 +286,7 @@ abstract class Controller
      *  method of the helper
      * @return mixed The return value of the helper, if any
      */
+    /*
     public function __call($method, $arguments)
     {
         $method = $method . 'Helper';
@@ -296,5 +297,26 @@ abstract class Controller
         }
 
         throw new ControllerActionNotFoundException();
+    }
+    */
+    
+    /**
+     * __call() magic method setup to load action helpers as requested
+     *
+     * @param string $helperName The method being called, which translates to the
+     *  helper class
+     * @param array $arguments An array of arguments to pass to the render()
+     *  method of the helper
+     * @return mixed The return value of the helper, if any
+     */
+    public function __call($helperName, $arguments)
+    {
+        if(($class = $this->getApplication()->actionHelperExists($helperName)) !== false)
+        {
+            $class = new $class($this);
+            return call_user_func_array(array($class, 'process'), $arguments);
+        }
+        
+        throw new \Exception('Action Helper [' . $helperName . '] not found');
     }
 }
