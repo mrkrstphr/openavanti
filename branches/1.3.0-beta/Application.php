@@ -486,7 +486,6 @@ class Application
         return $this->_dispatcher;
     }
     
-    
     /**
      * Determines if an action helper class exists and, if so, loads the class file
      *
@@ -495,24 +494,22 @@ class Application
      */
     public function actionHelperExists($helper)
     {
-        if(class_exists($helper, false) && is_subclass_of($helper, 'ControllerActionHelper'))
-        {
-            return true;
-        }
-        else if(file_exists($this->_controllerPath . '/helpers/' . ucfirst($helper) . '.php'))
-        {
-            require_once $this->_controllerPath . '/helpers/' . ucfirst($helper) . '.php';
-            return true;
-        }
-        else if(file_exists("{$this->_modulePath}/{$this->_currentModule}/controllers/helpers/" . ucfirst($helper) . '.php'))
-        {
-            require_once "{$this->_modulePath}/{$this->_currentModule}/controllers/helpers/" . ucfirst($helper) . '.php';
-            return true;
+        $helper = ucfirst($helper);
+        
+        $candidates = array(
+            '\\' . $this->getNamespace() . '\\' . $this->getCurrentModule() . '\\controller\\helper\\' . $helper,
+            '\\' . $this->getNamespace() . '\\controller\\helper\\' . $helper,
+            '\\OpenAvanti\\Controller\\Helper\\' . $helper
+        );
+        
+        foreach ($candidates as $candidate) {
+            if (class_exists($candidate) && is_subclass_of($candidate, '\\OpenAvanti\\Controller\\HelperAbstract')) {
+                return $candidate;
+            }
         }
         
         return false;
     }
-    
     
     /**
      * Determines if a view helper class exists and, if so, loads the class file

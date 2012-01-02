@@ -307,7 +307,7 @@ class View
      * @argument string The name of the data variable being retrieved
      * @returns void
      */
-    public function __get($name)
+    public function &__get($name)
     {
         if(isset($this->_data[$name]))
         {
@@ -380,6 +380,4 @@ class View
         
         throw new \Exception('View Helper [' . $helperName . '] not found');
     }
-
 } 
-

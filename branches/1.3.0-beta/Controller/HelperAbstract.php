@@ -12,7 +12,7 @@
  * @version     1.3.0-beta
  */
 
-namespace OpenAvanti;
+namespace OpenAvanti\Controller;
  
 /**
  * Controller Helper abstract implementation
@@ -21,7 +21,7 @@ namespace OpenAvanti;
  * @author      Kristopher Wilson <kwilson@shuttlebox.net>
  * @package     openavanti
  */
-abstract class ControllerActionHelper
+abstract class HelperAbstract
 {
     /**
      *
