@@ -1,5 +1,5 @@
 <?php
-/***************************************************************************************************
+/**
  * OpenAvanti
  *
  * OpenAvanti is an open source, object oriented framework for PHP 5+
@@ -13,7 +13,7 @@
 
 namespace OpenAvanti\Form\Element;
 
-require_once __DIR__ . "/Input.php";
+require_once __DIR__ . '/Input.php';
 
 /**
  * FormField for a file <input /> element.
@@ -22,7 +22,7 @@ require_once __DIR__ . "/Input.php";
  * @author      Kristopher Wilson
  * @link        http://www.openavanti.com/docs/form
  */
-class FileElement extends Input
+class File extends Input
 {
     
     /**
@@ -31,7 +31,7 @@ class FileElement extends Input
      */
     public function init()
     {
-        $this->_attributes["type"] = "file";
+        $this->_attributes['type'] = 'file';
     }
 
 }
