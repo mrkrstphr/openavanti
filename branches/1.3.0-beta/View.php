@@ -309,12 +309,13 @@ class View
      */
     public function &__get($name)
     {
-        if(isset($this->_data[$name]))
-        {
-            return $this->_data[$name];
+        $data = null;
+        
+        if (isset($this->_data[$name])) {
+            $data = &$this->_data[$name];
         }
         
-        return null;
+        return $data;
     }
     
     
