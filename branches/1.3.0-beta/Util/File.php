@@ -33,10 +33,9 @@ class File
     public static function getFileExtension( $fileName )
     {
         $fileExtension = substr($fileName, strrpos($fileName, ".") + 1);
-                                           
+        
         return $fileExtension;
-
-    } // getFileExtension()
+    }
     
     
     /**
@@ -157,7 +156,7 @@ class File
         return $fileName;
     
     } // handleUploadedFile()
-                                                                                
+    
 
     /**
      * Attempts to find the specified file name in the include path. Loops each path in the
