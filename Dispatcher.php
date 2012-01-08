@@ -125,6 +125,14 @@ class Dispatcher
         return $this->_response;
     }
     
+    /**
+     *
+     */
+    public function getController()
+    {
+        return $this->_controller;
+    }
+    
     
     /**
      *
@@ -301,12 +309,10 @@ class Dispatcher
      */
     public function preDispatch()
     {
-        foreach($this->_preDispatchCallbacks as $callback)
-        {
+        foreach ($this->_preDispatchCallbacks as $callback) {
             $dispatcher = &$this;
             
-            if(is_callable($callback))
-            {
+            if (is_callable($callback)) {
                 call_user_func_array($callback, array($dispatcher));
             }
         }
