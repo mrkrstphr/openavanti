@@ -2,10 +2,10 @@
 /**
  * OpenAvanti
  *
- * OpenAvanti is an open source, object oriented framework for PHP 5+
+ * OpenAvanti is an open source, object oriented framework for PHP 5.3+
  *
- * @author      Kristopher Wilson <kwilson@shuttlebox.net>
- * @copyright   Copyright (c) 2007-2010, Kristopher Wilson
+ * @author      Kristopher Wilson <kristopherwilson@gmail.com>
+ * @copyright   Copyright (c) 2007-2012, Kristopher Wilson
  * @package     openavanti
  * @license     http://www.openavanti.com/license
  * @link        http://www.openavanti.com
@@ -15,21 +15,21 @@
 namespace OpenAvanti;
 
 /**
- * A default controller class to be extended 
- *
- * @category    Controller
- * @author      Kristopher Wilson
- * @package     openavanti
+ * A default controller class to be extended
  */
 abstract class Controller
 {
     /**
-     * Stores a reference to the dispatcher that spawned this controller
+     * Stores a reference to the dispatcher that spawned this controller.
+     *
+     * @var Dispatcher 
      */
     protected $_dispatcher = null;
 
     /**
-     * Stores a reference to the view file that will render the page
+     * Stores a reference to the view file that will render the page.
+     *
+     * @var View
      */
     public $view = null;
 
@@ -40,9 +40,9 @@ abstract class Controller
      * @param Dispatcher $dispatcher The dispatcher class that loaded this
      *  controller
      */
-    public final function __construct(&$dispatcher)
+    public final function __construct($dispatcher)
     {
-        $this->_dispatcher = &$dispatcher;
+        $this->_dispatcher = $dispatcher;
 
         $this->view = new View($this);
 
@@ -73,7 +73,7 @@ abstract class Controller
      * view file name.
      *
      * @param string $controller Optional; The name of the controller.
-     *  Default: null
+     *      Default: null
      * @param string $action Optional; The name of the action. Default: null
      */
     protected function setDefaultView($controller = null, $action = null)
@@ -85,11 +85,13 @@ abstract class Controller
         $pieces = explode('\\', $controller);
         $controller = $pieces[count($pieces) - 1];
         
-        if (empty($action))
-            $action = $this->getRequest()->getAction();
+        if (empty($action)) {
+            $action = $this->getRequest()->getActionName();
+        }
 
-        if (strtolower(substr($action, strlen($action) - 6)) == 'action')
+        if (strtolower(substr($action, strlen($action) - 6)) == 'action') {
             $action = substr($action, 0, strlen($action) - 6);
+        }
 
         $action = \OpenAvanti\Util\String::fromCamelCase($action, '-');
 
@@ -114,9 +116,9 @@ abstract class Controller
      * and loaded this controller.
      *
      * @return Dispatcher The Dispatcher class that handled this request and
-     *  loaded the controller
+     *      loaded the controller
      */
-    public function &getDispatcher()
+    public function getDispatcher()
     {
         return $this->_dispatcher;
     }
@@ -128,7 +130,7 @@ abstract class Controller
      *
      * @return Application The Application class for this application instance
      */
-    public function &getApplication()
+    public function getApplication()
     {
         return $this->getDispatcher()->getApplication();
     }
@@ -137,10 +139,10 @@ abstract class Controller
      * Returns a copy of the Dispatcher's Request object which contains
      * information about the current request.
      *
-     * @returns Request The Request object containing information about the
-     *  current request
+     * @return Request The Request object containing information about the
+     *      current request
      */
-    public function &getRequest()
+    public function getRequest()
     {
         return $this->_dispatcher->getRequest();
     }
@@ -150,9 +152,9 @@ abstract class Controller
      * information about the HTTP response.
      *
      * @return Request The Response object containing information about the
-     *  HTTP response
+     *      HTTP response
      */
-    public function &getResponse()
+    public function getResponse()
     {
         return $this->_dispatcher->getResponse();
     }
@@ -214,20 +216,24 @@ abstract class Controller
             $controller = new $controllerName($this->getDispatcher());
         }
 
-        if (!is_callable(array($controller, $action)))
+        if (!is_callable(array($controller, $action))) {
             return;
+        }
 
-        if (is_array($arguments))
+        if (is_array($arguments)) {
             call_user_func_array(array($controller, $action), $arguments);
-        else if (is_scalar($arguments))
+        } else if (is_scalar($arguments)) {
             $controller->$action($arguments);
-        else
+        } else {
             $controller->$action();
+        }
 
-        $this->view->setData(array_merge(
-            $this->view->getData(),
-            $controller->view->getData()
-        ));
+        $this->view->setData(
+            array_merge(
+                $this->view->getData(),
+                $controller->view->getData()
+            )
+        );
 
         $this->view->setViewScript($controller->view->getViewScript());
     }
@@ -237,7 +243,7 @@ abstract class Controller
      *
      * @return View A refernece to the View that will render the page
      */
-    public function &getView()
+    public function getView()
     {
         return $this->view;
     }
@@ -276,29 +282,6 @@ abstract class Controller
 
         return $flash;
     }
-
-    /**
-     * __call() magic method setup to load action helpers as requested
-     *
-     * @param string $method The method being called, which translates to the
-     *  helper class
-     * @param array $arguments An array of arguments to pass to the render()
-     *  method of the helper
-     * @return mixed The return value of the helper, if any
-     */
-    /*
-    public function __call($method, $arguments)
-    {
-        $method = $method . 'Helper';
-        
-        if ($this->getApplication()->actionHelperExists($method)) {
-            $class = new $method($this);
-            return call_user_func_array(array($class, 'process'), $arguments);
-        }
-
-        throw new ControllerActionNotFoundException();
-    }
-    */
     
     /**
      * __call() magic method setup to load action helpers as requested
@@ -311,9 +294,9 @@ abstract class Controller
      */
     public function __call($helperName, $arguments)
     {
-        if(($class = $this->getApplication()->actionHelperExists($helperName)) !== false)
-        {
+        if (($class = $this->getApplication()->actionHelperExists($helperName)) !== false) {
             $class = new $class($this);
+            
             return call_user_func_array(array($class, 'process'), $arguments);
         }
         
