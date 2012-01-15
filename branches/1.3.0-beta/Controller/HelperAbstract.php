@@ -21,7 +21,7 @@ abstract class HelperAbstract
     /**
      * Stores a reference to the controller.
      *
-     * @var \OpenAvanti\Controller $_controller
+     * @var \OpenAvanti\Controller
      */
     protected $_controller = null;
 
@@ -34,5 +34,15 @@ abstract class HelperAbstract
     public function __construct($controller)
     {
         $this->_controller = $controller;
+    }
+    
+    /**
+     * Returns the controller object.
+     *
+     * @return \OpenAvanti\Controller;
+     */
+    protected function getController()
+    {
+        return $this->_controller;
     }
 } 
