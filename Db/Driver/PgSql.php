@@ -379,7 +379,7 @@ class PgSql extends Driver
                 "name" => $column->attname, 
                 "type" => $column->data_type,
                 "not-null" => $column->attnotnull == "t",
-                "default" => $column->default_value
+                //"default" => $column->default_value
             );
              
             if($column->typname == "_varchar")

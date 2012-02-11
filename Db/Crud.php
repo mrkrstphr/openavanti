@@ -391,7 +391,7 @@ class Crud implements \Iterator, \Countable
 
         // Loop the data and create member variables
         if($this->_dataSet->count() != 0)
-            $this->load($this->_dataSet->current());
+            $this->load($this->_dataSet->current()->getArrayCopy());
 
         if(isset($queryClauses['count']) && $queryClauses['count'] == true)
             return $this->_dataSet->current()->count;

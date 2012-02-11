@@ -107,7 +107,7 @@ abstract class Driver
         
         $statement->setFetchMode($selMode);
         
-        $results = $statement->fetchAll();
+        $results = $statement->fetchAll(\PDO::FETCH_CLASS, '\\OpenAvanti\\Db\\Row');
         
         $resultSet = new \OpenAvanti\Db\ResultSet($results);
         
