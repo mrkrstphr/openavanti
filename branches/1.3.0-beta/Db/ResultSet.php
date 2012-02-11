@@ -37,15 +37,12 @@ class ResultSet extends \ArrayIterator #implements \Iterator, \Countable
      */
     public function __get($column)
     {
-        if(isset(current($this)->$column))
-        {
+        if (isset(current($this)->$column)) {
             return current($this)->$column;
         }
 
         return null;
-    
-    } // __get()
-    
+    }
     
     /**
      *
@@ -54,21 +51,15 @@ class ResultSet extends \ArrayIterator #implements \Iterator, \Countable
     public function __isset($column)
     {
         return isset(current($this)->$column);
-        
-    } // __isset()
-
-
+    }
+    
     /**
      * Returns a copy of the current record, if any, or null if no record is stored
      *       
-     * @returns StdClass The current data record, or null if none
+     * @return StdClass The current data record, or null if none
      */
     public function getRecord()
     {
         return current($this);
-    
-    } // getRecord()
-
-} // ResultSet()
-
-?>
+    }
+}
