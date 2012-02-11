@@ -380,7 +380,7 @@ class Dispatcher
                 array($this->_controller, $this->_request->getActionName()), 
                 $args
             );
-        } else if ($this->_request->getActionName()) {
+        } else if (!$this->_request->getActionName()) {
             // Default to the index file:
             $this->_controller->index();
         } else {
