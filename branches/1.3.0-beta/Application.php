@@ -570,15 +570,22 @@ class Application
     {
         $helper = ucfirst($helper);
         
-        $candidates = array(
-            '\\' . $this->getNamespace() . '\\' . $this->getCurrentModule() . '\\controller\\helper\\' . $helper,
-            '\\' . $this->getNamespace() . '\\controller\\helper\\' . $helper,
-            '\\OpenAvanti\\Controller\\Helper\\' . $helper
-        );
+        $candidates = array();
+        
+        if ($this->getUseModules()) {
+            $candidates[] = '\\' . $this->getNamespace() .
+                '\\' . $this->getCurrentModule() .
+                '\\controller\\helper\\' . $helper;
+        }
+        
+        $candidates[] = '\\' . $this->getNamespace() . '\\controller\\helper\\' . $helper;
+        $candidates[] = '\\OpenAvanti\\Controller\\Helper\\' . $helper;
         
         foreach ($candidates as $candidate) {
-            if (class_exists($candidate) && is_subclass_of($candidate, '\\OpenAvanti\\Controller\\HelperAbstract')) {
-                return $candidate;
+            if (class_exists($candidate)) {
+                if (is_subclass_of($candidate, '\\OpenAvanti\\Controller\\HelperAbstract')) {
+                    return $candidate;
+                }
             }
         }
         
@@ -596,15 +603,22 @@ class Application
     {
         $helper = ucfirst($helper);
         
-        $candidates = array(
-            '\\' . $this->getNamespace() . '\\' . $this->getCurrentModule() . '\\view\\helper\\' . $helper,
-            '\\' . $this->getNamespace() . '\\view\\helper\\' . $helper,
-            '\\OpenAvanti\\View\\Helper\\' . $helper
-        );
+        $candidates = array();
+        
+        if ($this->getUseModules()) {
+            $candidates[] = '\\' . $this->getNamespace() .
+                '\\' . $this->getCurrentModule() .
+                '\\view\\helper\\' . $helper;
+        }
+        
+        $candidates[] = '\\' . $this->getNamespace() . '\\view\\helper\\' . $helper;
+        $candidates[] = '\\OpenAvanti\\Controller\\View\\' . $helper;
         
         foreach ($candidates as $candidate) {
-            if (class_exists($candidate) && is_subclass_of($candidate, '\\OpenAvanti\\View\\HelperAbstract')) {
-                return $candidate;
+            if (class_exists($candidate)) {
+                if (is_subclass_of($candidate, '\\OpenAvanti\\View\\HelperAbstract')) {
+                    return $candidate;
+                }
             }
         }
         
