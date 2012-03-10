@@ -47,9 +47,7 @@ class Validation
     public static function disableLogging()
     {
         self::$_logErrors = false;
-        
-    } // disableLogging()
-    
+    }
     
     /**
      *
@@ -58,9 +56,7 @@ class Validation
     public static function enableLogging()
     {
         self::$_logErrors = true;
-        
-    } // enableLogging()
-    
+    }
     
     /**
      *
@@ -69,11 +65,8 @@ class Validation
     public static function isLoggingErrors()
     {
         return self::$_logErrors;
+    }
     
-    } // isLoggingErrors()
-    
-    
-  
     /**
      * Returns whether or not any errors were noted through validation calls
      *

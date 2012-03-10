@@ -176,6 +176,15 @@ class Form
         
     } // loadSanitizedRequest()
     
+    /**
+     *
+     */
+    public function loadErrors(array $errors)
+    {
+        foreach ($errors as $field => $errs) {
+            $this->getElement($field)->setErrors($errs);
+        }
+    }
     
     /**
      * Loops each form element and attempts to populate it with a value,
