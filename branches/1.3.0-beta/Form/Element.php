@@ -43,6 +43,11 @@ abstract class Element
     protected $_value = null;
     
     /**
+     *
+     */
+    protected $_errors = array();
+    
+    /**
      * Constructs a form element object based on the supplied element name
      * and additional attributes. Note that the supplied attributes are not 
      * validated to be valid attributes for the element. Each element
@@ -231,6 +236,60 @@ abstract class Element
         }
         
         return $attributes;
+    }
+    
+    /**
+     * Returns whether the form element has errors.
+     * 
+     * @return bool
+     */
+    public function hasError()
+    {
+        return count($this->_errors) > 0;
+    }
+    
+    /**
+     * Sets errors on the form element.
+     * 
+     * @param array $errors
+     * @return \OpenAvanti\Form\Element
+     */
+    public function setErrors(array $errors)
+    {
+        $this->_errors = $errors;
+        return $this;
+    }
+    
+    /**
+     * Adds an error to the element's error list.
+     * 
+     * @param string $error 
+     * @return \OpenAvanti\Form\Element
+     */
+    public function addError($error)
+    {
+        $this->_errors[] = $error;
+        return $this;
+    }
+    
+    /**
+     * Returns an array of errors on this form element.
+     * 
+     * return array
+     */
+    public function getErrors()
+    {
+        return $this->_errors;
+    }
+    
+    /**
+     * Returns the errors on this element as a string.
+     * 
+     * return string
+     */
+    public function getErrorString()
+    {
+        return implode(' ', $this->_errors);
     }
     
     /**

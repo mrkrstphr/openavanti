@@ -612,7 +612,7 @@ class Application
         }
         
         $candidates[] = '\\' . $this->getNamespace() . '\\view\\helper\\' . $helper;
-        $candidates[] = '\\OpenAvanti\\Controller\\View\\' . $helper;
+        $candidates[] = '\\OpenAvanti\\View\\Helper\\' . $helper;
         
         foreach ($candidates as $candidate) {
             if (class_exists($candidate)) {

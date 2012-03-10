@@ -49,7 +49,7 @@ class Label extends Element
     {
         $label = "";
         
-        if(class_exists("\OpenAvanti\Validation") && isset($this->_name) && 
+        if(class_exists('\\OpenAvanti\\Validation') && isset($this->_name) && 
             \OpenAvanti\Validation::fieldHasErrors($this->_name))
         {
             $this->_attributes["class"] = isset($this->_attributes["class"]) ? 
