@@ -46,17 +46,17 @@ class Row extends \ArrayIterator
      */
     public function __get($var)
     {
-        if (isset($this->_data[$var])) {
+        if (array_key_exists($var, $this->_data)) {
             return $this->_data[$var];
         }
         
         $altVar = \OpenAvanti\Util\String::fromCamelCase($var);
         
-        if (isset($this->_data[$altVar])) {
+        if (array_key_exists($altVar, $this->_data)) {
             return $this->_data[$altVar];
         }
         
-        throw new \Exception('Undefined property ' . $var);
+        throw new \Exception('Undefined property [' . $var . ']');
     }
     
     /**
